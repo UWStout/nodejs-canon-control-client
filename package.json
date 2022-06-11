@@ -1,0 +1,38 @@
+{
+  "name": "canon-camera-control-client",
+  "version": "0.1.0",
+  "description": "Client application to interface with nodejs-canon-control-server. Allows remote monitoring and control of canon cameras.",
+  "main": "client/app.jsx",
+  "type": "module",
+  "scripts": {
+    "client": "esbuild --bundle --minify --define:process.env.NODE_ENV=\\\"production\\\" --outdir=./public client/app.jsx",
+    "client:dev": "esbuild --bundle --sourcemap --watch --define:process.env.NODE_ENV=\\\"development\\\" --outdir=./public client/app.jsx",
+    "clientServer": "esbuild --bundle --servedir=./public --minify --define:process.env.NODE_ENV=\\\"production\\\" --outdir=./public client/app.jsx",
+    "clientServer:dev": "esbuild --bundle --servedir=./public --sourcemap --define:process.env.NODE_ENV=\\\"development\\\" --outdir=./public client/app.jsx",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "Camera",
+    "Canon",
+    "Control",
+    "HTTP"
+  ],
+  "author": "Seth Berrier",
+  "license": "GPL-3.0-or-later",
+  "devDependencies": {
+    "@emotion/react": "^11.9.0",
+    "@emotion/styled": "^11.8.1",
+    "@mui/material": "^5.8.3",
+    "esbuild": "^0.14.43",
+    "eslint": "^8.16.0",
+    "eslint-config-standard": "^17.0.0",
+    "eslint-plugin-import": "^2.26.0",
+    "eslint-plugin-n": "^15.2.1",
+    "eslint-plugin-promise": "^6.0.0",
+    "eslint-plugin-react": "^7.30.0",
+    "eslint-plugin-react-hooks": "^4.5.0",
+    "nodemon": "^2.0.16",
+    "react": "^18.1.0",
+    "react-dom": "^18.1.0"
+  }
+}
