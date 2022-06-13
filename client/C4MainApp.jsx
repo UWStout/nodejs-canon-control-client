@@ -1,8 +1,10 @@
 import React from 'react'
-import { CssBaseline, Container, Box, Typography } from '@mui/material'
+import { CssBaseline, Container, Fab, Box, Typography, Dialog, DialogTitle } from '@mui/material'
+import { Settings as SettingsIcon } from '@mui/icons-material'
 
 import CameraList from './components/CameraList.jsx'
 import CameraListItem from './components/CameraListItem.jsx'
+import ServerSettingsForm from './components/ServerSettingsForm.jsx'
 
 const TEST_CAMS = [
   { serial: '012070021526', server: '10.0.1.101', model: 'Test Camera EOS T6' },
@@ -14,16 +16,35 @@ const TEST_CAMS = [
 ]
 
 export default function App () {
+  const [showSettings, setShowSettings] = React.useState(false)
+
   return (
     <React.Fragment>
       <CssBaseline />
       <Container maxWidth="xl">
+        {/* Main Camera list */}
         <Box sx={{ bgcolor: '#cfe8fc', height: '100vh', padding: '16px' }}>
           <Typography variant="h1">{'Canon Cam Control Client'}</Typography>
           <CameraList>
             {TEST_CAMS.map((cam, i) => (<CameraListItem key={i} cameraObj={{ ...cam, index: i }} />))}
           </CameraList>
         </Box>
+
+        {/* Button to toggle server settings */}
+        <Fab
+          sx={{ position: 'absolute', bottom: 16, right: 16 }}
+          aria-label={'Server Settings'}
+          onClick={() => setShowSettings(true)}
+        >
+          <SettingsIcon />
+        </Fab>
+
+        {/* Server Settings Modal */}
+        <Dialog fullWidth maxWidth='sm' onClose={() => setShowSettings(false)} open={showSettings}>
+          <DialogTitle>{'Configure Server List'}</DialogTitle>
+          <ServerSettingsForm />
+        </Dialog>
+
       </Container>
     </React.Fragment>
   )
