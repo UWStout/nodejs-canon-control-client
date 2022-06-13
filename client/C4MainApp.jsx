@@ -1,5 +1,5 @@
 import React from 'react'
-import { CssBaseline, Container, Fab, Box, Typography, Dialog, DialogTitle } from '@mui/material'
+import { CssBaseline, Container, Button, Fab, Box, Typography, Dialog, DialogTitle, DialogActions } from '@mui/material'
 import { Settings as SettingsIcon } from '@mui/icons-material'
 
 import CameraList from './components/CameraList.jsx'
@@ -43,8 +43,10 @@ export default function App () {
         <Dialog fullWidth maxWidth='sm' onClose={() => setShowSettings(false)} open={showSettings}>
           <DialogTitle>{'Configure Server List'}</DialogTitle>
           <ServerSettingsForm />
+          <DialogActions>
+            <Button onClick={() => setShowSettings(false)}>{'Save'}</Button>
+          </DialogActions>
         </Dialog>
-
       </Container>
     </React.Fragment>
   )

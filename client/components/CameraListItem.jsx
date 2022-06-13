@@ -6,7 +6,8 @@ import {
   ListItemAvatar,
   Avatar,
   ListItemText,
-  ListItemButton
+  Button,
+  ButtonGroup
 } from '@mui/material'
 
 import {
@@ -55,7 +56,30 @@ export default function CameraListItem (props) {
   }
 
   return (
-    <ListItem>
+    <ListItem
+      secondaryAction={
+        <ButtonGroup variant="outlined">
+          <Button role={undefined} size='large' onClick={onAEModeClick} startIcon={<AEModeIcon />}>
+            {'M'}
+          </Button>
+          <Button role={undefined} size='large' onClick={onShutterClick} startIcon={<ShutterIcon />}>
+            {'1/2000'}
+          </Button>
+          <Button role={undefined} size='large' onClick={onApertureClick} startIcon={<ApertureIcon />}>
+            {'F22'}
+          </Button>
+          <Button role={undefined} size='large' onClick={onExposureClick} startIcon={<ExposureIcon />}>
+            {'+0'}
+          </Button>
+          <Button role={undefined} size='large' onClick={onSizeQualityClick} startIcon={<SizeQualityIcon />}>
+            {'L JPG'}
+          </Button>
+          <Button role={undefined} size='large' onClick={onWhiteBalanceClick} startIcon={<WhiteBalanceIcon />}>
+            {'Daylight'}
+          </Button>
+        </ButtonGroup>
+      }
+    >
       {/* Basic Camera Icon */}
       <ListItemAvatar>
         <Avatar>
@@ -65,26 +89,6 @@ export default function CameraListItem (props) {
 
       {/* Camera Info */}
       <ListItemText primary={cameraObj.model} secondary={cameraObj.serial} />
-
-      {/* Exposure Setting Icons */}
-      <ListItemButton role={undefined} onClick={onAEModeClick}>
-        <AEModeIcon />
-      </ListItemButton>
-      <ListItemButton role={undefined} onClick={onShutterClick}>
-        <ShutterIcon />
-      </ListItemButton>
-      <ListItemButton role={undefined} onClick={onApertureClick}>
-        <ApertureIcon />
-      </ListItemButton>
-      <ListItemButton role={undefined} onClick={onExposureClick}>
-        <ExposureIcon />
-      </ListItemButton>
-      <ListItemButton role={undefined} onClick={onSizeQualityClick}>
-        <SizeQualityIcon />
-      </ListItemButton>
-      <ListItemButton role={undefined} onClick={onWhiteBalanceClick}>
-        <WhiteBalanceIcon />
-      </ListItemButton>
 
     </ListItem>
   )
