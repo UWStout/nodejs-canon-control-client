@@ -22,6 +22,7 @@
   "devDependencies": {
     "@emotion/react": "^11.9.0",
     "@emotion/styled": "^11.8.1",
+    "@mui/icons-material": "^5.8.3",
     "@mui/material": "^5.8.3",
     "esbuild": "^0.14.43",
     "eslint": "^8.16.0",
