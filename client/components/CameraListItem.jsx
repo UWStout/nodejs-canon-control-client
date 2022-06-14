@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useEffect } from 'react'
 import PropTypes from 'prop-types'
 
 import {
@@ -6,8 +6,8 @@ import {
   ListItemAvatar,
   Avatar,
   ListItemText,
-  Button,
-  ButtonGroup
+  IconButton,
+  Tooltip
 } from '@mui/material'
 
 import {
@@ -20,64 +20,87 @@ import {
   CameraEnhance as AEModeIcon
 } from '@mui/icons-material'
 
-import { CameraObjShape } from '../dataModel.js'
+import { CameraObjShape } from '../state/dataModel.js'
+import { getCameraDetails } from '../helpers/serverHelper.js'
+
+function trimProp (propertyValue) {
+  if (typeof propertyValue !== 'string') {
+    return propertyValue
+  }
+
+  const index = propertyValue.lastIndexOf('.')
+  if (index >= 0) {
+    return propertyValue.substring(index + 1)
+  }
+  return propertyValue
+}
 
 export default function CameraListItem (props) {
-  const { cameraObj } = props
+  const { cameraSummary, serverIP } = props
+
+  const [cameraObj, setCameraObj] = React.useState(null)
+  useEffect(() => {
+    const retrieveDetails = async () => {
+      const details = await getCameraDetails(serverIP, cameraSummary.index)
+      setCameraObj(details)
+    }
+    retrieveDetails()
+  }, [cameraSummary.index, serverIP])
 
   // Callback for clicking AE Mode icon
   const onAEModeClick = () => {
-    console.log(`AE Mode button clicked (${cameraObj.serial})`)
+    console.log(`AE Mode button clicked (${cameraSummary.BodyIDEx.value})`)
   }
 
   // Callback for clicking shutter icon
   const onShutterClick = () => {
-    console.log(`Shutter button clicked (${cameraObj.serial})`)
+    console.log(`Shutter button clicked (${cameraSummary.BodyIDEx.value})`)
   }
 
   // Callback for clicking aperture icon
   const onApertureClick = () => {
-    console.log(`Aperture button clicked (${cameraObj.serial})`)
+    console.log(`Aperture button clicked (${cameraSummary.BodyIDEx.value})`)
   }
 
   // Callback for clicking exposure icon
   const onExposureClick = () => {
-    console.log(`Exposure button clicked (${cameraObj.serial})`)
+    console.log(`Exposure button clicked (${cameraSummary.BodyIDEx.value})`)
   }
 
   // Callback for clicking size-quality icon
   const onSizeQualityClick = () => {
-    console.log(`Size/Quality button clicked (${cameraObj.serial})`)
+    console.log(`Size/Quality button clicked (${cameraSummary.BodyIDEx.value})`)
   }
 
   // Callback for clicking white balance icon
   const onWhiteBalanceClick = () => {
-    console.log(`White Balance button clicked (${cameraObj.serial})`)
+    console.log(`White Balance button clicked (${cameraSummary.BodyIDEx.value})`)
   }
 
   return (
     <ListItem
       secondaryAction={
-        <ButtonGroup variant="outlined">
-          <Button role={undefined} size='large' onClick={onAEModeClick} startIcon={<AEModeIcon />}>
-            {'M'}
-          </Button>
-          <Button role={undefined} size='large' onClick={onShutterClick} startIcon={<ShutterIcon />}>
-            {'1/2000'}
-          </Button>
-          <Button role={undefined} size='large' onClick={onApertureClick} startIcon={<ApertureIcon />}>
-            {'F22'}
-          </Button>
-          <Button role={undefined} size='large' onClick={onExposureClick} startIcon={<ExposureIcon />}>
-            {'+0'}
-          </Button>
-          <Button role={undefined} size='large' onClick={onSizeQualityClick} startIcon={<SizeQualityIcon />}>
-            {'L JPG'}
-          </Button>
-          <Button role={undefined} size='large' onClick={onWhiteBalanceClick} startIcon={<WhiteBalanceIcon />}>
-            {'Daylight'}
-          </Button>
-        </ButtonGroup>
+        !!cameraObj &&
+        <React.Fragment>
+          <Tooltip position="top" title={trimProp(cameraObj.AEMode.label)}>
+            <IconButton role={undefined} size='large' onClick={onAEModeClick}><AEModeIcon /></IconButton>
+          </Tooltip>
+          <Tooltip position="top" title={trimProp(cameraObj.Tv.label)}>
+            <IconButton role={undefined} size='large' onClick={onShutterClick}><ShutterIcon /></IconButton>
+          </Tooltip>
+          <Tooltip position="top" title={trimProp(cameraObj.Av.label)}>
+            <IconButton role={undefined} size='large' onClick={onApertureClick}><ApertureIcon /></IconButton>
+          </Tooltip>
+          <Tooltip position="top" title={trimProp(cameraObj.ExposureCompensation.label)}>
+            <IconButton role={undefined} size='large' onClick={onExposureClick}><ExposureIcon /></IconButton>
+          </Tooltip>
+          <Tooltip position="top" title={trimProp(cameraObj.ImageQuality.label)}>
+            <IconButton role={undefined} size='large' onClick={onSizeQualityClick}><SizeQualityIcon /></IconButton>
+          </Tooltip>
+          <Tooltip position="top" title={trimProp(cameraObj.WhiteBalance.label)}>
+            <IconButton role={undefined} size='large' onClick={onWhiteBalanceClick}><WhiteBalanceIcon /></IconButton>
+          </Tooltip>
+        </React.Fragment>
       }
     >
       {/* Basic Camera Icon */}
@@ -88,12 +111,13 @@ export default function CameraListItem (props) {
       </ListItemAvatar>
 
       {/* Camera Info */}
-      <ListItemText primary={cameraObj.model} secondary={cameraObj.serial} />
+      <ListItemText primary={cameraSummary.ProductName.value} secondary={cameraSummary.BodyIDEx.value} />
 
     </ListItem>
   )
 }
 
 CameraListItem.propTypes = {
-  cameraObj: PropTypes.shape(CameraObjShape).isRequired
+  cameraSummary: PropTypes.shape(CameraObjShape).isRequired,
+  serverIP: PropTypes.string.isRequired
 }

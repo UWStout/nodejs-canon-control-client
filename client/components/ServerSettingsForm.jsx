@@ -1,33 +1,18 @@
 import React from 'react'
 
+import userServerStore from '../state/useServerStore.js'
+
 import { List, IconButton, ListItem, ListItemText, Divider } from '@mui/material'
 import { Remove as RemoveIcon } from '@mui/icons-material'
 
 import ServerAddItem from './ServerAddItem.jsx'
 
 export default function ServerList () {
-  // Maintain list of servers
-  const [serverList, setServerList] = React.useState([])
-  const onAddServer = (newServer) => {
-    if (serverList.find((server) => (
-      server.IP === newServer.IP ||
-      server.nickname.toLowerCase() === newServer.nickname.toLowerCase()
-    ))) {
-      window.alert('Duplicate server')
-    } else {
-      setServerList([...serverList, newServer])
-    }
-  }
-  const onRemoveServer = (serverIP) => {
-    const index = serverList.findIndex((server) => (server.IP === serverIP))
-    if (index < 0) {
-      window.alert('Server not found')
-    } else {
-      const newList = [...serverList]
-      newList.splice(index, 1)
-      setServerList(newList)
-    }
-  }
+  // Manage global server list state
+  // Access to the global state store
+  const {
+    serverList, addServer, removeServerByIP
+  } = userServerStore(state => state)
 
   return (
     <List sx={{ marginLeft: 2, marginRight: 2, marginBottom: 2 }}>
@@ -35,7 +20,11 @@ export default function ServerList () {
         <ListItem
           key={server.IP}
           secondaryAction={
-            <IconButton edge="end" aria-label="remove server" onClick={() => onRemoveServer(server.IP)}>
+            <IconButton
+              edge="end"
+              aria-label="remove server"
+              onClick={() => removeServerByIP(server.IP)}
+            >
               <RemoveIcon />
             </IconButton>
           }
@@ -44,7 +33,7 @@ export default function ServerList () {
         </ListItem>
       ))}
       {serverList.length > 0 && <Divider />}
-      <ServerAddItem onAdd={onAddServer} />
+      <ServerAddItem onAdd={addServer} />
     </List>
   )
 }

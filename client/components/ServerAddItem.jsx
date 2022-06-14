@@ -4,7 +4,8 @@ import PropTypes from 'prop-types'
 import { ListItem, IconButton, ListItemText, TextField, Grid } from '@mui/material'
 import { Add as AddIcon } from '@mui/icons-material'
 
-const IP_REGEX = /^(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$/
+// Matches IP v4 addresses with an optional port
+const IP_REGEX = /^(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)(:[0-9]+)?$/
 
 export default function ServerAddItem (props) {
   const [serverIP, setServerIP] = React.useState('127.0.0.1')

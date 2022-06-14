@@ -24,6 +24,7 @@
     "@emotion/styled": "^11.8.1",
     "@mui/icons-material": "^5.8.3",
     "@mui/material": "^5.8.3",
+    "axios": "^0.27.2",
     "esbuild": "^0.14.43",
     "eslint": "^8.16.0",
     "eslint-config-standard": "^17.0.0",
@@ -34,6 +35,7 @@
     "eslint-plugin-react-hooks": "^4.5.0",
     "nodemon": "^2.0.16",
     "react": "^18.1.0",
-    "react-dom": "^18.1.0"
+    "react-dom": "^18.1.0",
+    "zustand": "^4.0.0-rc.1"
   }
 }
