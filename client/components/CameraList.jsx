@@ -1,18 +1,21 @@
 import React from 'react'
 
-import userServerStore from '../state/useServerStore.js'
-import userCameraStore from '../state/useCameraStore.js'
+import useServerStore from '../state/useServerStore.js'
+import useCameraStore from '../state/useCameraStore.js'
+import useGlobalState from '../state/useGlobalState.js'
 
 import { getCameraList } from '../helpers/serverHelper.js'
 
 import { List, ListSubheader } from '@mui/material'
 
 import CameraListItem from './CameraListItem.jsx'
+import CameraListItemReadOnly from './CameraListItemReadOnly.jsx'
 
 export default function CameraList () {
   // Subscribe to server and camera stores
-  const { serverList } = userServerStore(state => state)
-  const { cameraList, addCameras } = userCameraStore(state => state)
+  const { serverList } = useServerStore(state => state)
+  const { cameraList, addCameras } = useCameraStore(state => state)
+  const { bulkModeEnabled } = useGlobalState(state => state)
 
   // Syncronize camera list when servers change
   React.useEffect(() => {
@@ -35,7 +38,9 @@ export default function CameraList () {
   let cameraListItems = []
   Object.keys(cameraList).forEach((serverIP) => {
     const newCameraListItems = cameraList[serverIP].map((camera) => (
-      <CameraListItem key={camera.BodyIDEx.value} cameraSummary={camera} serverIP={serverIP} />
+      (bulkModeEnabled
+        ? <CameraListItemReadOnly key={`${camera.BodyIDEx.value}RO`} cameraSummary={camera} serverIP={serverIP} />
+        : <CameraListItem key={camera.BodyIDEx.value} cameraSummary={camera} serverIP={serverIP} />)
     ))
     cameraListItems = [
       ...cameraListItems,

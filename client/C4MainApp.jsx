@@ -1,5 +1,20 @@
 import React from 'react'
-import { CssBaseline, Container, Button, Fab, Box, Typography, Dialog, DialogTitle, DialogActions } from '@mui/material'
+
+import useGlobalState from './state/useGlobalState.js'
+
+import {
+  CssBaseline,
+  Container,
+  Button,
+  Fab,
+  FormControlLabel,
+  Grid,
+  Typography,
+  Dialog,
+  DialogTitle,
+  DialogActions,
+  Switch
+} from '@mui/material'
 import { Settings as SettingsIcon } from '@mui/icons-material'
 
 import CameraList from './components/CameraList.jsx'
@@ -7,16 +22,29 @@ import ServerSettingsForm from './components/ServerSettingsForm.jsx'
 
 export default function App () {
   const [showSettings, setShowSettings] = React.useState(false)
+  const { bulkModeEnabled, toggleBulkMode } = useGlobalState(state => state)
 
   return (
     <React.Fragment>
       <CssBaseline />
       <Container maxWidth="xl">
         {/* Main Camera list */}
-        <Box sx={{ bgcolor: '#cfe8fc', height: '100vh', padding: '16px' }}>
-          <Typography variant="h4">{'Canon Cam Control Client'}</Typography>
-          <CameraList />
-        </Box>
+        <Grid container sx={{ bgcolor: '#cfe8fc', padding: '16px' }}>
+          <Grid item xs={9}>
+            <Typography variant="h4">{'Canon Cam Control Client'}</Typography>
+          </Grid>
+          <Grid item xs={3}>
+            <FormControlLabel
+              control={
+                <Switch value={bulkModeEnabled} onClick={toggleBulkMode} />
+              }
+              label="Bulk Mode"
+            />
+          </Grid>
+          <Grid item xs={12}>
+            <CameraList />
+          </Grid>
+        </Grid>
 
         {/* Button to toggle server settings */}
         <Fab

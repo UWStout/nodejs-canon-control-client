@@ -27,3 +27,43 @@ export function getCameraDetails (serverIP, camIndex) {
       })
   })
 }
+
+export function getCameraProperty (serverIP, camIndex, propID) {
+  console.log('Retrieving property', propID, 'for camera', camIndex, 'on', serverIP)
+  return new Promise((resolve, reject) => {
+    axios.get(`https://${serverIP}/camera/${camIndex}/${propID}`)
+      .then((response) => {
+        resolve(response.data)
+      })
+      .catch((error) => {
+        reject(error)
+      })
+  })
+}
+
+export function getAllowedPropertyValues (serverIP, camIndex, propID) {
+  console.log('Retrieving property', propID, 'for camera', camIndex, 'on', serverIP)
+  return new Promise((resolve, reject) => {
+    axios.get(`https://${serverIP}/camera/${camIndex}/${propID}/allowed`)
+      .then((response) => {
+        resolve(response.data)
+      })
+      .catch((error) => {
+        reject(error)
+      })
+  })
+}
+
+export function setCameraProperty (serverIP, camIndex, propID, valueOrLabel) {
+  console.log('Retrieving property', propID, 'for camera', camIndex, 'on', serverIP)
+  return new Promise((resolve, reject) => {
+    axios.post(
+      `https://${serverIP}/camera/${camIndex}/${propID}`,
+      { value: valueOrLabel }
+    ).then((response) => {
+      resolve(response.data)
+    }).catch((error) => {
+      reject(error)
+    })
+  })
+}

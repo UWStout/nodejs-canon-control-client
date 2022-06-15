@@ -1,0 +1,117 @@
+{
+  "index": 0,
+  "portName": "\\\\?\\usb#vid_04a9&pid_32b4#6&290aa0fd&0&4#{6ac27878-a6fa-4155-ba85-f98f491d4f33}",
+  "ProductName": {
+    "value": "Canon EOS Rebel T6"
+  },
+  "BodyIDEx": {
+    "value": "012070029627"
+  },
+  "OwnerName": {
+    "value": ""
+  },
+  "DateTime": {
+    "value": {
+      "year": 2022,
+      "month": 6,
+      "day": 14,
+      "hour": 14,
+      "minute": 8,
+      "second": 29,
+      "milliseconds": 0
+    }
+  },
+  "FirmwareVersion": {
+    "value": "1.0.1"
+  },
+  "BatteryLevel": {
+    "value": 80
+  },
+  "SaveTo": {
+    "label": "SaveTo.Camera",
+    "value": 1
+  },
+  "CurrentStorage": {
+    "value": "SD"
+  },
+  "MyMenu": {
+    "value": []
+  },
+  "ImageQuality": {
+    "label": "LargeJPEGFine",
+    "value": 1310479
+  },
+  "WhiteBalance": {
+    "label": "WhiteBalance.AutoAmbiencePriority",
+    "value": 0
+  },
+  "WhiteBalanceShift": {
+    "value": [0, 0]
+  },
+  "ColorSpace": {
+    "label": "ColorSpace.sRGB",
+    "value": 1
+  },
+  "PictureStyle": {
+    "value": 135
+  },
+  "AEMode": {
+    "label": "AEMode.Manual",
+    "value": 3
+  },
+  "DriveMode": {
+    "label": "DriveMode.SingleShooting",
+    "value": 0
+  },
+  "ISOSpeed": {
+    "label": "Auto",
+    "value": 0
+  },
+  "MeteringMode": {
+    "label": "MeteringMode.Evaluative",
+    "value": 3
+  },
+  "AFMode": {
+    "label": "AFMode.OneShot",
+    "value": 0
+  },
+  "Av": {
+    "label": "f3.5",
+    "value": 37
+  },
+  "Tv": {
+    "label": "1/15",
+    "value": 88
+  },
+  "ExposureCompensation": {
+    "label": "0",
+    "value": 0
+  },
+  "AvailableShots": {
+    "value": 0
+  },
+  "Bracket": {
+    "label": "0x00000000",
+    "value": 0
+  },
+  "LensName": {
+    "value": "EF-S18-55mm f/3.5-5.6 IS II"
+  },
+  "AEBracket": {
+    "value": 0
+  },
+  "LensStatus": {
+    "label": "LensStatus.Attached",
+    "value": 1
+  },
+  "Artist": {
+    "value": ""
+  },
+  "Copyright": {
+    "value": ""
+  },
+  "AEModeSelect": {
+    "label": "AEModeSelect.Manual",
+    "value": 3
+  }
+}
