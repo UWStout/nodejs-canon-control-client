@@ -1,5 +1,10 @@
 import PropTypes from 'prop-types'
 
+const ReactRefType = PropTypes.oneOfType([
+  PropTypes.func,
+  PropTypes.shape({ current: PropTypes.instanceOf(Element) })
+])
+
 export const CameraDateTime = {
   year: PropTypes.number.isRequired,
   month: PropTypes.number.isRequired,
@@ -17,6 +22,14 @@ export const CameraProperty = {
     PropTypes.shape(CameraDateTime)
   ]).isRequired,
   label: PropTypes.string
+}
+
+export const PropertyIDsShape = {
+  Tv: ReactRefType,
+  Av: ReactRefType,
+  ISOSpeed: ReactRefType,
+  ImageQuality: ReactRefType,
+  WhiteBalance: ReactRefType
 }
 
 export const CameraObjShape = {

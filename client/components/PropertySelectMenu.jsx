@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useEffect } from 'react'
 import PropTypes from 'prop-types'
 
 import { Menu, MenuItem, Skeleton } from '@mui/material'
@@ -7,10 +7,10 @@ import { getAllowedPropertyValues, getCameraProperty, setCameraProperty } from '
 import { trimProp } from '../helpers/utility.js'
 
 export default function PropertySelectMenu (props) {
-  const { anchorElement, serverIP, camera, propID, open, onClose } = props
+  const { anchorElement, serverIP, camera, propID, open, onClose, overrideValue } = props
 
   // Selection state and list of options
-  const [selectedIndex, setSelectedIndex] = React.useState('')
+  const [selectedIndex, setSelectedIndex] = React.useState(0)
   const [options, setOptions] = React.useState(null)
 
   // Close callback
@@ -41,7 +41,7 @@ export default function PropertySelectMenu (props) {
     const retrieveCurrentValue = async () => {
       const currentValue = await getCameraProperty(serverIP, camera, propID)
       if (typeof currentValue?.value === 'object') {
-        const index = options.findIndex(option => option.value.value === currentValue.value)
+        const index = options.findIndex(option => option.value === currentValue.value.value)
         setSelectedIndex(index)
       } else if (typeof currentValue?.value !== 'undefined') {
         const index = options.findIndex(option => option.value === currentValue.value)
@@ -50,10 +50,10 @@ export default function PropertySelectMenu (props) {
     }
 
     // Run the async process
-    if (open && Array.isArray(options) && options.length > 0) {
+    if (overrideValue === null && open && Array.isArray(options) && options.length > 0) {
       retrieveCurrentValue()
     }
-  }, [camera, open, options, propID, serverIP])
+  }, [camera, open, options, overrideValue, propID, serverIP])
 
   // Menu click callback
   const handleMenuItemClick = (newIndex) => {
@@ -70,9 +70,23 @@ export default function PropertySelectMenu (props) {
       }
     }
 
-    // Start async process
-    updateSelection()
+    if (overrideValue) {
+      // Set as a bulk update settings instead
+    } else {
+      // Send to camera
+      updateSelection()
+    }
   }
+
+  // If overrideValue is provided, set the selected index from that
+  useEffect(() => {
+    if (overrideValue !== null && Array.isArray(options)) {
+      const index = options.findIndex(option => option.value === overrideValue)
+      if (index >= 0) {
+        setSelectedIndex(index)
+      }
+    }
+  }, [options, overrideValue])
 
   // Options is defined and is an empty array (or anchorElement is not ready yet) so don't render the menu
   if (options?.length === 0 || !anchorElement) {
@@ -116,11 +130,13 @@ PropertySelectMenu.propTypes = {
   propID: PropTypes.string.isRequired,
 
   open: PropTypes.bool,
-  onClose: PropTypes.func
+  onClose: PropTypes.func,
+  overrideValue: PropTypes.oneOfType([PropTypes.string, PropTypes.object])
 }
 
 PropertySelectMenu.defaultProps = {
   anchorElement: null,
   open: false,
-  onClose: null
+  onClose: null,
+  overrideValue: null
 }

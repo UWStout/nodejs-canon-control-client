@@ -1,5 +1,6 @@
 import React, { useEffect } from 'react'
-import PropTypes from 'prop-types'
+
+import useGlobalState from '../state/useGlobalState.js'
 
 import { ListItem, ListItemAvatar, Avatar, ListItemText } from '@mui/material'
 import { PhotoCamera as CameraIcon } from '@mui/icons-material'
@@ -7,13 +8,13 @@ import { PhotoCamera as CameraIcon } from '@mui/icons-material'
 import PropertySelectMenu from './PropertySelectMenu.jsx'
 import CameraPropertyButtons from './CameraPropertyButtons.jsx'
 
-import { CameraObjShape, PropertyIDsShape } from '../state/dataModel.js'
+import { PropertyIDsShape } from '../state/dataModel.js'
 import { getCameraDetails } from '../helpers/serverHelper.js'
 
 const PROPERTY_IDS = Object.keys(PropertyIDsShape)
 
-export default function CameraListItem (props) {
-  const { cameraSummary, serverIP, readOnly } = props
+export default function BulkSettings () {
+  const { bulkModeSettings, updateBulkModeSettings, bulkCameraIndex, bulkServerIP } = useGlobalState(state => state)
 
   // Currently shown settings menu
   const [openMenu, setOpenMenu] = React.useState('')
@@ -21,17 +22,24 @@ export default function CameraListItem (props) {
     setOpenMenu('')
   }
 
-  // Details for the indicated camera
-  const [cameraObj, setCameraObj] = React.useState(null)
+  // Initialize bulk mode values
   useEffect(() => {
-    const retrieveDetails = async () => {
-      const details = await getCameraDetails(serverIP, cameraSummary.index)
-      setCameraObj(details)
+    const initializeBulkSettings = async () => {
+      console.log('Innitializing settings from', bulkServerIP, 'cam', bulkCameraIndex)
+      const details = await getCameraDetails(bulkServerIP, bulkCameraIndex)
+
+      const newSettings = {}
+      PROPERTY_IDS.forEach((propID) => {
+        newSettings[propID] = details[propID].label
+      })
+      console.log('Settings are', newSettings)
+      updateBulkModeSettings(newSettings)
     }
-    if (openMenu === '') {
-      retrieveDetails()
+
+    if (!bulkModeSettings) {
+      initializeBulkSettings()
     }
-  }, [cameraSummary.index, openMenu, serverIP])
+  }, [bulkCameraIndex, bulkModeSettings, bulkServerIP, updateBulkModeSettings])
 
   // Refs for all the property menu anchors
   const propRefs = {
@@ -45,7 +53,7 @@ export default function CameraListItem (props) {
   return (
     <ListItem
       secondaryAction={
-        <CameraPropertyButtons readOnly={readOnly} cameraObj={cameraObj} propRefs={propRefs} onOpenMenu={setOpenMenu} />
+        <CameraPropertyButtons useBulkValues propRefs={propRefs} onOpenMenu={setOpenMenu} />
       }
     >
       {/* Basic Camera Icon */}
@@ -56,31 +64,22 @@ export default function CameraListItem (props) {
       </ListItemAvatar>
 
       {/* Camera Info */}
-      <ListItemText primary={cameraSummary.ProductName.value} secondary={cameraSummary.BodyIDEx.value} />
+      <ListItemText primary={'Bulk Camera Settings'} />
 
       {/* Property selection menus */}
-      {!readOnly && PROPERTY_IDS.map((propID) => (
+      {PROPERTY_IDS.map((propID) => (
         <PropertySelectMenu
           key={`${propID}-menu`}
           anchorElement={propRefs[propID].current}
           propID={propID}
-          camera={cameraSummary.index}
-          serverIP={serverIP}
+          camera={bulkCameraIndex}
+          serverIP={bulkServerIP}
           open={openMenu === propID}
           onClose={closeMenu}
+          overrideValue={bulkModeSettings?.[propID]}
         />
       ))}
 
     </ListItem>
   )
-}
-
-CameraListItem.propTypes = {
-  cameraSummary: PropTypes.shape(CameraObjShape).isRequired,
-  serverIP: PropTypes.string.isRequired,
-  readOnly: PropTypes.bool
-}
-
-CameraListItem.defaultProps = {
-  readOnly: false
 }
