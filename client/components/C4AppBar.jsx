@@ -2,34 +2,32 @@ import React from 'react'
 
 import useGlobalState from '../state/useGlobalState.js'
 
-import { AppBar, Toolbar, Typography, IconButton, FormControlLabel, Switch } from '@mui/material'
-import { Menu as MenuIcon } from '@mui/icons-material'
+import { AppBar, Toolbar, Typography, FormControlLabel, Switch } from '@mui/material'
 
-export default function ButtonAppBar () {
+import SettingsMenu from './settings/SettingsMenu.jsx'
+
+export default function ButtonAppBar (props) {
+  // Manage bulk mode global state
   const { bulkModeEnabled, setBulkModeEnabled } = useGlobalState(state => state)
 
   return (
     <AppBar position="static">
       <Toolbar>
-        <IconButton
-          size="large"
-          edge="start"
-          color="inherit"
-          aria-label="menu"
-          sx={{ mr: 2 }}
-        >
-          <MenuIcon />
-        </IconButton>
         <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
           {'Canon Cam Control Client'}
         </Typography>
         <FormControlLabel
           color="inherit"
           control={
-            <Switch color="secondary" checked={bulkModeEnabled} onChange={(e) => setBulkModeEnabled(e.target.checked)} />
+            <Switch
+              color="secondary"
+              checked={bulkModeEnabled}
+              onChange={(e) => setBulkModeEnabled(e.target.checked)}
+            />
           }
           label="Bulk Mode"
         />
+        <SettingsMenu />
       </Toolbar>
     </AppBar>
   )

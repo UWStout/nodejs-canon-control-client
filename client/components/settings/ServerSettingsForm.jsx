@@ -1,14 +1,14 @@
 import React from 'react'
 
 import { useLiveQuery } from 'dexie-react-hooks'
-import localDB from '../state/localDB.js'
+import localDB from '../../state/localDB.js'
 
 import { List, IconButton, ListItem, ListItemText, Divider } from '@mui/material'
 import { Remove as RemoveIcon } from '@mui/icons-material'
 
 import ServerAddItem from './ServerAddItem.jsx'
 
-export default function ServerList () {
+export default function ServerSettingsForm () {
   // Subscribe to changes to servers array
   const serverList = useLiveQuery(() => localDB.servers.toArray())
 

@@ -1,14 +1,20 @@
 import React, { useEffect } from 'react'
 import PropTypes from 'prop-types'
 
+import localDB from '../../state/localDB.js'
+import { useLiveQuery } from 'dexie-react-hooks'
+
 import { Menu, MenuItem, Skeleton } from '@mui/material'
 
-import { getAllowedPropertyValues, getCameraProperty, setCameraProperty } from '../helpers/serverHelper'
-import { ServerObjShape } from '../state/dataModel'
-import { trimProp } from '../helpers/utility.js'
+import { getAllowedPropertyValues, getCameraProperty, setCameraProperty } from '../../helpers/serverHelper'
+import { trimProp } from '../../helpers/utility.js'
 
 export default function PropertySelectMenu (props) {
-  const { anchorElement, server, camera, propID, open, onClose, overrideValue } = props
+  const { anchorElement, serverID, cameraID, propID, open, onClose, overrideValue } = props
+
+  // Subscribe to changes to the camera object
+  const camera = useLiveQuery(() => localDB.cameras.get(cameraID))
+  const server = useLiveQuery(() => localDB.servers.get(serverID))
 
   // Selection state and list of options
   const [selectedIndex, setSelectedIndex] = React.useState(0)
@@ -27,7 +33,7 @@ export default function PropertySelectMenu (props) {
       if (Array.isArray(allowedValues) && allowedValues.length > 0) {
         setOptions(allowedValues.map(option => ({ label: option.label, value: option.value })))
       } else {
-        handleClose()
+        handleClose(false)
       }
     }
 
@@ -61,14 +67,17 @@ export default function PropertySelectMenu (props) {
     // Async function to send selection to camera
     const updateSelection = async () => {
       try {
-        await setCameraProperty(server, camera, propID, trimProp(options[newIndex].label))
-        setSelectedIndex(newIndex)
+        if (newIndex !== selectedIndex) {
+          await setCameraProperty(server, camera, propID, trimProp(options[newIndex].label))
+          setSelectedIndex(newIndex)
+          onClose(true)
+        }
       } catch (error) {
         window.alert('Error setting value, see console')
         console.error(error)
-      } finally {
-        if (onClose) { onClose() }
       }
+
+      onClose(false)
     }
 
     if (overrideValue) {
@@ -126,8 +135,8 @@ export default function PropertySelectMenu (props) {
 
 PropertySelectMenu.propTypes = {
   anchorElement: PropTypes.oneOfType([PropTypes.element, PropTypes.object]),
-  server: PropTypes.shape(ServerObjShape).isRequired,
-  camera: PropTypes.number.isRequired,
+  cameraID: PropTypes.string.isRequired,
+  serverID: PropTypes.number.isRequired,
   propID: PropTypes.string.isRequired,
 
   open: PropTypes.bool,

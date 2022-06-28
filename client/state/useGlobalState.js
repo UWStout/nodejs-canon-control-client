@@ -2,11 +2,27 @@ import create from 'zustand'
 
 // Store for global application state
 const useGlobalState = create(set => ({
+  // Visibility of settings dialogs
+  serverEditDialogVisible: false,
+  showServerEditDialog: () => set(state => {
+    return { serverEditDialogVisible: true }
+  }),
+  hideServerEditDialog: () => set(state => {
+    return { serverEditDialogVisible: false }
+  }),
+
+  importExportDialogVisible: false,
+  showImportExportDialog: () => set(state => {
+    return { importExportDialogVisible: true }
+  }),
+  hideImportExportDialog: () => set(state => {
+    return { importExportDialogVisible: false }
+  }),
+
   // Bulk mode global values
   bulkModeEnabled: false,
-  bulkServerIP: '10.1.1.104:42424',
-  bulkCameraIndex: 0,
-  bulkModeSettings: null,
+  bulkCameraId: '',
+  bulkProperties: null,
 
   // Bulk mode setters and mutators
   toggleBulkMode: () => set(state => {
@@ -17,11 +33,11 @@ const useGlobalState = create(set => ({
     return { bulkModeEnabled: enabledState }
   }),
 
-  updateBulkModeSettings: (newSettings) => set(state => {
-    console.log('Updating bulk mode settings:')
-    console.log({ ...state.bulkModeSettings, ...newSettings })
+  updateBulkProperties: (newProperties) => set(state => {
+    console.log('Updating bulk properties:')
+    console.log({ ...state.bulkProperties, ...newProperties })
     return {
-      bulkModeSettings: { ...state.bulkModeSettings, ...newSettings }
+      bulkProperties: { ...state.bulkProperties, ...newProperties }
     }
   })
 }))

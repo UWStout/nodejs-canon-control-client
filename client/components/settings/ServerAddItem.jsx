@@ -1,6 +1,6 @@
 import React from 'react'
 
-import localDB from '../state/localDB.js'
+import localDB from '../../state/localDB.js'
 
 import { ListItem, IconButton, ListItemText, TextField, Grid } from '@mui/material'
 import { Add as AddIcon } from '@mui/icons-material'
@@ -11,15 +11,15 @@ const IP_REGEX = /^(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|
 export default function ServerAddItem () {
   const [serverIP, setServerIP] = React.useState('127.0.0.1')
   const [serverPort, setServerPort] = React.useState(42424)
-  const [serverNickname, setServerNickname] = React.useState('name')
+  const [serverNickname, setServerNickname] = React.useState('')
 
   const addServer = async (newServer) => {
     try {
       const id = await localDB.servers.add(newServer)
       console.info('Server added with id', id)
-      setServerIP('10.1.1.100')
+      setServerIP('127.0.0.1')
       setServerPort(42424)
-      setServerNickname('name')
+      setServerNickname('')
     } catch (error) {
       window.alert('Failed to add server')
       console.error('Failed to add server', error)

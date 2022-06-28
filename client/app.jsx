@@ -1,7 +1,7 @@
 import React from 'react'
 import ReactDOM from 'react-dom/client'
 
-import C4MainApp from './C4MainApp.jsx'
+import C4MainApp from './components/C4MainApp.jsx'
 
 // Create root and render to it
 const reactRoot = ReactDOM.createRoot(document.getElementById('root'))

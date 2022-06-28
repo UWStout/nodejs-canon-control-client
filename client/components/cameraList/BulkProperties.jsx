@@ -1,6 +1,9 @@
 import React, { useEffect } from 'react'
 
-import useGlobalState from '../state/useGlobalState.js'
+import localDB, { refreshCameraDetails } from '../../state/localDB.js'
+import { useLiveQuery } from 'dexie-react-hooks'
+
+import useGlobalState from '../../state/useGlobalState.js'
 
 import { ListItem, ListItemAvatar, Avatar, ListItemText } from '@mui/material'
 import { PhotoCamera as CameraIcon } from '@mui/icons-material'
@@ -8,38 +11,40 @@ import { PhotoCamera as CameraIcon } from '@mui/icons-material'
 import PropertySelectMenu from './PropertySelectMenu.jsx'
 import CameraPropertyButtons from './CameraPropertyButtons.jsx'
 
-import { PropertyIDsShape } from '../state/dataModel.js'
-import { getCameraDetails } from '../helpers/serverHelper.js'
+import { PropertyIDsShape } from '../../state/dataModel.js'
 
 const PROPERTY_IDS = Object.keys(PropertyIDsShape)
 
-export default function BulkSettings () {
-  const { bulkModeSettings, updateBulkModeSettings, bulkCameraIndex, bulkServerIP } = useGlobalState(state => state)
+export default function BulkProperties () {
+  const { bulkProperties, updateBulkProperties, bulkCameraId } = useGlobalState(state => state)
 
   // Currently shown settings menu
   const [openMenu, setOpenMenu] = React.useState('')
-  const closeMenu = () => {
-    setOpenMenu('')
-  }
+  const closeMenu = () => { setOpenMenu('') }
 
-  // Initialize bulk mode values
+  // Subscribe to changes to the camera object
+  const camera = useLiveQuery(() => localDB.cameras.get(bulkCameraId))
+
+  // Stay in sync with camera bulk properties
   useEffect(() => {
-    const initializeBulkSettings = async () => {
-      console.log('Innitializing settings from', bulkServerIP, 'cam', bulkCameraIndex)
-      const details = await getCameraDetails(bulkServerIP, bulkCameraIndex)
-
-      const newSettings = {}
-      PROPERTY_IDS.forEach((propID) => {
-        newSettings[propID] = details[propID].label
-      })
-      console.log('Settings are', newSettings)
-      updateBulkModeSettings(newSettings)
+    const refreshBulkProperties = async () => {
+      if (camera) {
+        if (!camera.AEMode) {
+          await refreshCameraDetails(camera.serverId, camera.id)
+        } else {
+          console.log('Innitializing settings from camera', camera.Id)
+          const newSettings = {}
+          PROPERTY_IDS.forEach((propID) => {
+            newSettings[propID] = camera[propID].label
+          })
+          console.log('Settings are', newSettings)
+          updateBulkProperties(newSettings)
+        }
+      }
     }
 
-    if (!bulkModeSettings) {
-      initializeBulkSettings()
-    }
-  }, [bulkCameraIndex, bulkModeSettings, bulkServerIP, updateBulkModeSettings])
+    refreshBulkProperties()
+  }, [camera, updateBulkProperties])
 
   // Refs for all the property menu anchors
   const propRefs = {
@@ -72,11 +77,11 @@ export default function BulkSettings () {
           key={`${propID}-menu`}
           anchorElement={propRefs[propID].current}
           propID={propID}
-          camera={bulkCameraIndex}
-          serverIP={bulkServerIP}
+          cameraID={bulkCameraId}
+          serverID={camera?.serverId || -1}
           open={openMenu === propID}
           onClose={closeMenu}
-          overrideValue={bulkModeSettings?.[propID]}
+          overrideValue={bulkProperties?.[propID]}
         />
       ))}
 

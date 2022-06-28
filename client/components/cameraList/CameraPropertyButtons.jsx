@@ -1,7 +1,9 @@
 import React from 'react'
 import PropTypes from 'prop-types'
 
-import useGlobalState from '../state/useGlobalState.js'
+import localDB from '../../state/localDB.js'
+import { useLiveQuery } from 'dexie-react-hooks'
+import useGlobalState from '../../state/useGlobalState.js'
 
 import { IconButton, Tooltip } from '@mui/material'
 
@@ -13,14 +15,17 @@ import {
   WbSunny as WhiteBalanceIcon
 } from '@mui/icons-material'
 
-import { CameraObjShape, PropertyIDsShape } from '../state/dataModel.js'
-import { trimProp } from '../helpers/utility.js'
+import { PropertyIDsShape } from '../../state/dataModel.js'
+import { trimProp } from '../../helpers/utility.js'
 
 const PROPERTY_IDS = Object.keys(PropertyIDsShape)
 
 export default function CameraPropertyButtons (props) {
-  const { cameraObj, readOnly, propRefs, onOpenMenu, useBulkValues } = props
+  const { cameraID, readOnly, propRefs, onOpenMenu, useBulkValues } = props
   const { bulkModeSettings } = useGlobalState(state => state)
+
+  // Subscribe to changes to the camera object
+  const camera = useLiveQuery(() => localDB.cameras.get(cameraID))
 
   // Map for the icon elements
   const iconMap = {
@@ -32,14 +37,14 @@ export default function CameraPropertyButtons (props) {
   }
 
   return (
-    (useBulkValues || cameraObj !== null
+    (useBulkValues || camera
       ? PROPERTY_IDS.map(propID => (
         <Tooltip
           key={`${propID}-icon`}
           placement="top"
           title={useBulkValues
             ? (bulkModeSettings?.[propID] ? trimProp(bulkModeSettings[propID]) : 'loading')
-            : trimProp(cameraObj[propID].label)}
+            : (camera?.[propID] ? trimProp(camera[propID].label) : 'loading')}
           ref={propRefs[propID]}
         >
           <span>
@@ -59,7 +64,7 @@ export default function CameraPropertyButtons (props) {
 }
 
 CameraPropertyButtons.propTypes = {
-  cameraObj: PropTypes.shape(CameraObjShape),
+  cameraID: PropTypes.string.isRequired,
   readOnly: PropTypes.bool,
   propRefs: PropTypes.shape(PropertyIDsShape),
   onOpenMenu: PropTypes.func,
@@ -67,7 +72,6 @@ CameraPropertyButtons.propTypes = {
 }
 
 CameraPropertyButtons.defaultProps = {
-  cameraObj: null,
   readOnly: false,
   propRefs: null,
   onOpenMenu: null,
