@@ -30,12 +30,12 @@ export default function ImportExportForm () {
     if (file) { setShowConfirm(true) }
   }, [file, setShowConfirm])
 
-  const handleConfirm = async (proceed) => {
+  const handleConfirm = async (confirmed, servers, cameras) => {
     setShowConfirm(false)
 
-    if (proceed && file) {
+    if (confirmed && file) {
       try {
-        await importLocalData(file)
+        await importLocalData(file, servers, cameras)
         hideImportExportDialog()
       } catch (error) {
         window.alert('Import failed (see console for details')

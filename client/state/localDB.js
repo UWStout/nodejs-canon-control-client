@@ -23,10 +23,19 @@ export async function exportLocalData () {
 /**
  * Import a previously exported data blob into the local database, replacing
  * any existing data in the database.
- * @returns {blob} Data blob representing the entirety of the local c4 database
+ * @param {blob} dataBlob A file or dataBlob containing the data to import.
+ * @param {boolean} [includeServers=true] Import data in the servers table
+ * @param {boolean} [includeCameras=true] Import data in the cameras table
  */
-export async function importLocalData (dataBlob) {
-  await importInto(db, dataBlob, { overwriteValues: true, clearTablesBeforeImport: true })
+export async function importLocalData (dataBlob, includeServers = true, includeCameras = true) {
+  await importInto(db, dataBlob, {
+    overwriteValues: true,
+    filter: (table, value, key) => {
+      if (!includeServers && table === 'servers') return false
+      if (!includeCameras && table === 'cameras') return false
+      return true
+    }
+  })
 }
 
 /**
