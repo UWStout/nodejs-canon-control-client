@@ -1,6 +1,8 @@
 import React from 'react'
 
-import useServerStore from '../state/useServerStore.js'
+import localDB from '../state/localDB.js'
+import { useLiveQuery } from 'dexie-react-hooks'
+
 import useCameraStore from '../state/useCameraStore.js'
 import useGlobalState from '../state/useGlobalState.js'
 
@@ -12,8 +14,9 @@ import CameraListItem from './CameraListItem.jsx'
 import BulkSettings from './BulkSettings.jsx'
 
 export default function CameraList () {
-  // Subscribe to server and camera stores
-  const { serverList } = useServerStore(state => state)
+  // Subscribe to changes to servers array
+  const serverList = useLiveQuery(() => localDB.servers.toArray())
+
   const { cameraList, addCameras } = useCameraStore(state => state)
   const { bulkModeEnabled } = useGlobalState(state => state)
 
@@ -21,12 +24,14 @@ export default function CameraList () {
   React.useEffect(() => {
     // Async function to update list of cameras
     const updateCameraList = async () => {
-      for (let i = 0; i < serverList.length; i++) {
-        const server = serverList[i]
+      if (Array.isArray(serverList)) {
+        for (let i = 0; i < serverList.length; i++) {
+          const server = serverList[i]
 
-        // Retrieve latest list of cameras
-        const newCamsList = await getCameraList(server)
-        addCameras(newCamsList, server.IP)
+          // Retrieve latest list of cameras
+          const newCamsList = await getCameraList(server)
+          addCameras(newCamsList, server.id)
+        }
       }
     }
 
@@ -36,17 +41,20 @@ export default function CameraList () {
 
   // Build camera widget list
   let cameraListItems = []
-  Object.keys(cameraList).forEach((serverIP) => {
-    const newCameraListItems = cameraList[serverIP].map((camera) => (
-      <CameraListItem key={camera.BodyIDEx.value} readOnly={bulkModeEnabled} cameraSummary={camera} serverIP={serverIP} />
-    ))
-    cameraListItems = [
-      ...cameraListItems,
-      <ListSubheader key={serverIP} sx={{ borderTop: '1px solid lightgrey', borderBottom: '1px solid lightgrey' }}>
-        {serverIP}
-      </ListSubheader>,
-      ...newCameraListItems
-    ]
+  Object.keys(cameraList).forEach((serverId) => {
+    const server = serverList.find(server => server.id === serverId)
+    if (server) {
+      const newCameraListItems = cameraList[serverId].map((camera) => (
+        <CameraListItem key={camera.BodyIDEx.value} readOnly={bulkModeEnabled} cameraSummary={camera} server={server} />
+      ))
+      cameraListItems = [
+        ...cameraListItems,
+        <ListSubheader key={server.id} sx={{ borderTop: '1px solid lightgrey', borderBottom: '1px solid lightgrey' }}>
+          {`${server.name} (${server.ip}:${server.port})`}
+        </ListSubheader>,
+        ...newCameraListItems
+      ]
+    }
   })
 
   return (

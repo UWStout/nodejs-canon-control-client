@@ -3,7 +3,7 @@ import axios from 'axios'
 export function getCameraList (server) {
   console.log('Retrieving camera list for', server)
   return new Promise((resolve, reject) => {
-    axios.get(`https://${server.IP}/camera`)
+    axios.get(`https://${server.IP}:${server.port}/camera`)
       .then((response) => {
         if (Array.isArray(response.data)) {
           return resolve(response.data)
@@ -15,10 +15,10 @@ export function getCameraList (server) {
   })
 }
 
-export function getCameraDetails (serverIP, camIndex) {
-  console.log('Retrieving details for camera', camIndex, 'on', serverIP)
+export function getCameraDetails (server, camIndex) {
+  console.log('Retrieving details for camera', camIndex, 'on', server.name)
   return new Promise((resolve, reject) => {
-    axios.get(`https://${serverIP}/camera/${camIndex}`)
+    axios.get(`https://${server.IP}:${server.port}/camera/${camIndex}`)
       .then((response) => {
         resolve(response.data)
       })
@@ -28,10 +28,10 @@ export function getCameraDetails (serverIP, camIndex) {
   })
 }
 
-export function getCameraProperty (serverIP, camIndex, propID) {
-  console.log('Retrieving property', propID, 'for camera', camIndex, 'on', serverIP)
+export function getCameraProperty (server, camIndex, propID) {
+  console.log('Retrieving property', propID, 'for camera', camIndex, 'on', server.name)
   return new Promise((resolve, reject) => {
-    axios.get(`https://${serverIP}/camera/${camIndex}/${propID}`)
+    axios.get(`https://${server.IP}:${server.port}/camera/${camIndex}/${propID}`)
       .then((response) => {
         resolve(response.data)
       })
@@ -41,10 +41,10 @@ export function getCameraProperty (serverIP, camIndex, propID) {
   })
 }
 
-export function getAllowedPropertyValues (serverIP, camIndex, propID) {
-  console.log('Retrieving property', propID, 'for camera', camIndex, 'on', serverIP)
+export function getAllowedPropertyValues (server, camIndex, propID) {
+  console.log('Retrieving property', propID, 'for camera', camIndex, 'on', server.name)
   return new Promise((resolve, reject) => {
-    axios.get(`https://${serverIP}/camera/${camIndex}/${propID}/allowed`)
+    axios.get(`https://${server.IP}:${server.port}/camera/${camIndex}/${propID}/allowed`)
       .then((response) => {
         resolve(response.data)
       })
@@ -54,11 +54,11 @@ export function getAllowedPropertyValues (serverIP, camIndex, propID) {
   })
 }
 
-export function setCameraProperty (serverIP, camIndex, propID, valueOrLabel) {
-  console.log('Retrieving property', propID, 'for camera', camIndex, 'on', serverIP)
+export function setCameraProperty (server, camIndex, propID, valueOrLabel) {
+  console.log('Retrieving property', propID, 'for camera', camIndex, 'on', server.name)
   return new Promise((resolve, reject) => {
     axios.post(
-      `https://${serverIP}/camera/${camIndex}/${propID}`,
+      `https://${server.IP}:${server.port}/camera/${camIndex}/${propID}`,
       { value: valueOrLabel }
     ).then((response) => {
       resolve(response.data)

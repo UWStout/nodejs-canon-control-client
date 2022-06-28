@@ -7,13 +7,13 @@ import { PhotoCamera as CameraIcon } from '@mui/icons-material'
 import PropertySelectMenu from './PropertySelectMenu.jsx'
 import CameraPropertyButtons from './CameraPropertyButtons.jsx'
 
-import { CameraObjShape, PropertyIDsShape } from '../state/dataModel.js'
+import { CameraObjShape, ServerObjShape, PropertyIDsShape } from '../state/dataModel.js'
 import { getCameraDetails } from '../helpers/serverHelper.js'
 
 const PROPERTY_IDS = Object.keys(PropertyIDsShape)
 
 export default function CameraListItem (props) {
-  const { cameraSummary, serverIP, readOnly } = props
+  const { cameraSummary, server, readOnly } = props
 
   // Currently shown settings menu
   const [openMenu, setOpenMenu] = React.useState('')
@@ -25,13 +25,13 @@ export default function CameraListItem (props) {
   const [cameraObj, setCameraObj] = React.useState(null)
   useEffect(() => {
     const retrieveDetails = async () => {
-      const details = await getCameraDetails(serverIP, cameraSummary.index)
+      const details = await getCameraDetails(server, cameraSummary.index)
       setCameraObj(details)
     }
     if (openMenu === '') {
       retrieveDetails()
     }
-  }, [cameraSummary.index, openMenu, serverIP])
+  }, [cameraSummary.index, openMenu, server])
 
   // Refs for all the property menu anchors
   const propRefs = {
@@ -65,7 +65,7 @@ export default function CameraListItem (props) {
           anchorElement={propRefs[propID].current}
           propID={propID}
           camera={cameraSummary.index}
-          serverIP={serverIP}
+          server={server}
           open={openMenu === propID}
           onClose={closeMenu}
         />
@@ -77,7 +77,7 @@ export default function CameraListItem (props) {
 
 CameraListItem.propTypes = {
   cameraSummary: PropTypes.shape(CameraObjShape).isRequired,
-  serverIP: PropTypes.string.isRequired,
+  server: PropTypes.shape(ServerObjShape).isRequired,
   readOnly: PropTypes.bool
 }
 

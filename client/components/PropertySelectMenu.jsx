@@ -4,10 +4,11 @@ import PropTypes from 'prop-types'
 import { Menu, MenuItem, Skeleton } from '@mui/material'
 
 import { getAllowedPropertyValues, getCameraProperty, setCameraProperty } from '../helpers/serverHelper'
+import { ServerObjShape } from '../state/dataModel'
 import { trimProp } from '../helpers/utility.js'
 
 export default function PropertySelectMenu (props) {
-  const { anchorElement, serverIP, camera, propID, open, onClose, overrideValue } = props
+  const { anchorElement, server, camera, propID, open, onClose, overrideValue } = props
 
   // Selection state and list of options
   const [selectedIndex, setSelectedIndex] = React.useState(0)
@@ -22,7 +23,7 @@ export default function PropertySelectMenu (props) {
   React.useEffect(() => {
     // Update list of allowed values (asynchronous)
     const retrieveAllowedValues = async () => {
-      const allowedValues = await getAllowedPropertyValues(serverIP, camera, propID)
+      const allowedValues = await getAllowedPropertyValues(server, camera, propID)
       if (Array.isArray(allowedValues) && allowedValues.length > 0) {
         setOptions(allowedValues.map(option => ({ label: option.label, value: option.value })))
       } else {
@@ -34,12 +35,12 @@ export default function PropertySelectMenu (props) {
     if (open) {
       retrieveAllowedValues()
     }
-  }, [camera, handleClose, open, propID, serverIP])
+  }, [camera, handleClose, open, propID, server])
 
   React.useEffect(() => {
     // Update current value (asynchronous)
     const retrieveCurrentValue = async () => {
-      const currentValue = await getCameraProperty(serverIP, camera, propID)
+      const currentValue = await getCameraProperty(server, camera, propID)
       if (typeof currentValue?.value === 'object') {
         const index = options.findIndex(option => option.value === currentValue.value.value)
         setSelectedIndex(index)
@@ -53,14 +54,14 @@ export default function PropertySelectMenu (props) {
     if (overrideValue === null && open && Array.isArray(options) && options.length > 0) {
       retrieveCurrentValue()
     }
-  }, [camera, open, options, overrideValue, propID, serverIP])
+  }, [camera, open, options, overrideValue, propID, server])
 
   // Menu click callback
   const handleMenuItemClick = (newIndex) => {
     // Async function to send selection to camera
     const updateSelection = async () => {
       try {
-        await setCameraProperty(serverIP, camera, propID, trimProp(options[newIndex].label))
+        await setCameraProperty(server, camera, propID, trimProp(options[newIndex].label))
         setSelectedIndex(newIndex)
       } catch (error) {
         window.alert('Error setting value, see console')
@@ -125,7 +126,7 @@ export default function PropertySelectMenu (props) {
 
 PropertySelectMenu.propTypes = {
   anchorElement: PropTypes.oneOfType([PropTypes.element, PropTypes.object]),
-  serverIP: PropTypes.string.isRequired,
+  server: PropTypes.shape(ServerObjShape).isRequired,
   camera: PropTypes.number.isRequired,
   propID: PropTypes.string.isRequired,
 

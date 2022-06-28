@@ -3,8 +3,8 @@ import create from 'zustand'
 // Store for global application state
 const useGlobalState = create(set => ({
   // Bulk mode global values
-  bulkModeEnabled: true,
-  bulkServerIP: '127.0.0.1:3000',
+  bulkModeEnabled: false,
+  bulkServerIP: '10.1.1.104:42424',
   bulkCameraIndex: 0,
   bulkModeSettings: null,
 

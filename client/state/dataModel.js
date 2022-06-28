@@ -53,6 +53,8 @@ export const CameraObjShape = {
 }
 
 export const ServerObjShape = {
+  id: PropTypes.number.isRequired,
   IP: PropTypes.string.isRequired,
-  nickname: PropTypes.string
+  port: PropTypes.number.isRequired,
+  name: PropTypes.string.isRequired
 }

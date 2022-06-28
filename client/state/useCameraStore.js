@@ -6,19 +6,19 @@ const useCameraStore = create(set => ({
   cameraList: {},
 
   // Camera list mutators
-  addCameras: (newCameras, serverIP) => set(state => {
-    console.log('Updating camera list for', serverIP)
+  addCameras: (newCameras, serverId) => set(state => {
+    console.log('Updating camera list for', serverId)
     const cameraList = { ...state.cameraList }
-    cameraList[serverIP] = [...newCameras]
+    cameraList[serverId] = [...newCameras]
     return { cameraList }
   }),
 
-  removeCamera: (cameraIndex, serverIP) => set(state => {
-    if (Array.isArray(state.cameraList[serverIP])) {
-      const listIndex = state.cameraList[serverIP].findIndex((camera) => (camera.index === cameraIndex))
+  removeCamera: (cameraIndex, serverId) => set(state => {
+    if (Array.isArray(state.cameraList[serverId])) {
+      const listIndex = state.cameraList[serverId].findIndex((camera) => (camera.index === cameraIndex))
       if (listIndex >= 0) {
         const cameraList = { ...state.cameraList }
-        cameraList[serverIP].splice(listIndex, 1)
+        cameraList[serverId].splice(listIndex, 1)
         return { cameraList }
       }
     }
