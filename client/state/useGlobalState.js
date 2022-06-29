@@ -20,19 +20,7 @@ const useGlobalState = create(set => ({
   }),
 
   // Bulk mode global values
-  bulkModeEnabled: false,
-  bulkCameraId: '',
   bulkProperties: null,
-
-  // Bulk mode setters and mutators
-  toggleBulkMode: () => set(state => {
-    return { bulkModeEnabled: !state.bulkModeEnabled }
-  }),
-
-  setBulkModeEnabled: (enabledState) => set(state => {
-    return { bulkModeEnabled: enabledState }
-  }),
-
   updateBulkProperties: (newProperties) => set(state => {
     console.log('Updating bulk properties:')
     console.log({ ...state.bulkProperties, ...newProperties })

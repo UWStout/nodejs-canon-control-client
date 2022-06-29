@@ -10,7 +10,7 @@ import { getAllowedPropertyValues, getCameraProperty, setCameraProperty } from '
 import { trimProp } from '../../helpers/utility.js'
 
 export default function PropertySelectMenu (props) {
-  const { anchorElement, serverID, cameraID, propID, open, onClose, overrideValue } = props
+  const { anchorElement, serverID, cameraID, propID, open, onClose, isbulkProperty } = props
 
   // Subscribe to changes to the camera object
   const camera = useLiveQuery(() => localDB.cameras.get(cameraID))
@@ -29,11 +29,13 @@ export default function PropertySelectMenu (props) {
   React.useEffect(() => {
     // Update list of allowed values (asynchronous)
     const retrieveAllowedValues = async () => {
-      const allowedValues = await getAllowedPropertyValues(server, camera, propID)
-      if (Array.isArray(allowedValues) && allowedValues.length > 0) {
-        setOptions(allowedValues.map(option => ({ label: option.label, value: option.value })))
-      } else {
-        handleClose(false)
+      if (camera && server) {
+        const allowedValues = await getAllowedPropertyValues(server, camera, propID)
+        if (Array.isArray(allowedValues) && allowedValues.length > 0) {
+          setOptions(allowedValues.map(option => ({ label: option.label, value: option.value })))
+        } else {
+          handleClose(false)
+        }
       }
     }
 
@@ -46,41 +48,45 @@ export default function PropertySelectMenu (props) {
   React.useEffect(() => {
     // Update current value (asynchronous)
     const retrieveCurrentValue = async () => {
-      const currentValue = await getCameraProperty(server, camera, propID)
-      if (typeof currentValue?.value === 'object') {
-        const index = options.findIndex(option => option.value === currentValue.value.value)
-        setSelectedIndex(index)
-      } else if (typeof currentValue?.value !== 'undefined') {
-        const index = options.findIndex(option => option.value === currentValue.value)
-        setSelectedIndex(index)
+      if (camera && server) {
+        const currentValue = await getCameraProperty(server, camera, propID)
+        if (typeof currentValue?.value === 'object') {
+          const index = options.findIndex(option => option.value === currentValue.value.value)
+          setSelectedIndex(index)
+        } else if (typeof currentValue?.value !== 'undefined') {
+          const index = options.findIndex(option => option.value === currentValue.value)
+          setSelectedIndex(index)
+        }
       }
     }
 
     // Run the async process
-    if (overrideValue === null && open && Array.isArray(options) && options.length > 0) {
+    if (!isbulkProperty && open && Array.isArray(options) && options.length > 0) {
       retrieveCurrentValue()
     }
-  }, [camera, open, options, overrideValue, propID, server])
+  }, [camera, open, options, isbulkProperty, propID, server])
 
   // Menu click callback
   const handleMenuItemClick = (newIndex) => {
     // Async function to send selection to camera
     const updateSelection = async () => {
-      try {
-        if (newIndex !== selectedIndex) {
-          await setCameraProperty(server, camera, propID, trimProp(options[newIndex].label))
-          setSelectedIndex(newIndex)
-          onClose(true)
+      if (camera && server) {
+        try {
+          if (newIndex !== selectedIndex) {
+            await setCameraProperty(server, camera, propID, trimProp(options[newIndex].label))
+            setSelectedIndex(newIndex)
+            onClose(true)
+          }
+        } catch (error) {
+          window.alert('Error setting value, see console')
+          console.error(error)
         }
-      } catch (error) {
-        window.alert('Error setting value, see console')
-        console.error(error)
-      }
 
-      onClose(false)
+        onClose(false)
+      }
     }
 
-    if (overrideValue) {
+    if (isbulkProperty) {
       // Set as a bulk update settings instead
     } else {
       // Send to camera
@@ -90,13 +96,13 @@ export default function PropertySelectMenu (props) {
 
   // If overrideValue is provided, set the selected index from that
   useEffect(() => {
-    if (overrideValue !== null && Array.isArray(options)) {
-      const index = options.findIndex(option => option.value === overrideValue)
-      if (index >= 0) {
-        setSelectedIndex(index)
-      }
+    if (isbulkProperty && Array.isArray(options)) {
+      // const index = options.findIndex(option => option.value === overrideValue)
+      // if (index >= 0) {
+      //   setSelectedIndex(index)
+      // }
     }
-  }, [options, overrideValue])
+  }, [options, isbulkProperty])
 
   // Options is defined and is an empty array (or anchorElement is not ready yet) so don't render the menu
   if (options?.length === 0 || !anchorElement) {
@@ -135,18 +141,20 @@ export default function PropertySelectMenu (props) {
 
 PropertySelectMenu.propTypes = {
   anchorElement: PropTypes.oneOfType([PropTypes.element, PropTypes.object]),
-  cameraID: PropTypes.string.isRequired,
-  serverID: PropTypes.number.isRequired,
   propID: PropTypes.string.isRequired,
 
+  cameraID: PropTypes.string,
+  serverID: PropTypes.number,
   open: PropTypes.bool,
   onClose: PropTypes.func,
-  overrideValue: PropTypes.oneOfType([PropTypes.string, PropTypes.object])
+  isbulkProperty: PropTypes.bool
 }
 
 PropertySelectMenu.defaultProps = {
+  cameraID: '',
+  serverID: -1,
   anchorElement: null,
   open: false,
   onClose: null,
-  overrideValue: null
+  isbulkProperty: false
 }

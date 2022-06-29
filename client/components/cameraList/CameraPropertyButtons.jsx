@@ -64,7 +64,7 @@ export default function CameraPropertyButtons (props) {
 }
 
 CameraPropertyButtons.propTypes = {
-  cameraID: PropTypes.string.isRequired,
+  cameraID: PropTypes.string,
   readOnly: PropTypes.bool,
   propRefs: PropTypes.shape(PropertyIDsShape),
   onOpenMenu: PropTypes.func,
@@ -72,6 +72,7 @@ CameraPropertyButtons.propTypes = {
 }
 
 CameraPropertyButtons.defaultProps = {
+  cameraID: '',
   readOnly: false,
   propRefs: null,
   onOpenMenu: null,

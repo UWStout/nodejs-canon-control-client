@@ -8,7 +8,8 @@ import { getCameraDetails, getCameraList } from '../helpers/serverHelper'
 const db = new Dexie('c4-database')
 db.version(1).stores({
   servers: '++id, IP',
-  cameras: 'id, serverId'
+  cameras: 'id, serverId',
+  settings: 'name'
 })
 
 /**
@@ -112,6 +113,30 @@ export async function refreshCameraDetails (serverID, cameraID) {
     console.error('Error refreshing camera details')
     console.error(error)
   }
+}
+
+/**
+ * Update a 'setting' that you want to persist between browser sessions. The 'name'
+ * acts as a key to lookup the value later and any setting with a matching name will
+ * be overwritten. NOTE: nested properties are merged 1-level deep.
+ *
+ * @param {string} name The key name of the setting
+ * @param {(string|object)} newValue A primitive value to set or an object of properties
+ */
+export async function updateSetting (name, newValue) {
+  // Pack a non-object value under the property 'value'
+  if (typeof value !== 'object') {
+    newValue = { value: newValue }
+  }
+
+  // Retrieve current value (if any)
+  let oldValue = await db.settings.get(name)
+  if (oldValue === undefined) {
+    oldValue = {}
+  }
+
+  // Update the setting
+  await db.settings.put({ name, ...oldValue, ...newValue })
 }
 
 // Expose access to database for other files
