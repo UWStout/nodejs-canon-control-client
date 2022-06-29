@@ -4,9 +4,10 @@ import PropTypes from 'prop-types'
 import localDB, { refreshCameraDetails } from '../../state/localDB.js'
 import { useLiveQuery } from 'dexie-react-hooks'
 
-import { ListItem, ListItemAvatar, Avatar, ListItemText } from '@mui/material'
+import { ListItem, ListItemAvatar, Avatar } from '@mui/material'
 import { PhotoCamera as CameraIcon } from '@mui/icons-material'
 
+import EditableListItemText from './EditableListItemText.jsx'
 import PropertySelectMenu from './PropertySelectMenu.jsx'
 import CameraPropertyButtons from './CameraPropertyButtons.jsx'
 
@@ -77,13 +78,8 @@ export default function CameraListItem (props) {
         </Avatar>
       </ListItemAvatar>
 
-      {/* Camera Info */}
-      {camera
-        ? <ListItemText
-            primary={camera.nickname || camera.ProductName?.value}
-            secondary={`SN: ${camera.BodyIDEx?.value}${camera.FirmwareVersion ? ` / v${camera.FirmwareVersion?.value}` : ''}`}
-          />
-        : <ListItemText primary={'loading...'} />}
+      {/* Camera Text Info */}
+      <EditableListItemText cameraID={cameraID} />
 
       {/* Property selection menus */}
       {!readOnly && PROPERTY_IDS.map((propID) => (

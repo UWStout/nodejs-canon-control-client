@@ -68,7 +68,7 @@ export async function refreshCameraList (server) {
 
           // Update its entry
           console.log('Updating camera', camera.id)
-          ref.value = { ...serverCam, id: camera.id, serverId: server.id }
+          ref.value = { ...camera, ...serverCam }
         }
       })
     })
