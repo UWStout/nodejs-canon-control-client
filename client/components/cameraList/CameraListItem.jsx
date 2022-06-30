@@ -9,13 +9,14 @@ import { ListItem, ListItemAvatar, Avatar } from '@mui/material'
 import { PhotoCamera as CameraIcon } from '@mui/icons-material'
 
 import EditableListItemText from './EditableListItemText.jsx'
-import CameraListItemButtons from './cameraControls/CameraListItemButtons.jsx'
+import CameraActionAndPropertyButtons from './cameraControls/CameraActionAndPropertyButtons.jsx'
 
 export default function CameraListItem (props) {
   const { cameraID, serverID, readOnly } = props
 
-  // Subscribe to changes to the camera object
-  const camera = useLiveQuery(() => localDB.cameras.get(cameraID))
+  // Subscribe to changes to the camera and server objects
+  const camera = useLiveQuery(() => localDB.cameras.get(cameraID), [cameraID], null)
+  const server = useLiveQuery(() => localDB.servers.get(serverID), [serverID], null)
 
   // Track if camera details refresh is needed
   const [needsRefresh, setNeedsRefresh] = React.useState(false)
@@ -41,20 +42,24 @@ export default function CameraListItem (props) {
   return (
     <ListItem
       secondaryAction={
-        <CameraListItemButtons serverID={serverID} cameraID={cameraID} readOnly={readOnly} />
+        // Buttons for controlling the camera and setting properties
+        <CameraActionAndPropertyButtons
+          server={server}
+          camera={camera}
+          readOnly={readOnly}
+        />
       }
     >
-      {/* Basic Camera Icon */}
+      {/* Basic camera icon indicating status */}
       <ListItemAvatar>
         <Avatar sx={{ bgcolor: camera?.missing ? 'error.light' : 'success.light' }}>
           <CameraIcon />
         </Avatar>
       </ListItemAvatar>
 
-      {/* Camera Text Info */}
+      {/* Camera Text Info with a nickname that can be edited */}
       <EditableListItemText
-        serverID={serverID}
-        cameraID={cameraID}
+        camera={camera}
         needsRefresh={() => setNeedsRefresh(true)}
         readOnly={readOnly}
       />

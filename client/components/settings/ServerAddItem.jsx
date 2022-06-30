@@ -4,6 +4,7 @@ import localDB from '../../state/localDB.js'
 
 import { ListItem, IconButton, ListItemText, TextField, Grid } from '@mui/material'
 import { Add as AddIcon } from '@mui/icons-material'
+import { useSnackbar } from 'notistack'
 
 // Matches IP v4 addresses with an optional port
 const IP_REGEX = /^(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$/
@@ -13,6 +14,8 @@ export default function ServerAddItem () {
   const [serverPort, setServerPort] = React.useState(42424)
   const [serverNickname, setServerNickname] = React.useState('')
 
+  const { enqueueSnackbar } = useSnackbar()
+
   const addServer = async (newServer) => {
     try {
       const id = await localDB.servers.add(newServer)
@@ -21,7 +24,7 @@ export default function ServerAddItem () {
       setServerPort(42424)
       setServerNickname('')
     } catch (error) {
-      window.alert('Failed to add server')
+      enqueueSnackbar('Failed to add server', { variant: 'error' })
       console.error('Failed to add server', error)
     }
   }

@@ -2,16 +2,17 @@ import React from 'react'
 import PropTypes from 'prop-types'
 
 import localDB from '../../state/localDB.js'
-import { useLiveQuery } from 'dexie-react-hooks'
 
 import { ListItemText, TextField, InputAdornment, IconButton } from '@mui/material'
 import { Edit as EditIcon } from '@mui/icons-material'
+import { useSnackbar } from 'notistack'
+
+import { CameraObjShape } from '../../state/dataModel.js'
 
 export default function EditableListItemText (props) {
-  const { cameraID } = props
+  const { camera } = props
 
-  // Subscribe to changes to the camera object
-  const camera = useLiveQuery(() => localDB.cameras.get(cameraID))
+  const { enqueueSnackbar } = useSnackbar()
 
   // Local nickname editing state
   const inputRef = React.useRef()
@@ -24,7 +25,7 @@ export default function EditableListItemText (props) {
   // Update nickname once camera object is avialable
   React.useEffect(() => {
     // Has the nickname syncing finished?
-    if (isSyncing && nickname === camera.nickname) {
+    if (isSyncing && nickname === camera?.nickname) {
       setIsSyncing(false)
     }
 
@@ -36,16 +37,16 @@ export default function EditableListItemText (props) {
 
   // Toggling edit mode on and off
   const doneEditing = async (accept) => {
-    if (accept) {
+    if (accept && camera) {
       try {
         setIsSyncing(true)
-        const updated = await localDB.cameras.update(cameraID, { nickname })
+        const updated = await localDB.cameras.update(camera.id, { nickname })
         if (updated !== 1) {
-          window.alert('Failed to save nickname (see console for details)')
+          enqueueSnackbar(`Failed to save nickname for camera ${camera?.nickname}`, { variant: 'error' })
           console.error('Dexie table updated returned', updated)
         }
       } catch (error) {
-        window.alert('Failed to save nickname (see console for details)')
+        enqueueSnackbar(`Failed to save nickname for camera ${camera?.nickname}`, { variant: 'error' })
         console.error(error)
       }
     } else {
@@ -132,5 +133,9 @@ export default function EditableListItemText (props) {
 }
 
 EditableListItemText.propTypes = {
-  cameraID: PropTypes.string.isRequired
+  camera: PropTypes.shape(CameraObjShape)
+}
+
+EditableListItemText.defaultProps = {
+  camera: null
 }

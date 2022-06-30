@@ -67,3 +67,42 @@ export function setCameraProperty (server, camera, propID, valueOrLabel) {
     })
   })
 }
+
+export function takeAPhoto (server, camera) {
+  console.log(`Taking photo using camera ${camera.index} on ${server.nickname} server`)
+  return new Promise((resolve, reject) => {
+    axios.post(`https://${server.IP}:${server.port}/camera/${camera.index}/trigger`)
+      .then((response) => {
+        resolve(response.data)
+      })
+      .catch((error) => {
+        reject(error)
+      })
+  })
+}
+
+export function doAutoFocus (server, camera) {
+  console.log(`Doing auto-focus on camera ${camera.index} on ${server.nickname} server`)
+  return new Promise((resolve, reject) => {
+    axios.post(`https://${server.IP}:${server.port}/camera/${camera.index}/halfShutter`)
+      .then((response) => {
+        resolve(response.data)
+      })
+      .catch((error) => {
+        reject(error)
+      })
+  })
+}
+
+export function releaseShutter (server, camera) {
+  console.log(`Releasing shutter without focus on camera ${camera.index} on ${server.nickname} server`)
+  return new Promise((resolve, reject) => {
+    axios.post(`https://${server.IP}:${server.port}/camera/${camera.index}/fullShutter`)
+      .then((response) => {
+        resolve(response.data)
+      })
+      .catch((error) => {
+        reject(error)
+      })
+  })
+}

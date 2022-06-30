@@ -1,6 +1,7 @@
 import React from 'react'
 
 import { CssBaseline, ThemeProvider, Container, Grid, Stack } from '@mui/material'
+import { SnackbarProvider } from 'notistack'
 
 import C4AppBar from './C4AppBar.jsx'
 import CameraSortingSelect from './CameraSortingSelect.jsx'
@@ -17,29 +18,31 @@ export default function App () {
     <React.Fragment>
       <CssBaseline />
       <ThemeProvider theme={C4_THEME}>
-        <Container maxWidth="lg">
-          {/* Header AppBar with Settings Menu and BulkMode toggle */}
-          <C4AppBar />
+        <SnackbarProvider maxSnack={3}>
+          <Container maxWidth="lg">
+            {/* Header AppBar with Settings Menu and BulkMode toggle */}
+            <C4AppBar />
 
-          {/* Quck Settings */}
-          <Stack direction='row' spacing={1} alignItems='center' sx={{ bgcolor: '#cfe8fc', padding: 1, paddingBottom: 0 }}>
-            <CameraSortingSelect />
-            <ErrorsAtTopCheckbox sx={{ flexGrow: 1 }} />
-            <BulkModeSwitch />
-          </Stack>
+            {/* Quck Settings */}
+            <Stack direction='row' spacing={1} alignItems='center' sx={{ bgcolor: '#cfe8fc', padding: 1, paddingBottom: 0 }}>
+              <CameraSortingSelect />
+              <ErrorsAtTopCheckbox sx={{ flexGrow: 1 }} />
+              <BulkModeSwitch />
+            </Stack>
 
-          {/* Main Camera list with Bulk Settings widget */}
-          <Grid container sx={{ bgcolor: '#cfe8fc', padding: 2, paddingTop: 0 }}>
-            <Grid item xs={12}>
-              <CameraList />
+            {/* Main Camera list with Bulk Settings widget */}
+            <Grid container sx={{ bgcolor: '#cfe8fc', padding: 2, paddingTop: 0 }}>
+              <Grid item xs={12}>
+                <CameraList />
+              </Grid>
             </Grid>
-          </Grid>
 
-          {/* Various app-wide dialogs */}
-          <ServerSettingsDialog />
-          <ImportExportDialog />
+            {/* Various app-wide dialogs */}
+            <ServerSettingsDialog />
+            <ImportExportDialog />
 
-        </Container>
+          </Container>
+        </SnackbarProvider>
       </ThemeProvider>
     </React.Fragment>
   )

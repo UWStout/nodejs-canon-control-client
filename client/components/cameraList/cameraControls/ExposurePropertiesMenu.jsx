@@ -1,8 +1,6 @@
 import React from 'react'
 import PropTypes from 'prop-types'
 
-import localDB from '../../../state/localDB.js'
-import { useLiveQuery } from 'dexie-react-hooks'
 import useGlobalState from '../../../state/useGlobalState.js'
 
 import { Menu, MenuItem, ListItemIcon, ListItemText, Tooltip } from '@mui/material'
@@ -17,22 +15,35 @@ import {
 
 import PropertySelectMenu from './PropertySelectMenu.jsx'
 
-import { PropertyIDsShape } from '../../../state/dataModel.js'
+import { CameraObjShape, PropertyIDsShape, ServerObjShape } from '../../../state/dataModel.js'
 import { trimProp } from '../../../helpers/utility.js'
 
 const PROPERTY_IDS = Object.keys(PropertyIDsShape)
 
 export default function ExposurePropertiesMenu (props) {
-  const { serverID, cameraID, useBulkValues, anchor, onClose, needsRefresh } = props
+  const { server, camera, useBulkValues, anchor, onClose, needsRefresh } = props
   const { bulkModeSettings } = useGlobalState(state => state)
 
-  // Subscribe to changes to the camera object
-  const camera = useLiveQuery(() => localDB.cameras.get(cameraID))
+  // Local state for exposure properties
+  // const localExposureState = PROPERTY_IDS.map(propID => ())
+  // const [tvValue, setTvValue] = React.useState('loading')
+  // const [avValue, setAvValue] = React.useState('loading')
+  // const [isoSpeedValue, setISOSpeedValue] = React.useState('loading')
+  // const [imageQualityValue, setImageQualityValue] = React.useState('loading')
+  // const [whiteBalanceValue, setWhiteBalanceValue] = React.useState('loading')
 
-  // Force a re-render
-  const [rerender, setRerender] = React.useState(false)
+  // // Synchronize camera values with local state
+  // React.useEffect(() => {
+  //   if (camera) {
+  //     if (camera.Tv) { setTvValue(trimProp(camera.Tv.label)) }
+  //     if (camera.Av) { setAvValue(trimProp(camera.Av.label)) }
+  //     if (camera.ISOSpeed) { setISOSpeedValue(trimProp(camera.ISOSpeed.label)) }
+  //     if (camera.ImageQuality) { setImageQualityValue(trimProp(camera.ImageQuality.label)) }
+  //     if (camera.WhiteBalance) { setWhiteBalanceValue(trimProp(camera.WhiteBalance.label)) }
+  //   }
+  // }, [camera, camera?.Tv, camera?.Av, camera?.ISOSpeed, camera?.ImageQuality, camera?.WhiteBalance])
 
-  // Map for the icon elements
+  // Map for the icons for exposure properties
   const iconMap = {
     Tv: <ShutterIcon />,
     Av: <ApertureIcon />,
@@ -51,7 +62,6 @@ export default function ExposurePropertiesMenu (props) {
     setOpenSubMenu('')
     if (valueChanged && needsRefresh) {
       needsRefresh(true)
-      setRerender(!rerender)
     }
   }
 
@@ -92,8 +102,8 @@ export default function ExposurePropertiesMenu (props) {
             <PropertySelectMenu
               anchorElement={propSubMenuRefs[propID].current}
               propID={propID}
-              cameraID={cameraID}
-              serverID={serverID}
+              camera={camera}
+              server={server}
               open={openSubMenu === propID}
               onClose={closeSubMenu}
             />
@@ -105,8 +115,8 @@ export default function ExposurePropertiesMenu (props) {
 }
 
 ExposurePropertiesMenu.propTypes = {
-  serverID: PropTypes.number,
-  cameraID: PropTypes.string,
+  server: PropTypes.shape(ServerObjShape),
+  camera: PropTypes.shape(CameraObjShape),
   anchor: PropTypes.instanceOf(Element),
   onClose: PropTypes.func,
   needsRefresh: PropTypes.func,
@@ -114,8 +124,8 @@ ExposurePropertiesMenu.propTypes = {
 }
 
 ExposurePropertiesMenu.defaultProps = {
-  serverID: -1,
-  cameraID: '',
+  server: null,
+  camera: null,
   anchor: null,
   onClose: null,
   needsRefresh: null,

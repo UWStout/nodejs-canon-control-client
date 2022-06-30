@@ -56,5 +56,5 @@ export const ServerObjShape = {
   id: PropTypes.number.isRequired,
   IP: PropTypes.string.isRequired,
   port: PropTypes.number.isRequired,
-  name: PropTypes.string.isRequired
+  nickname: PropTypes.string.isRequired
 }

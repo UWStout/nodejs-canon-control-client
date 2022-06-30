@@ -6,11 +6,14 @@ import useGlobalState from '../../state/useGlobalState.js'
 import { exportLocalData, importLocalData } from '../../state/localDB.js'
 
 import { Box, Grid, Button } from '@mui/material'
+import { useSnackbar } from 'notistack'
 
 import FileDropzone from './FileDropzone.jsx'
 import ConfirmImportDialog from './ConfirmImportDialog.jsx'
 
 export default function ImportExportForm () {
+  const { enqueueSnackbar } = useSnackbar()
+
   const { hideImportExportDialog } = useGlobalState(state => state)
 
   const onExportClick = async () => {
@@ -19,7 +22,7 @@ export default function ImportExportForm () {
       download(dataBlob, 'c4-data-export.json', 'application/json')
       hideImportExportDialog()
     } catch (error) {
-      window.alert('Export failed (see console for details')
+      enqueueSnackbar('Local data export failed', { variant: 'error' })
       console.error(error)
     }
   }
@@ -38,7 +41,7 @@ export default function ImportExportForm () {
         await importLocalData(file, servers, cameras)
         hideImportExportDialog()
       } catch (error) {
-        window.alert('Import failed (see console for details')
+        enqueueSnackbar('Local data import failed', { variant: 'error' })
         console.error(error)
       }
     }

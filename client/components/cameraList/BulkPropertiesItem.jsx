@@ -7,7 +7,7 @@ import { Collapse, List, ListItem, ListItemAvatar, Avatar, ListItemText } from '
 import { PhotoCamera as CameraIcon } from '@mui/icons-material'
 
 import PropertySelectMenu from './cameraControls/PropertySelectMenu.jsx'
-import CameraPropertyButtons from './cameraControls/CameraPropertyButtons.jsx'
+import CameraPropertyButtons from './cameraControls/OldButtons.jsx'
 
 import { PropertyIDsShape } from '../../state/dataModel.js'
 

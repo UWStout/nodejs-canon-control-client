@@ -2,18 +2,23 @@ import React from 'react'
 import PropTypes from 'prop-types'
 
 import { IconButton, Stack, Tooltip, Divider } from '@mui/material'
-
 import {
   AddPhotoAlternate as TakePhotoIcon,
   CenterFocusStrong as FocusIcon,
   Camera as ReleaseSutterIcon,
   SettingsSuggest as ExposurePropertiesIcon
 } from '@mui/icons-material'
+import { useSnackbar } from 'notistack'
 
 import ExposurePropertiesMenu from './ExposurePropertiesMenu.jsx'
 
-export default function CameraListItemButtons (props) {
-  const { serverID, cameraID, readOnly, useBulkValues } = props
+import { takeAPhoto, doAutoFocus, releaseShutter } from '../../../helpers/serverHelper.js'
+import { CameraObjShape, ServerObjShape } from '../../../state/dataModel.js'
+
+export default function CameraActionAndPropertyButtons (props) {
+  const { server, camera, readOnly, useBulkValues } = props
+
+  const { enqueueSnackbar } = useSnackbar()
 
   // Menu anchor refs
   const exposureAnchorRef = React.useRef()
@@ -25,16 +30,40 @@ export default function CameraListItemButtons (props) {
   }
 
   // Camera control callbacks
-  const onTakePhoto = () => {
-    console.log('Photo requested for camera', cameraID)
+  const onTakePhoto = async () => {
+    try {
+      if (!server || !camera) {
+        throw new Error(`Cannot take photo: server and/or camera are null (${server?.id}/${camera?.id})`)
+      }
+      await takeAPhoto(server, camera)
+    } catch (error) {
+      enqueueSnackbar(`Failed to take photo on camera ${camera?.nickname}`, { variant: 'error' })
+      console.error(error)
+    }
   }
 
-  const onAutoFocus = () => {
-    console.log('Auto-focus requested for camera', cameraID)
+  const onAutoFocus = async () => {
+    try {
+      if (!server || !camera) {
+        throw new Error(`Cannot auto-focus: server and/or camera are null (${server?.id}/${camera?.id})`)
+      }
+      await doAutoFocus(server, camera)
+    } catch (error) {
+      enqueueSnackbar(`Auto-focus failed on camera ${camera?.nickname}`, { variant: 'error' })
+      console.error(error)
+    }
   }
 
-  const onReleaseShutter = () => {
-    console.log('Shutter release requested for camera', cameraID)
+  const onReleaseShutter = async () => {
+    try {
+      if (!server || !camera) {
+        throw new Error(`Cannot release shutter: server and/or camera are null (${server?.id}/${camera?.id})`)
+      }
+      await releaseShutter(server, camera)
+    } catch (error) {
+      enqueueSnackbar(`Shutter release failed on camera ${camera?.nickname}`, { variant: 'error' })
+      console.error(error)
+    }
   }
 
   return (
@@ -102,8 +131,8 @@ export default function CameraListItemButtons (props) {
 
       {/* The actual exposure properties menu */}
       <ExposurePropertiesMenu
-        serverID={serverID}
-        cameraID={cameraID}
+        server={server}
+        camera={camera}
         useBulkValues={useBulkValues}
         anchor={exposureMenuAnchor}
         onClose={() => setExposureMenuAnchor(null)}
@@ -112,16 +141,16 @@ export default function CameraListItemButtons (props) {
   )
 }
 
-CameraListItemButtons.propTypes = {
-  serverID: PropTypes.number,
-  cameraID: PropTypes.string,
+CameraActionAndPropertyButtons.propTypes = {
+  server: PropTypes.shape(ServerObjShape),
+  camera: PropTypes.shape(CameraObjShape),
   readOnly: PropTypes.bool,
   useBulkValues: PropTypes.bool
 }
 
-CameraListItemButtons.defaultProps = {
-  serverID: -1,
-  cameraID: '',
+CameraActionAndPropertyButtons.defaultProps = {
+  server: null,
+  camera: null,
   readOnly: false,
   useBulkValues: false
 }

@@ -1,20 +1,17 @@
 import React from 'react'
 import PropTypes from 'prop-types'
 
-import localDB from '../../../state/localDB.js'
-import { useLiveQuery } from 'dexie-react-hooks'
-
 import { Menu, MenuItem, Skeleton } from '@mui/material'
+import { useSnackbar } from 'notistack'
 
 import { getAllowedPropertyValues, getCameraProperty, setCameraProperty } from '../../../helpers/serverHelper'
 import { trimProp } from '../../../helpers/utility.js'
+import { CameraObjShape, ServerObjShape } from '../../../state/dataModel'
 
 export default function PropertySelectMenu (props) {
-  const { anchorElement, serverID, cameraID, propID, open, onClose } = props
+  const { anchorElement, server, camera, propID, open, onClose } = props
 
-  // Subscribe to changes to the camera object
-  const camera = useLiveQuery(() => localDB.cameras.get(cameraID))
-  const server = useLiveQuery(() => localDB.servers.get(serverID))
+  const { enqueueSnackbar } = useSnackbar()
 
   // Selection state and list of options
   const [selectedIndex, setSelectedIndex] = React.useState(0)
@@ -78,7 +75,7 @@ export default function PropertySelectMenu (props) {
             onClose(true)
           }
         } catch (error) {
-          window.alert('Error setting value, see console')
+          enqueueSnackbar(`Error setting property for camera ${camera?.nickname}`, { variant: 'error' })
           console.error(error)
         }
 
@@ -124,19 +121,19 @@ export default function PropertySelectMenu (props) {
 }
 
 PropertySelectMenu.propTypes = {
-  anchorElement: PropTypes.oneOfType([PropTypes.element, PropTypes.object]),
   propID: PropTypes.string.isRequired,
 
-  cameraID: PropTypes.string,
-  serverID: PropTypes.number,
+  anchorElement: PropTypes.instanceOf(Element),
+  camera: PropTypes.shape(CameraObjShape),
+  server: PropTypes.shape(ServerObjShape),
   open: PropTypes.bool,
   onClose: PropTypes.func
 }
 
 PropertySelectMenu.defaultProps = {
-  cameraID: '',
-  serverID: -1,
   anchorElement: null,
+  camera: null,
+  server: null,
   open: false,
   onClose: null
 }

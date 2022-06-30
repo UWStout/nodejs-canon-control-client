@@ -20,7 +20,7 @@ import { trimProp } from '../../../helpers/utility.js'
 
 const PROPERTY_IDS = Object.keys(PropertyIDsShape)
 
-export default function CameraPropertyButtons (props) {
+export default function CameraActionAndPropertyButtons (props) {
   const { cameraID, readOnly, propRefs, onOpenMenu, useBulkValues } = props
   const { bulkModeSettings } = useGlobalState(state => state)
 
@@ -63,7 +63,7 @@ export default function CameraPropertyButtons (props) {
   )
 }
 
-CameraPropertyButtons.propTypes = {
+CameraActionAndPropertyButtons.propTypes = {
   cameraID: PropTypes.string,
   readOnly: PropTypes.bool,
   propRefs: PropTypes.shape(PropertyIDsShape),
@@ -71,7 +71,7 @@ CameraPropertyButtons.propTypes = {
   useBulkValues: PropTypes.bool
 }
 
-CameraPropertyButtons.defaultProps = {
+CameraActionAndPropertyButtons.defaultProps = {
   cameraID: '',
   readOnly: false,
   propRefs: null,
