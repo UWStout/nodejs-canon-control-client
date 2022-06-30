@@ -56,7 +56,7 @@ export async function refreshCameraList (server) {
     // Start transaction for modify query
     console.log('Updating cameras in DB')
     await db.transaction('rw', db.cameras, async () => {
-      await db.cameras.toCollection().modify((camera, ref) => {
+      await db.cameras.where({ serverId: server.id }).modify((camera, ref) => {
         // Look for camera in camera list
         const serverCam = cameraList.find(serverCam => serverCam.BodyIDEx?.value === camera.id)
         if (!serverCam) {
@@ -69,7 +69,7 @@ export async function refreshCameraList (server) {
 
           // Update its entry
           console.log('Updating camera', camera.id)
-          ref.value = { ...camera, ...serverCam }
+          ref.value = { ...camera, ...serverCam, missing: undefined }
         }
       })
     })

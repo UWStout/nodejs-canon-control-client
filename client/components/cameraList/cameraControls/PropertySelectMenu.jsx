@@ -1,16 +1,16 @@
-import React, { useEffect } from 'react'
+import React from 'react'
 import PropTypes from 'prop-types'
 
-import localDB from '../../state/localDB.js'
+import localDB from '../../../state/localDB.js'
 import { useLiveQuery } from 'dexie-react-hooks'
 
 import { Menu, MenuItem, Skeleton } from '@mui/material'
 
-import { getAllowedPropertyValues, getCameraProperty, setCameraProperty } from '../../helpers/serverHelper'
-import { trimProp } from '../../helpers/utility.js'
+import { getAllowedPropertyValues, getCameraProperty, setCameraProperty } from '../../../helpers/serverHelper'
+import { trimProp } from '../../../helpers/utility.js'
 
 export default function PropertySelectMenu (props) {
-  const { anchorElement, serverID, cameraID, propID, open, onClose, isbulkProperty } = props
+  const { anchorElement, serverID, cameraID, propID, open, onClose } = props
 
   // Subscribe to changes to the camera object
   const camera = useLiveQuery(() => localDB.cameras.get(cameraID))
@@ -43,7 +43,7 @@ export default function PropertySelectMenu (props) {
     if (open) {
       retrieveAllowedValues()
     }
-  }, [camera, handleClose, open, propID, server])
+  }, [camera, server, handleClose, open, propID])
 
   React.useEffect(() => {
     // Update current value (asynchronous)
@@ -61,10 +61,10 @@ export default function PropertySelectMenu (props) {
     }
 
     // Run the async process
-    if (!isbulkProperty && open && Array.isArray(options) && options.length > 0) {
+    if (open && Array.isArray(options) && options.length > 0) {
       retrieveCurrentValue()
     }
-  }, [camera, open, options, isbulkProperty, propID, server])
+  }, [camera, server, open, options, propID])
 
   // Menu click callback
   const handleMenuItemClick = (newIndex) => {
@@ -86,23 +86,9 @@ export default function PropertySelectMenu (props) {
       }
     }
 
-    if (isbulkProperty) {
-      // Set as a bulk update settings instead
-    } else {
-      // Send to camera
-      updateSelection()
-    }
+    // Send to camera
+    updateSelection()
   }
-
-  // If overrideValue is provided, set the selected index from that
-  useEffect(() => {
-    if (isbulkProperty && Array.isArray(options)) {
-      // const index = options.findIndex(option => option.value === overrideValue)
-      // if (index >= 0) {
-      //   setSelectedIndex(index)
-      // }
-    }
-  }, [options, isbulkProperty])
 
   // Options is defined and is an empty array (or anchorElement is not ready yet) so don't render the menu
   if (options?.length === 0 || !anchorElement) {
@@ -115,10 +101,8 @@ export default function PropertySelectMenu (props) {
       anchorEl={anchorElement}
       open={open}
       onClose={handleClose}
-      MenuListProps={{
-        'aria-labelledby': 'lock-button',
-        role: 'listbox'
-      }}
+      anchorOrigin={{ vertical: 'center', horizontal: 'right' }}
+      transformOrigin={{ vertical: 'center', horizontal: 'right' }}
     >
       {/* eslint-disable react/jsx-indent, indent */}
       {options === null
@@ -146,8 +130,7 @@ PropertySelectMenu.propTypes = {
   cameraID: PropTypes.string,
   serverID: PropTypes.number,
   open: PropTypes.bool,
-  onClose: PropTypes.func,
-  isbulkProperty: PropTypes.bool
+  onClose: PropTypes.func
 }
 
 PropertySelectMenu.defaultProps = {
@@ -155,6 +138,5 @@ PropertySelectMenu.defaultProps = {
   serverID: -1,
   anchorElement: null,
   open: false,
-  onClose: null,
-  isbulkProperty: false
+  onClose: null
 }

@@ -1,9 +1,9 @@
 import React from 'react'
 import PropTypes from 'prop-types'
 
-import localDB from '../../state/localDB.js'
+import localDB from '../../../state/localDB.js'
 import { useLiveQuery } from 'dexie-react-hooks'
-import useGlobalState from '../../state/useGlobalState.js'
+import useGlobalState from '../../../state/useGlobalState.js'
 
 import { IconButton, Tooltip } from '@mui/material'
 
@@ -15,8 +15,8 @@ import {
   WbSunny as WhiteBalanceIcon
 } from '@mui/icons-material'
 
-import { PropertyIDsShape } from '../../state/dataModel.js'
-import { trimProp } from '../../helpers/utility.js'
+import { PropertyIDsShape } from '../../../state/dataModel.js'
+import { trimProp } from '../../../helpers/utility.js'
 
 const PROPERTY_IDS = Object.keys(PropertyIDsShape)
 

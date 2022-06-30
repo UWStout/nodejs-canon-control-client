@@ -5,15 +5,11 @@ import localDB, { refreshCameraDetails } from '../../state/localDB.js'
 import { useLiveQuery } from 'dexie-react-hooks'
 
 import { ListItem, ListItemAvatar, Avatar } from '@mui/material'
+
 import { PhotoCamera as CameraIcon } from '@mui/icons-material'
 
 import EditableListItemText from './EditableListItemText.jsx'
-import PropertySelectMenu from './PropertySelectMenu.jsx'
-import CameraPropertyButtons from './CameraPropertyButtons.jsx'
-
-import { PropertyIDsShape } from '../../state/dataModel.js'
-
-const PROPERTY_IDS = Object.keys(PropertyIDsShape)
+import CameraListItemButtons from './cameraControls/CameraListItemButtons.jsx'
 
 export default function CameraListItem (props) {
   const { cameraID, serverID, readOnly } = props
@@ -27,15 +23,6 @@ export default function CameraListItem (props) {
     // Catch if camera has no details but is only a summary
     if (camera && !camera.AEMode) { setNeedsRefresh(true) }
   }, [camera])
-
-  // Currently shown settings menu
-  const [openMenu, setOpenMenu] = React.useState('')
-  const closeMenu = (valueChanged = true) => {
-    setOpenMenu('')
-    if (valueChanged) {
-      setNeedsRefresh(true)
-    }
-  }
 
   // Refresh the camera details any time a menu is closed
   useEffect(() => {
@@ -51,48 +38,26 @@ export default function CameraListItem (props) {
     }
   }, [cameraID, serverID, needsRefresh])
 
-  // Refs for all the property menu anchors
-  const propRefs = {
-    Tv: React.useRef(),
-    Av: React.useRef(),
-    ISOSpeed: React.useRef(),
-    ImageQuality: React.useRef(),
-    WhiteBalance: React.useRef()
-  }
-
   return (
     <ListItem
       secondaryAction={
-        <CameraPropertyButtons
-          readOnly={readOnly}
-          cameraID={cameraID}
-          propRefs={propRefs}
-          onOpenMenu={setOpenMenu}
-        />
+        <CameraListItemButtons serverID={serverID} cameraID={cameraID} readOnly={readOnly} />
       }
     >
       {/* Basic Camera Icon */}
       <ListItemAvatar>
-        <Avatar>
+        <Avatar sx={{ bgcolor: camera?.missing ? 'error.light' : 'success.light' }}>
           <CameraIcon />
         </Avatar>
       </ListItemAvatar>
 
       {/* Camera Text Info */}
-      <EditableListItemText cameraID={cameraID} />
-
-      {/* Property selection menus */}
-      {!readOnly && PROPERTY_IDS.map((propID) => (
-        <PropertySelectMenu
-          key={`${propID}-menu`}
-          anchorElement={propRefs[propID].current}
-          propID={propID}
-          cameraID={cameraID}
-          serverID={serverID}
-          open={openMenu === propID}
-          onClose={closeMenu}
-        />
-      ))}
+      <EditableListItemText
+        serverID={serverID}
+        cameraID={cameraID}
+        needsRefresh={() => setNeedsRefresh(true)}
+        readOnly={readOnly}
+      />
 
     </ListItem>
   )

@@ -6,8 +6,8 @@ import { useLiveQuery } from 'dexie-react-hooks'
 import { Collapse, List, ListItem, ListItemAvatar, Avatar, ListItemText } from '@mui/material'
 import { PhotoCamera as CameraIcon } from '@mui/icons-material'
 
-import PropertySelectMenu from './PropertySelectMenu.jsx'
-import CameraPropertyButtons from './CameraPropertyButtons.jsx'
+import PropertySelectMenu from './cameraControls/PropertySelectMenu.jsx'
+import CameraPropertyButtons from './cameraControls/CameraPropertyButtons.jsx'
 
 import { PropertyIDsShape } from '../../state/dataModel.js'
 
