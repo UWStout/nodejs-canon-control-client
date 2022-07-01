@@ -65,8 +65,7 @@ export default function CameraList () {
 
           // Sort by the select sorting field
           return ('' + a[cameraSortField.value]).localeCompare(b[cameraSortField.value])
-        }
-        )
+        })
       }
 
       // Convert camera objects to CameraListItem components

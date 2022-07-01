@@ -11,13 +11,18 @@ export default function CameraListView () {
   return (
     <React.Fragment>
       {/* Quck Settings */}
-      <Stack direction='row' spacing={1} alignItems='center' sx={{ bgcolor: '#cfe8fc', padding: 1, paddingBottom: 0 }}>
+      <Stack
+        direction='row'
+        spacing={1}
+        alignItems='center'
+        sx={{ bgcolor: 'background.cameraList', padding: 1, paddingBottom: 0 }}
+      >
         <CameraSortingSelect />
         <ErrorsAtTopCheckbox sx={{ flexGrow: 1 }} />
         <BulkModeSwitch />
       </Stack>
 
-      <Grid container sx={{ bgcolor: '#cfe8fc', padding: 2, paddingTop: 0 }}>
+      <Grid container sx={{ bgcolor: 'background.cameraList', padding: 2, paddingTop: 0 }}>
         <Grid item xs={12}>
           <CameraList />
         </Grid>

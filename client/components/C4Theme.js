@@ -2,6 +2,16 @@ import { createTheme } from '@mui/material'
 
 const defaultTheme = createTheme()
 const C4_THEME = createTheme(defaultTheme, {
+  // Some custom colors for view backgrounds
+  palette: {
+    background: {
+      capture: '#DDEFFD',
+      cameraList: '#EAEFCC',
+      testing: '#F4C5BD'
+    }
+  },
+
+  // Component styling overrides
   components: {
     // Name of the component
     MuiListSubheader: {
@@ -10,9 +20,9 @@ const C4_THEME = createTheme(defaultTheme, {
         root: {
           // Some CSS
           color: defaultTheme.palette.getContrastText(
-            defaultTheme.palette.primary.main
+            '#7C8C2C'
           ),
-          backgroundColor: defaultTheme.palette.primary.main
+          backgroundColor: '#7C8C2C'
         }
       }
     }
