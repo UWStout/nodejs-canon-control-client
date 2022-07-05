@@ -1,6 +1,9 @@
 import React from 'react'
 import PropTypes from 'prop-types'
 
+import localDB from '../../../state/localDB.js'
+import { useLiveQuery } from 'dexie-react-hooks'
+
 import { IconButton, Stack, Tooltip, Divider } from '@mui/material'
 import {
   AddPhotoAlternate as TakePhotoIcon,
@@ -17,8 +20,11 @@ import { CameraObjShape, ServerObjShape } from '../../../state/dataModel.js'
 
 export default function CameraActionAndPropertyButtons (props) {
   const { server, camera, readOnly, useBulkValues } = props
-
   const { enqueueSnackbar } = useSnackbar()
+
+  // Needed browser data and state
+  const serverList = useLiveQuery(() => localDB.servers.toArray())
+  // const bulkExposureSettings = useLiveQuery(() => localDB.settings.get('bulkExposureSettings'))
 
   // Menu anchor refs
   const exposureAnchorRef = React.useRef()
@@ -32,36 +38,66 @@ export default function CameraActionAndPropertyButtons (props) {
   // Camera control callbacks
   const onTakePhoto = async () => {
     try {
-      if (!server || !camera) {
+      if (useBulkValues) {
+        await Promise.allSettled(
+          serverList.map(server => takeAPhoto(server, '*'))
+        )
+        enqueueSnackbar('Bulk photo capture complete', { variant: 'success' })
+      } else if (!server || !camera) {
         throw new Error(`Cannot take photo: server and/or camera are null (${server?.id}/${camera?.id})`)
+      } else {
+        await takeAPhoto(server, camera)
       }
-      await takeAPhoto(server, camera)
     } catch (error) {
-      enqueueSnackbar(`Failed to take photo on camera ${camera?.nickname}`, { variant: 'error' })
+      if (useBulkValues) {
+        enqueueSnackbar('Failed to take photos in bulk', { variant: 'error' })
+      } else {
+        enqueueSnackbar(`Failed to take photo on camera ${camera?.nickname || camera?.BodyIDEx?.value}`, { variant: 'error' })
+      }
       console.error(error)
     }
   }
 
   const onAutoFocus = async () => {
     try {
-      if (!server || !camera) {
+      if (useBulkValues) {
+        await Promise.allSettled(
+          serverList.map(server => doAutoFocus(server, '*'))
+        )
+        enqueueSnackbar('Bulk auto-focus complete', { variant: 'success' })
+      } else if (!server || !camera) {
         throw new Error(`Cannot auto-focus: server and/or camera are null (${server?.id}/${camera?.id})`)
+      } else {
+        await doAutoFocus(server, camera)
       }
-      await doAutoFocus(server, camera)
     } catch (error) {
-      enqueueSnackbar(`Auto-focus failed on camera ${camera?.nickname}`, { variant: 'error' })
+      if (useBulkValues) {
+        enqueueSnackbar('Failed to Auto-focus cameras in bulk', { variant: 'error' })
+      } else {
+        enqueueSnackbar(`Auto-focus failed on camera ${camera?.nickname || camera?.BodyIDEx?.value}`, { variant: 'error' })
+      }
       console.error(error)
     }
   }
 
   const onReleaseShutter = async () => {
     try {
-      if (!server || !camera) {
+      if (useBulkValues) {
+        await Promise.allSettled(
+          serverList.map(server => releaseShutter(server, '*'))
+        )
+        enqueueSnackbar('Bulk shutter release complete', { variant: 'success' })
+      } else if (!server || !camera) {
         throw new Error(`Cannot release shutter: server and/or camera are null (${server?.id}/${camera?.id})`)
+      } else {
+        await releaseShutter(server, camera)
       }
-      await releaseShutter(server, camera)
     } catch (error) {
-      enqueueSnackbar(`Shutter release failed on camera ${camera?.nickname}`, { variant: 'error' })
+      if (useBulkValues) {
+        enqueueSnackbar('Failed to release camera shutters in bulk', { variant: 'error' })
+      } else {
+        enqueueSnackbar(`Shutter release failed on camera ${camera?.nickname || camera?.ProductName?.value}`, { variant: 'error' })
+      }
       console.error(error)
     }
   }
@@ -120,7 +156,7 @@ export default function CameraActionAndPropertyButtons (props) {
             <IconButton
               role={undefined}
               size="large"
-              disabled={readOnly}
+              disabled={readOnly || useBulkValues}
               onClick={readOnly ? null : onOpenMenu}
             >
               <ExposurePropertiesIcon />

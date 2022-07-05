@@ -42,11 +42,11 @@ export default function EditableListItemText (props) {
         setIsSyncing(true)
         const updated = await localDB.cameras.update(camera.id, { nickname })
         if (updated !== 1) {
-          enqueueSnackbar(`Failed to save nickname for camera ${camera?.nickname}`, { variant: 'error' })
+          enqueueSnackbar(`Failed to save nickname for camera ${camera?.nickname || camera?.BodyIDEx?.value}`, { variant: 'error' })
           console.error('Dexie table updated returned', updated)
         }
       } catch (error) {
-        enqueueSnackbar(`Failed to save nickname for camera ${camera?.nickname}`, { variant: 'error' })
+        enqueueSnackbar(`Failed to save nickname for camera ${camera?.nickname || camera?.BodyIDEx?.value}`, { variant: 'error' })
         console.error(error)
       }
     } else {

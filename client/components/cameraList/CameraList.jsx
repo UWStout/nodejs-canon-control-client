@@ -74,7 +74,7 @@ export default function CameraList () {
           key={camera.BodyIDEx.value}
           cameraID={camera.id}
           serverID={server.id}
-          readOnly={camera.missing}
+          readOnly={camera.missing || bulkModeEnabled?.value}
         />
       ))
 

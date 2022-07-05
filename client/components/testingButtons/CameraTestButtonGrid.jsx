@@ -31,7 +31,7 @@ export default function CameraTestButtonGrid () {
       }
       await releaseShutter(server, camera)
     } catch (error) {
-      enqueueSnackbar(`Shutter release failed on camera ${camera?.nickname}`, { variant: 'error' })
+      enqueueSnackbar(`Shutter release failed on camera ${camera?.nickname || camera?.BodyIDEx?.value}`, { variant: 'error' })
       console.error(error)
     }
   }

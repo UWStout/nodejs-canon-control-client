@@ -9,7 +9,7 @@ import { trimProp } from '../../../helpers/utility.js'
 import { CameraObjShape, ServerObjShape } from '../../../state/dataModel'
 
 export default function PropertySelectMenu (props) {
-  const { anchorElement, server, camera, propID, open, onClose } = props
+  const { anchorElement, server, camera, useBulkValues, propID, open, onClose } = props
 
   const { enqueueSnackbar } = useSnackbar()
 
@@ -37,10 +37,10 @@ export default function PropertySelectMenu (props) {
     }
 
     // Run the async process
-    if (open) {
+    if (open && !useBulkValues) {
       retrieveAllowedValues()
     }
-  }, [camera, server, handleClose, open, propID])
+  }, [camera, server, handleClose, open, propID, useBulkValues])
 
   React.useEffect(() => {
     // Update current value (asynchronous)
@@ -58,10 +58,10 @@ export default function PropertySelectMenu (props) {
     }
 
     // Run the async process
-    if (open && Array.isArray(options) && options.length > 0) {
+    if (open && !useBulkValues && Array.isArray(options) && options.length > 0) {
       retrieveCurrentValue()
     }
-  }, [camera, server, open, options, propID])
+  }, [camera, server, open, options, propID, useBulkValues])
 
   // Menu click callback
   const handleMenuItemClick = (newIndex) => {
@@ -75,7 +75,7 @@ export default function PropertySelectMenu (props) {
             onClose(true)
           }
         } catch (error) {
-          enqueueSnackbar(`Error setting property for camera ${camera?.nickname}`, { variant: 'error' })
+          enqueueSnackbar(`Error setting property for camera ${camera?.nickname || camera?.BodyIDEx?.value}`, { variant: 'error' })
           console.error(error)
         }
 
@@ -84,7 +84,9 @@ export default function PropertySelectMenu (props) {
     }
 
     // Send to camera
-    updateSelection()
+    if (!useBulkValues) {
+      updateSelection()
+    }
   }
 
   // Options is defined and is an empty array (or anchorElement is not ready yet) so don't render the menu
@@ -126,6 +128,7 @@ PropertySelectMenu.propTypes = {
   anchorElement: PropTypes.instanceOf(Element),
   camera: PropTypes.shape(CameraObjShape),
   server: PropTypes.shape(ServerObjShape),
+  useBulkValues: PropTypes.bool,
   open: PropTypes.bool,
   onClose: PropTypes.func
 }
@@ -134,6 +137,7 @@ PropertySelectMenu.defaultProps = {
   anchorElement: null,
   camera: null,
   server: null,
+  useBulkValues: false,
   open: false,
   onClose: null
 }

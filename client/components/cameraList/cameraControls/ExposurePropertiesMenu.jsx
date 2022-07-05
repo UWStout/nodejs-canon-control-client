@@ -1,8 +1,6 @@
 import React from 'react'
 import PropTypes from 'prop-types'
 
-import useGlobalState from '../../../state/useGlobalState.js'
-
 import { Menu, MenuItem, ListItemIcon, ListItemText, Tooltip } from '@mui/material'
 
 import {
@@ -13,6 +11,9 @@ import {
   WbSunny as WhiteBalanceIcon
 } from '@mui/icons-material'
 
+import localDB from '../../../state/localDB.js'
+import { useLiveQuery } from 'dexie-react-hooks'
+
 import PropertySelectMenu from './PropertySelectMenu.jsx'
 
 import { CameraObjShape, PropertyIDsShape, ServerObjShape } from '../../../state/dataModel.js'
@@ -22,7 +23,7 @@ const PROPERTY_IDS = Object.keys(PropertyIDsShape)
 
 export default function ExposurePropertiesMenu (props) {
   const { server, camera, useBulkValues, anchor, onClose, needsRefresh } = props
-  const { bulkModeSettings } = useGlobalState(state => state)
+  const bulkModeExposureSettings = useLiveQuery(() => localDB.settings.get('bulkModeExposureSettings'))
 
   // Local state for exposure properties
   // const localExposureState = PROPERTY_IDS.map(propID => ())
@@ -92,7 +93,7 @@ export default function ExposurePropertiesMenu (props) {
                 <ListItemIcon>{iconMap[propID]}</ListItemIcon>
                 <ListItemText>
                   {useBulkValues
-                    ? (bulkModeSettings?.[propID] ? trimProp(bulkModeSettings[propID]) : 'loading')
+                    ? (bulkModeExposureSettings?.[propID] ? trimProp(bulkModeExposureSettings[propID]) : 'loading')
                     : (camera?.[propID] ? trimProp(camera[propID].label) : 'loading')}
                 </ListItemText>
               </MenuItem>
@@ -102,6 +103,7 @@ export default function ExposurePropertiesMenu (props) {
             <PropertySelectMenu
               anchorElement={propSubMenuRefs[propID].current}
               propID={propID}
+              useBulkValues={useBulkValues}
               camera={camera}
               server={server}
               open={openSubMenu === propID}
