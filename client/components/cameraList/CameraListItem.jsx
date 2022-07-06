@@ -25,6 +25,18 @@ export default function CameraListItem (props) {
     if (camera && !camera.AEMode) { setNeedsRefresh(true) }
   }, [camera])
 
+  // Track the status of the camera
+  const [statusColor, setStatusColor] = React.useState('error.light')
+  React.useEffect(() => {
+    if (!camera || camera?.missing) {
+      setStatusColor('error.light')
+    } else if (camera?.exposureStatus !== 'ok') {
+      setStatusColor('warning.light')
+    } else {
+      setStatusColor('success.light')
+    }
+  }, [camera?.missing, camera?.exposureStatus, camera])
+
   // Refresh the camera details any time a menu is closed
   useEffect(() => {
     // Asynchronous funciton to update camera details
@@ -52,7 +64,7 @@ export default function CameraListItem (props) {
     >
       {/* Basic camera icon indicating status */}
       <ListItemAvatar>
-        <Avatar sx={{ bgcolor: camera?.missing ? 'error.light' : 'success.light' }}>
+        <Avatar sx={{ bgcolor: statusColor }}>
           <CameraIcon />
         </Avatar>
       </ListItemAvatar>

@@ -1,6 +1,6 @@
 import React from 'react'
 
-import localDB from '../../state/localDB.js'
+import localDB, { setExposureStatus } from '../../state/localDB.js'
 import { useLiveQuery } from 'dexie-react-hooks'
 
 import { Collapse, List, ListItem, ListItemAvatar, Avatar, ListItemText } from '@mui/material'
@@ -29,6 +29,7 @@ export default function BulkPropertiesItem () {
   React.useEffect(() => {
     if (bulkExposureSettings) {
       setChangesDetected(true)
+      setExposureStatus('bad')
     }
   }, [bulkExposureSettings])
 
@@ -59,6 +60,7 @@ export default function BulkPropertiesItem () {
     } else {
       enqueueSnackbar('Bulk properties updated', { variant: 'success' })
       setChangesDetected(false)
+      setExposureStatus('ok')
     }
   }, [bulkExposureSettings, enqueueSnackbar, serverList])
 

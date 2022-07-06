@@ -56,7 +56,7 @@ export default function CameraTestButtonGrid () {
             onClick={() => triggerCamera(camera.id)}
             icon={<CameraIcon fontSize='small' />}
             label={camera.nickname}
-            color={camera.missing ? 'error' : 'success'}
+            color={camera.missing ? 'error' : (camera.exposureStatus === 'ok' ? 'success' : 'warning')}
           />
         </Grid>
       ))}

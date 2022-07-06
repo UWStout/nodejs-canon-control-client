@@ -97,6 +97,19 @@ export async function clearCameraStatus () {
 }
 
 /**
+ * Set the exposure status of all cameras to the given string
+ */
+export async function setExposureStatus (newStatus = 'unknown') {
+  await waitForDBLock()
+  await db.transaction('rw', db.cameras, async () => {
+    await db.cameras.toCollection().modify(camera => {
+      camera.exposureStatus = newStatus
+    })
+  })
+  unlockDB()
+}
+
+/**
  * Query the list of cameras available on a server and update
  * their entries in the database.
  * @param {ServerObjShape} server The server to refresh
