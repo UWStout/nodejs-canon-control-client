@@ -68,6 +68,20 @@ export function setCameraProperty (server, camera, propID, valueOrLabel) {
   })
 }
 
+export function setCameraProperties (server, camera, propertyObject) {
+  console.log(`Setting bulk properties for camera ${camera?.index || camera} on ${server?.nickname} server`)
+  return new Promise((resolve, reject) => {
+    axios.post(
+      `https://${server.IP}:${server.port}/camera/${camera.index || camera}`,
+      propertyObject
+    ).then((response) => {
+      resolve(response.data)
+    }).catch((error) => {
+      reject(error)
+    })
+  })
+}
+
 export function takeAPhoto (server, camera) {
   console.log(`Taking photo using camera ${camera?.index || camera} on ${server?.nickname} server`)
   return new Promise((resolve, reject) => {

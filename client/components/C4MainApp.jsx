@@ -1,5 +1,7 @@
 import React from 'react'
 
+import { clearCameraStatus } from '../state/localDB.js'
+
 import { CssBaseline, ThemeProvider, Container } from '@mui/material'
 import { SnackbarProvider } from 'notistack'
 
@@ -16,6 +18,19 @@ import ImportExportDialog from './settings/ImportExportDialog.jsx'
 import C4_THEME from './C4Theme.js'
 
 export default function App () {
+  // Always reset camera status on first render
+  React.useEffect(() => {
+    (async () => {
+      try {
+        await clearCameraStatus()
+        console.log('Camera status cleared')
+      } catch (error) {
+        alert('Failed to clear camera status')
+        console.error(error)
+      }
+    })()
+  }, [])
+
   return (
     <React.Fragment>
       <CssBaseline />

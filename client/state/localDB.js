@@ -12,12 +12,52 @@ db.version(1).stores({
   settings: 'name'
 })
 
+// Flag for syncronizing async DB queries and preventing race conditions
+let DB_BUSY = false
+
+/**
+ * Create a promise that will only resolve once the database has been locked. It will
+ * wait up to 'timeout' milliseconds for the lock to be released and will then relock
+ * it before resolving.  If timeout is exceeded it will reject.
+ * @param {number} timeout How long to wait (in milliseconds) before rejecting
+ * @returns {Promise} Returns a promise that resolves when and if the DB is locked
+ */
+function waitForDBLock (timeout = 5000) {
+  let elapsed = 0
+  return new Promise((resolve, reject) => {
+    if (DB_BUSY) {
+      const myInterval = setInterval(() => {
+        // Check for timeout
+        elapsed += 500
+        if (elapsed > timeout) {
+          clearInterval(myInterval)
+          return reject(new Error('Timeout exceeded waiting for database'))
+        }
+
+        // Has the database lock been released?
+        if (!DB_BUSY) {
+          clearInterval(myInterval)
+          DB_BUSY = true
+          return resolve()
+        }
+      }, 500)
+    } else {
+      DB_BUSY = true
+      return resolve()
+    }
+  })
+}
+
+function unlockDB () { DB_BUSY = false }
+
 /**
  * Export the entire local database to a data blob for download as a file.
  * @returns {blob} Data blob representing the entirety of the local c4 database
  */
 export async function exportLocalData () {
+  await waitForDBLock()
   const dataBlob = await exportDB(db)
+  unlockDB()
   return dataBlob
 }
 
@@ -29,6 +69,7 @@ export async function exportLocalData () {
  * @param {boolean} [includeCameras=true] Import data in the cameras table
  */
 export async function importLocalData (dataBlob, includeServers = true, includeCameras = true) {
+  await waitForDBLock()
   await importInto(db, dataBlob, {
     overwriteValues: true,
     filter: (table, value, key) => {
@@ -37,6 +78,22 @@ export async function importLocalData (dataBlob, includeServers = true, includeC
       return true
     }
   })
+  unlockDB()
+}
+
+/**
+ * Manually set the 'status' of all cameras in the database to default values
+ */
+export async function clearCameraStatus () {
+  await waitForDBLock()
+  await db.transaction('rw', db.cameras, async () => {
+    await db.cameras.toCollection().modify(camera => {
+      // Default to missing and an 'unknown' exposure status
+      camera.missing = true
+      camera.exposureStatus = 'unknown'
+    })
+  })
+  unlockDB()
 }
 
 /**
@@ -45,22 +102,20 @@ export async function importLocalData (dataBlob, includeServers = true, includeC
  * @param {ServerObjShape} server The server to refresh
  */
 export async function refreshCameraList (server) {
+  await waitForDBLock()
   try {
     // Query camera list from server and adjust with proper DB keys
-    console.log('Retrieving cameras for', server)
     const cameraList = await getCameraList(server)
 
     // Build modify query object
     const newCameras = cameraList.map(camera => camera.BodyIDEx.value)
 
     // Start transaction for modify query
-    console.log('Updating cameras in DB')
     await db.transaction('rw', db.cameras, async () => {
       await db.cameras.where({ serverId: server.id }).modify((camera, ref) => {
         // Look for camera in camera list
         const serverCam = cameraList.find(serverCam => serverCam.BodyIDEx?.value === camera.id)
         if (!serverCam) {
-          console.log('Missing camera', camera.id)
           camera.missing = true
         } else {
           // Remove from new camera list
@@ -68,7 +123,6 @@ export async function refreshCameraList (server) {
           if (camIndex >= 0) { newCameras.splice(camIndex, 1) }
 
           // Update its entry
-          console.log('Updating camera', camera.id)
           ref.value = { ...camera, ...serverCam, missing: undefined }
         }
       })
@@ -76,7 +130,6 @@ export async function refreshCameraList (server) {
 
     // Add in any new cameras
     if (newCameras.length > 0) {
-      console.log('Adding cameras to DB', newCameras)
       await db.cameras.bulkAdd(newCameras.map(cameraId => ({
         ...cameraList.find(serverCam => serverCam.BodyIDEx?.value === cameraId),
         id: cameraId,
@@ -87,6 +140,7 @@ export async function refreshCameraList (server) {
     console.error('Error refreshing server cameras')
     console.error(error)
   }
+  unlockDB()
 }
 
 /**
@@ -95,6 +149,7 @@ export async function refreshCameraList (server) {
  * @param {CameraObjShape} camera The server to refresh
  */
 export async function refreshCameraDetails (serverID, cameraID) {
+  await waitForDBLock()
   try {
     // Lookup server and camera objects
     const server = await db.servers.get(serverID)
@@ -113,6 +168,7 @@ export async function refreshCameraDetails (serverID, cameraID) {
     console.error('Error refreshing camera details')
     console.error(error)
   }
+  unlockDB()
 }
 
 /**

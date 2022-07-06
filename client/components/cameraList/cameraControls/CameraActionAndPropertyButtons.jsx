@@ -4,7 +4,7 @@ import PropTypes from 'prop-types'
 import localDB from '../../../state/localDB.js'
 import { useLiveQuery } from 'dexie-react-hooks'
 
-import { IconButton, Stack, Tooltip, Divider } from '@mui/material'
+import { Button, IconButton, Stack, Tooltip, Divider } from '@mui/material'
 import {
   AddPhotoAlternate as TakePhotoIcon,
   CenterFocusStrong as FocusIcon,
@@ -19,7 +19,7 @@ import { takeAPhoto, doAutoFocus, releaseShutter } from '../../../helpers/server
 import { CameraObjShape, ServerObjShape } from '../../../state/dataModel.js'
 
 export default function CameraActionAndPropertyButtons (props) {
-  const { server, camera, readOnly, useBulkValues } = props
+  const { server, camera, readOnly, useBulkValues, onApply, disableApply } = props
   const { enqueueSnackbar } = useSnackbar()
 
   // Needed browser data and state
@@ -97,7 +97,7 @@ export default function CameraActionAndPropertyButtons (props) {
 
   return (
     <React.Fragment>
-      <Stack direction='row' spacing={1}>
+      <Stack direction='row' spacing={1} alignItems="center">
         {/* Take Photo Button */}
         <Tooltip placement="top" title={'Take Photo w/ Focus'}>
           <span>
@@ -156,6 +156,21 @@ export default function CameraActionAndPropertyButtons (props) {
             </IconButton>
           </span>
         </Tooltip>
+
+        {!!onApply &&
+          // Exposure Settings Apply Button
+          <Tooltip placement="top" title={'Apply Exposure Settings'}>
+            <span>
+              <Button
+                size="small"
+                variant="contained"
+                disabled={disableApply}
+                onClick={onApply}
+              >
+                {'Apply'}
+              </Button>
+            </span>
+          </Tooltip>}
       </Stack>
 
       {/* The actual exposure properties menu */}
@@ -174,12 +189,16 @@ CameraActionAndPropertyButtons.propTypes = {
   server: PropTypes.shape(ServerObjShape),
   camera: PropTypes.shape(CameraObjShape),
   readOnly: PropTypes.bool,
-  useBulkValues: PropTypes.bool
+  useBulkValues: PropTypes.bool,
+  onApply: PropTypes.func,
+  disableApply: PropTypes.bool
 }
 
 CameraActionAndPropertyButtons.defaultProps = {
   server: null,
   camera: null,
   readOnly: false,
-  useBulkValues: false
+  useBulkValues: false,
+  onApply: null,
+  disableApply: true
 }
