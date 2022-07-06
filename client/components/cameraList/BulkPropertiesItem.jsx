@@ -10,13 +10,17 @@ import CameraActionAndPropertyButtons from './cameraControls/CameraActionAndProp
 export default function BulkPropertiesItem () {
   const bulkModeEnabled = useLiveQuery(() => localDB.settings.get('bulkModeEnabled'))
 
+  // Grab the first camera on the first server (if any)
+  const server = useLiveQuery(() => localDB.servers.toCollection().first())
+  const camera = useLiveQuery(() => localDB.cameras.toCollection().first())
+
   return (
     <Collapse in={bulkModeEnabled?.value} timeout="auto" unmountOnExit>
       <List sx={{ padding: 0, width: '100%', bgcolor: 'background.paper' }}>
         <ListItem
           secondaryAction={
             // Buttons for controlling the camera and setting properties
-            <CameraActionAndPropertyButtons useBulkValues />
+            <CameraActionAndPropertyButtons camera={camera} server={server} useBulkValues />
           }
         >
           {/* Basic camera icon indicating status */}

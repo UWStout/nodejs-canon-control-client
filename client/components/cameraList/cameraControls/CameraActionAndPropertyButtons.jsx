@@ -24,7 +24,6 @@ export default function CameraActionAndPropertyButtons (props) {
 
   // Needed browser data and state
   const serverList = useLiveQuery(() => localDB.servers.toArray())
-  // const bulkExposureSettings = useLiveQuery(() => localDB.settings.get('bulkExposureSettings'))
 
   // Menu anchor refs
   const exposureAnchorRef = React.useRef()
@@ -39,9 +38,7 @@ export default function CameraActionAndPropertyButtons (props) {
   const onTakePhoto = async () => {
     try {
       if (useBulkValues) {
-        await Promise.allSettled(
-          serverList.map(server => takeAPhoto(server, '*'))
-        )
+        await Promise.allSettled(serverList.map(server => takeAPhoto(server, '*')))
         enqueueSnackbar('Bulk photo capture complete', { variant: 'success' })
       } else if (!server || !camera) {
         throw new Error(`Cannot take photo: server and/or camera are null (${server?.id}/${camera?.id})`)
@@ -61,9 +58,7 @@ export default function CameraActionAndPropertyButtons (props) {
   const onAutoFocus = async () => {
     try {
       if (useBulkValues) {
-        await Promise.allSettled(
-          serverList.map(server => doAutoFocus(server, '*'))
-        )
+        await Promise.allSettled(serverList.map(server => doAutoFocus(server, '*')))
         enqueueSnackbar('Bulk auto-focus complete', { variant: 'success' })
       } else if (!server || !camera) {
         throw new Error(`Cannot auto-focus: server and/or camera are null (${server?.id}/${camera?.id})`)
@@ -83,9 +78,7 @@ export default function CameraActionAndPropertyButtons (props) {
   const onReleaseShutter = async () => {
     try {
       if (useBulkValues) {
-        await Promise.allSettled(
-          serverList.map(server => releaseShutter(server, '*'))
-        )
+        await Promise.allSettled(serverList.map(server => releaseShutter(server, '*')))
         enqueueSnackbar('Bulk shutter release complete', { variant: 'success' })
       } else if (!server || !camera) {
         throw new Error(`Cannot release shutter: server and/or camera are null (${server?.id}/${camera?.id})`)
@@ -156,7 +149,7 @@ export default function CameraActionAndPropertyButtons (props) {
             <IconButton
               role={undefined}
               size="large"
-              disabled={readOnly || useBulkValues}
+              disabled={readOnly}
               onClick={readOnly ? null : onOpenMenu}
             >
               <ExposurePropertiesIcon />

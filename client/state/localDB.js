@@ -124,8 +124,8 @@ export async function refreshCameraDetails (serverID, cameraID) {
  * @param {(string|object)} newValue A primitive value to set or an object of properties
  */
 export async function updateSetting (name, newValue) {
-  // Pack a non-object value under the property 'value'
-  if (typeof value !== 'object') {
+  // Pack a primitive value under the property 'value'
+  if (typeof newValue !== 'object') {
     newValue = { value: newValue }
   }
 

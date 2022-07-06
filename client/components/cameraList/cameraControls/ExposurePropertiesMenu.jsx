@@ -23,26 +23,7 @@ const PROPERTY_IDS = Object.keys(PropertyIDsShape)
 
 export default function ExposurePropertiesMenu (props) {
   const { server, camera, useBulkValues, anchor, onClose, needsRefresh } = props
-  const bulkModeExposureSettings = useLiveQuery(() => localDB.settings.get('bulkModeExposureSettings'))
-
-  // Local state for exposure properties
-  // const localExposureState = PROPERTY_IDS.map(propID => ())
-  // const [tvValue, setTvValue] = React.useState('loading')
-  // const [avValue, setAvValue] = React.useState('loading')
-  // const [isoSpeedValue, setISOSpeedValue] = React.useState('loading')
-  // const [imageQualityValue, setImageQualityValue] = React.useState('loading')
-  // const [whiteBalanceValue, setWhiteBalanceValue] = React.useState('loading')
-
-  // // Synchronize camera values with local state
-  // React.useEffect(() => {
-  //   if (camera) {
-  //     if (camera.Tv) { setTvValue(trimProp(camera.Tv.label)) }
-  //     if (camera.Av) { setAvValue(trimProp(camera.Av.label)) }
-  //     if (camera.ISOSpeed) { setISOSpeedValue(trimProp(camera.ISOSpeed.label)) }
-  //     if (camera.ImageQuality) { setImageQualityValue(trimProp(camera.ImageQuality.label)) }
-  //     if (camera.WhiteBalance) { setWhiteBalanceValue(trimProp(camera.WhiteBalance.label)) }
-  //   }
-  // }, [camera, camera?.Tv, camera?.Av, camera?.ISOSpeed, camera?.ImageQuality, camera?.WhiteBalance])
+  const bulkExposureSettings = useLiveQuery(() => localDB.settings.get('bulkExposureSettings'))
 
   // Map for the icons for exposure properties
   const iconMap = {
@@ -93,7 +74,7 @@ export default function ExposurePropertiesMenu (props) {
                 <ListItemIcon>{iconMap[propID]}</ListItemIcon>
                 <ListItemText>
                   {useBulkValues
-                    ? (bulkModeExposureSettings?.[propID] ? trimProp(bulkModeExposureSettings[propID]) : 'loading')
+                    ? (bulkExposureSettings?.[propID] ? trimProp(bulkExposureSettings?.[propID]) : 'none')
                     : (camera?.[propID] ? trimProp(camera[propID].label) : 'loading')}
                 </ListItemText>
               </MenuItem>

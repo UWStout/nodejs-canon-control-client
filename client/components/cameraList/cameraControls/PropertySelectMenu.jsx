@@ -1,6 +1,9 @@
 import React from 'react'
 import PropTypes from 'prop-types'
 
+import localDB, { updateSetting } from '../../../state/localDB.js'
+import { useLiveQuery } from 'dexie-react-hooks'
+
 import { Menu, MenuItem, Skeleton } from '@mui/material'
 import { useSnackbar } from 'notistack'
 
@@ -10,8 +13,10 @@ import { CameraObjShape, ServerObjShape } from '../../../state/dataModel'
 
 export default function PropertySelectMenu (props) {
   const { anchorElement, server, camera, useBulkValues, propID, open, onClose } = props
-
   const { enqueueSnackbar } = useSnackbar()
+
+  // subscribe to changes in bulk exposure settings
+  const bulkExposureSettings = useLiveQuery(() => localDB.settings.get('bulkExposureSettings'))
 
   // Selection state and list of options
   const [selectedIndex, setSelectedIndex] = React.useState(0)
@@ -37,13 +42,13 @@ export default function PropertySelectMenu (props) {
     }
 
     // Run the async process
-    if (open && !useBulkValues) {
+    if (open) {
       retrieveAllowedValues()
     }
   }, [camera, server, handleClose, open, propID, useBulkValues])
 
   React.useEffect(() => {
-    // Update current value (asynchronous)
+    // Update selected index based on current property value in camera (asynchronous)
     const retrieveCurrentValue = async () => {
       if (camera && server) {
         const currentValue = await getCameraProperty(server, camera, propID)
@@ -58,10 +63,16 @@ export default function PropertySelectMenu (props) {
     }
 
     // Run the async process
-    if (open && !useBulkValues && Array.isArray(options) && options.length > 0) {
-      retrieveCurrentValue()
+    if (open && Array.isArray(options) && options.length > 0) {
+      if (useBulkValues) {
+        const currentValue = bulkExposureSettings?.[propID]
+        const index = options.findIndex(option => option.value === currentValue)
+        setSelectedIndex(index)
+      } else {
+        retrieveCurrentValue()
+      }
     }
-  }, [camera, server, open, options, propID, useBulkValues])
+  }, [camera, server, open, options, propID, useBulkValues, bulkExposureSettings])
 
   // Menu click callback
   const handleMenuItemClick = (newIndex) => {
@@ -84,7 +95,15 @@ export default function PropertySelectMenu (props) {
     }
 
     // Send to camera
-    if (!useBulkValues) {
+    if (useBulkValues) {
+      if (newIndex !== selectedIndex) {
+        updateSetting('bulkExposureSettings', { [propID]: trimProp(options[newIndex].label) })
+        setSelectedIndex(newIndex)
+        onClose(true)
+      } else {
+        onClose(false)
+      }
+    } else {
       updateSelection()
     }
   }
