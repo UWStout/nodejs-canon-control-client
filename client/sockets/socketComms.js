@@ -1,8 +1,7 @@
 
-import EventEmitter from 'eventemitter3'
 import { io } from 'socket.io-client'
 
-// Establish connection
+// Existing server sessions
 const socketList = []
 
 /**

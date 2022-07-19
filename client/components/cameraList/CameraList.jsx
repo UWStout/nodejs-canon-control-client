@@ -1,6 +1,6 @@
 import React from 'react'
 
-import localDB, { refreshCameraList } from '../../state/localDB.js'
+import localDB from '../../state/localDB.js'
 import { useLiveQuery } from 'dexie-react-hooks'
 
 import { List, ListSubheader, Grid, Stack, Typography } from '@mui/material'
@@ -18,25 +18,13 @@ export default function CameraList () {
   const cameraSortField = useLiveQuery(() => localDB.settings.get('cameraSortField'))
   const cameraErrorsAtTop = useLiveQuery(() => localDB.settings.get('cameraErrorsAtTop'))
 
-  // Syncronize camera list when servers change
-  React.useEffect(() => {
-    // Async function to refresh list of cameras
-    const updateCameraList = async () => {
-      if (Array.isArray(serverList)) {
-        for (let i = 0; i < serverList.length; i++) {
-          await refreshCameraList(serverList[i])
-        }
-      }
-    }
-
-    // Start async function
-    updateCameraList()
-  }, [serverList])
-
   // Build camera widget list
   let cameraListItems = []
   if (Array.isArray(serverList)) {
     serverList.forEach(server => {
+      // Skip deactivated servers
+      if (server.deactivated) return
+
       // Filter for cameras on this server
       let serverCams = (Array.isArray(cameraList)
         ? cameraList.filter(camera => camera.serverId === server.id)

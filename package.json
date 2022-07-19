@@ -38,11 +38,13 @@
     "eslint-plugin-react": "^7.30.0",
     "eslint-plugin-react-hooks": "^4.5.0",
     "eventemitter3": "^4.0.7",
+    "material-ui-confirm": "^3.0.4",
     "nodemon": "^2.0.16",
     "react": "^18.1.0",
     "react-dom": "^18.1.0",
     "react-dropzone": "^14.2.1",
     "socket.io-client": "^4.5.1",
+    "socket.io-react-hook": "^1.0.16",
     "zustand": "^4.0.0-rc.1"
   },
   "dependencies": {
