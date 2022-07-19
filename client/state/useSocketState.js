@@ -27,7 +27,7 @@ const useSocketState = create(set => ({
         // Make and return new socket session
         console.log(`SOCKET: connecting to ${server.id}`)
         const socket = io(`https://${server.IP}:${server.port}`, { path: '/socket.io' })
-        return { serverID: server.id, socket }
+        return { serverId: server.id, socket }
       }
       return socketSession
     })
