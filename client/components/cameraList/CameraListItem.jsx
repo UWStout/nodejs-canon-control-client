@@ -5,7 +5,6 @@ import localDB, { refreshCameraDetails } from '../../state/localDB.js'
 import { useLiveQuery } from 'dexie-react-hooks'
 
 import { ListItem, ListItemAvatar, Avatar } from '@mui/material'
-
 import { PhotoCamera as CameraIcon } from '@mui/icons-material'
 
 import EditableListItemText from './EditableListItemText.jsx'
