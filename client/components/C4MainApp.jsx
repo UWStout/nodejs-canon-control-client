@@ -1,7 +1,6 @@
 import React from 'react'
 
-import useSocketState from '../state/useSocketState.js'
-import localDB, { clearCameraStatus, refreshCameraList } from '../state/localDB.js'
+import localDB, { clearCameraStatus, reloadCameraList } from '../state/localDB.js'
 import { useLiveQuery } from 'dexie-react-hooks'
 
 import { CssBaseline, ThemeProvider, Container } from '@mui/material'
@@ -20,12 +19,11 @@ import ImportExportDialog from './settings/ImportExportDialog.jsx'
 
 import C4_THEME from './C4Theme.js'
 
+import { useServerSockets } from './socketHooks.js'
+
 export default function App () {
   // Subscribe to changes in the server list
   const serverList = useLiveQuery(() => localDB.servers.toArray())
-
-  // Subscribe to socket.io connection state
-  const { updateServerSockets } = useSocketState(state => state)
 
   // Always reset camera status on first render
   React.useEffect(() => {
@@ -40,19 +38,17 @@ export default function App () {
     })()
   }, [])
 
+  // Setup and syncronize the socket.io connections
+  useServerSockets(serverList)
+
   // Syncronize camera list when servers change
   React.useEffect(() => {
-    // Ensure the socket connects are up to date
-    if (Array.isArray(serverList)) {
-      updateServerSockets(serverList)
-    }
-
     // Async function to refresh list of cameras
     const updateCameraList = async () => {
       if (Array.isArray(serverList)) {
         for (let i = 0; i < serverList.length; i++) {
           if (!serverList[i].deactivated) {
-            await refreshCameraList(serverList[i])
+            await reloadCameraList(serverList[i])
           }
         }
       }
@@ -60,7 +56,7 @@ export default function App () {
 
     // Start async function
     updateCameraList()
-  }, [serverList, updateServerSockets])
+  }, [serverList])
 
   return (
     <React.Fragment>

@@ -41,7 +41,21 @@ export default function CameraListItem (props) {
   useEffect(() => {
     // Asynchronous funciton to update camera details
     const retrieveDetails = async () => {
-      await refreshCameraDetails(serverID, cameraID)
+      let keepTrying = true
+      while (keepTrying) {
+        try {
+          await refreshCameraDetails(serverID, cameraID)
+          keepTrying = false
+        } catch (error) {
+          if (!error.message.toLowerCase().includes('timeout exceeded')) {
+            keepTrying = false
+            console.error(`Failed to retrieve details for camera ${cameraID} on server ${serverID}`)
+            console.error(error)
+          } else {
+            console.log(`Retrying for camera ${cameraID} on server ${serverID}`)
+          }
+        }
+      }
     }
 
     // If a refresh is needed, do it (and clear the flag)

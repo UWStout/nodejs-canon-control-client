@@ -114,18 +114,30 @@ export async function setExposureStatus (newStatus = 'unknown') {
  * their entries in the database.
  * @param {ServerObjShape} server The server to refresh
  */
-export async function refreshCameraList (server) {
-  await waitForDBLock()
+export async function reloadCameraList (server) {
   try {
     // Query camera list from server and adjust with proper DB keys
     const cameraList = await getCameraList(server)
+    refreshCameraList(cameraList, server.id)
+  } catch (error) {
+    console.error('Error reloading server cameras')
+    console.error(error)
+  }
+}
 
+/**
+ * Parse a list of cameras and update the database
+ * @param {object[]} cameraList List of cameras returned by the server API
+ */
+export async function refreshCameraList (cameraList, serverId) {
+  await waitForDBLock()
+  try {
     // Build modify query object
     const newCameras = cameraList.map(camera => camera.BodyIDEx.value)
 
     // Start transaction for modify query
     await db.transaction('rw', db.cameras, async () => {
-      await db.cameras.where({ serverId: server.id }).modify((camera, ref) => {
+      await db.cameras.where({ serverId }).modify((camera, ref) => {
         // Look for camera in camera list
         const serverCam = cameraList.find(serverCam => serverCam.BodyIDEx?.value === camera.id)
         if (!serverCam) {
@@ -146,7 +158,7 @@ export async function refreshCameraList (server) {
       await db.cameras.bulkAdd(newCameras.map(cameraId => ({
         ...cameraList.find(serverCam => serverCam.BodyIDEx?.value === cameraId),
         id: cameraId,
-        serverId: server.id
+        serverId
       })))
     }
   } catch (error) {
