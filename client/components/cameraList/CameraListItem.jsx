@@ -51,8 +51,6 @@ export default function CameraListItem (props) {
             keepTrying = false
             console.error(`Failed to retrieve details for camera ${cameraID} on server ${serverID}`)
             console.error(error)
-          } else {
-            console.log(`Retrying for camera ${cameraID} on server ${serverID}`)
           }
         }
       }
