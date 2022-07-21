@@ -63,7 +63,7 @@ export default function App () {
       <CssBaseline />
       <ThemeProvider theme={C4_THEME}>
         <ConfirmProvider>
-          <SnackbarProvider maxSnack={3}>
+          <SnackbarProvider maxSnack={6}>
             <Container maxWidth="lg">
               {/* Header AppBar with Settings Menu and BulkMode toggle */}
               <C4AppBar tabLabels={['Capture', 'List', 'Testing']} />

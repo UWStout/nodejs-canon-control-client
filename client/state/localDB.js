@@ -6,7 +6,7 @@ import { getCameraDetails, getCameraList } from '../helpers/serverHelper'
 
 // Initialize the database
 const db = new Dexie('c4-database')
-db.version(1).stores({
+db.version(3).stores({
   servers: '++id, IP',
   cameras: 'id, serverId',
   settings: 'name'

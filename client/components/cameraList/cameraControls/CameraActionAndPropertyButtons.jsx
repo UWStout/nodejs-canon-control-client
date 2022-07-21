@@ -3,6 +3,7 @@ import PropTypes from 'prop-types'
 
 import localDB from '../../../state/localDB.js'
 import { useLiveQuery } from 'dexie-react-hooks'
+// import useBulkTaskState from '../../../state/useBulkTaskState.js'
 
 import { Button, IconButton, Stack, Tooltip, Divider } from '@mui/material'
 import {
@@ -25,6 +26,9 @@ export default function CameraActionAndPropertyButtons (props) {
   // Needed browser data and state
   const serverList = useLiveQuery(() => localDB.servers.toArray())
 
+  // Task list state
+  // const { addBulkTask } = useBulkTaskState(state => state)
+
   // Menu anchor refs
   const exposureAnchorRef = React.useRef()
 
@@ -36,62 +40,80 @@ export default function CameraActionAndPropertyButtons (props) {
 
   // Camera control callbacks
   const onTakePhoto = async () => {
-    try {
-      if (useBulkValues) {
-        await Promise.allSettled(serverList.map(server => takeAPhoto(server, '*')))
-        enqueueSnackbar('Bulk photo capture complete', { variant: 'success' })
-      } else if (!server || !camera) {
-        throw new Error(`Cannot take photo: server and/or camera are null (${server?.id}/${camera?.id})`)
-      } else {
-        await takeAPhoto(server, camera)
+    if (useBulkValues) {
+      for (let i = 0; i < serverList.length; i++) {
+        const server = serverList[i]
+        try {
+          const result = takeAPhoto(server, '*')
+          const snackbarKey = enqueueSnackbar(`Bulk photo capture started for ${server.nickname}`)
+          // addBulkTask(result.taskId, 'Bulk photo capture', snackbarKey, server.nickname)
+        } catch (error) {
+          enqueueSnackbar(`Bulk photo capture failed for ${server.nickname}`, { variant: 'error' })
+        }
       }
-    } catch (error) {
-      if (useBulkValues) {
-        enqueueSnackbar('Failed to take photos in bulk', { variant: 'error' })
-      } else {
+    } else {
+      try {
+        if (!server || !camera) {
+          throw new Error(`Cannot take photo: server and/or camera are null (${server?.id}/${camera?.id})`)
+        } else {
+          await takeAPhoto(server, camera)
+        }
+      } catch (error) {
         enqueueSnackbar(`Failed to take photo on camera ${camera?.nickname || camera?.BodyIDEx?.value}`, { variant: 'error' })
+        console.error(error)
       }
-      console.error(error)
     }
   }
 
   const onAutoFocus = async () => {
-    try {
-      if (useBulkValues) {
-        await Promise.allSettled(serverList.map(server => doAutoFocus(server, '*')))
-        enqueueSnackbar('Bulk auto-focus complete', { variant: 'success' })
-      } else if (!server || !camera) {
-        throw new Error(`Cannot auto-focus: server and/or camera are null (${server?.id}/${camera?.id})`)
-      } else {
-        await doAutoFocus(server, camera)
+    if (useBulkValues) {
+      for (let i = 0; i < serverList.length; i++) {
+        const server = serverList[i]
+        try {
+          const result = await doAutoFocus(server, '*')
+          const snackbarKey = enqueueSnackbar(`Bulk auto-focus started for ${server.nickname}`)
+          // addBulkTask(result.taskId, 'Bulk auto-focus', snackbarKey, server.nickname)
+        } catch (error) {
+          enqueueSnackbar(`Bulk auto-focus failed for ${server.nickname}`, { variant: 'error' })
+        }
       }
-    } catch (error) {
-      if (useBulkValues) {
-        enqueueSnackbar('Failed to Auto-focus cameras in bulk', { variant: 'error' })
-      } else {
+    } else {
+      try {
+        if (!server || !camera) {
+          throw new Error(`Cannot auto-focus: server and/or camera are null (${server?.id}/${camera?.id})`)
+        } else {
+          await doAutoFocus(server, camera)
+        }
+      } catch (error) {
         enqueueSnackbar(`Auto-focus failed on camera ${camera?.nickname || camera?.BodyIDEx?.value}`, { variant: 'error' })
+        console.error(error)
       }
-      console.error(error)
     }
   }
 
   const onReleaseShutter = async () => {
-    try {
-      if (useBulkValues) {
-        await Promise.allSettled(serverList.map(server => releaseShutter(server, '*')))
-        enqueueSnackbar('Bulk shutter release complete', { variant: 'success' })
-      } else if (!server || !camera) {
-        throw new Error(`Cannot release shutter: server and/or camera are null (${server?.id}/${camera?.id})`)
-      } else {
-        await releaseShutter(server, camera)
+    if (useBulkValues) {
+      for (let i = 0; i < serverList.length; i++) {
+        const server = serverList[i]
+        try {
+          const result = await releaseShutter(server, '*')
+          const snackbarKey = enqueueSnackbar(`Bulk shutter release started for ${server.nickname}`)
+          // addBulkTask(result.taskId, 'Bulk shutter release', snackbarKey, server.nickname)
+        } catch (error) {
+          enqueueSnackbar(`Bulk shutter release failed for ${server.nickname}`, { variant: 'error' })
+        }
       }
-    } catch (error) {
-      if (useBulkValues) {
-        enqueueSnackbar('Failed to release camera shutters in bulk', { variant: 'error' })
-      } else {
+    } else {
+      try {
+        if (!server || !camera) {
+          throw new Error(`Cannot release shutter: server and/or camera are null (${server?.id}/${camera?.id})`)
+        } else {
+          await releaseShutter(server, camera)
+        }
+      } catch (error) {
         enqueueSnackbar(`Shutter release failed on camera ${camera?.nickname || camera?.ProductName?.value}`, { variant: 'error' })
+        console.error(error)
       }
-      console.error(error)
     }
   }
 

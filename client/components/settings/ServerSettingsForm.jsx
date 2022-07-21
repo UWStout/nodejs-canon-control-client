@@ -4,7 +4,7 @@ import { useLiveQuery } from 'dexie-react-hooks'
 import localDB from '../../state/localDB.js'
 import { useConfirm } from 'material-ui-confirm'
 
-import { Stack, Typography, List, ListSubheader, IconButton, ListItem, ListItemText, ListItemButton, ListItemIcon, Checkbox, Divider } from '@mui/material'
+import { Stack, Typography, List, IconButton, ListItem, ListItemText, ListItemButton, ListItemIcon, Checkbox, Divider } from '@mui/material'
 import { Remove as RemoveIcon } from '@mui/icons-material'
 
 import ServerAddItem from './ServerAddItem.jsx'
