@@ -4,7 +4,7 @@ import { useLiveQuery } from 'dexie-react-hooks'
 import localDB from '../../state/localDB.js'
 import { useConfirm } from 'material-ui-confirm'
 
-import { List, IconButton, ListItem, ListItemText, ListItemButton, ListItemIcon, Checkbox, Divider } from '@mui/material'
+import { Stack, Typography, List, ListSubheader, IconButton, ListItem, ListItemText, ListItemButton, ListItemIcon, Checkbox, Divider } from '@mui/material'
 import { Remove as RemoveIcon } from '@mui/icons-material'
 
 import ServerAddItem from './ServerAddItem.jsx'
@@ -32,7 +32,16 @@ export default function ServerSettingsForm () {
   }
 
   return (
-    <List sx={{ marginLeft: 2, marginRight: 2, marginBottom: 2 }}>
+    <List
+      subheader={
+        <Stack direction='row' sx={{ borderBottom: '1px solid gray' }}>
+          <Typography variant='body1' sx={{ marginLeft: 2 }}>{'Active'}</Typography>
+          <Typography variant='body1' sx={{ marginLeft: 3, marginRight: 'auto' }}>{'Server Info'}</Typography>
+          <Typography variant='body1'>{'Remove'}</Typography>
+        </Stack>
+      }
+      sx={{ marginLeft: 2, marginRight: 2, marginBottom: 2 }}
+    >
       {Array.isArray(serverList) && serverList.map((server) => (
         <ListItem
           key={server.id}
