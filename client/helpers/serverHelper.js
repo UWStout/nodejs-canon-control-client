@@ -155,3 +155,44 @@ export function releaseShutter (server, camera) {
       })
   })
 }
+
+export function createNewAutoSession(server, msTime = Date.now(), nickname = '') {
+  console.log(`Creating new Session Storage`)
+  return new Promise((resolve, reject) => {
+    axios.post(`https://${server.IP}:${server.port}/server/session/create/auto/${msTime}/${nickname || parseInt(msTime)}`)
+      .then((response) => {
+        resolve(response.data)
+      })
+      .catch((error) => {
+        reject(error)
+      })
+  })
+}
+
+export function createNewSession(server, msTime = Date.now(), nickname = '', path = '') {
+  if (!path)  { return createNewAutoSession(server, msTime, nickname) }
+  console.log(`Creating new Session Storage`)
+  return new Promise((resolve, reject) => {
+    axios.post(`https://${server.IP}:${server.port}/server/session/create/auto/${msTime}/${nickname || parseInt(msTime / 60000)}`)
+      .then((response) => {
+        resolve(response.data)
+      })
+      .catch((error) => {
+        reject(error)
+      })
+  })
+}
+
+// TODO: Could be possible to shift sessions.json into local storage database on client
+export function getSessionList(server) {
+  console.log(`Fetching list of sessions`)
+  return new Promise((resolve, reject) => {
+    axios.get(`https://${server.IP}:${server.port}/server/sessions`)
+      .then((response) => {
+        resolve(response.data)
+      })
+      .catch((error) => {
+        reject(error)
+      })
+  })
+}
