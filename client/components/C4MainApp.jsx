@@ -21,11 +21,12 @@ import C4_THEME from './C4Theme.js'
 
 import { useServerSockets } from './socketHooks.js'
 
-export default function App () {
+export default function C4MainApp () {
   // Subscribe to changes in the server list
   const serverList = useLiveQuery(() => localDB.servers.toArray())
 
   // Always reset camera status on first render
+  const [resetDone, setResetDone] = React.useState(false)
   React.useEffect(() => {
     (async () => {
       try {
@@ -35,6 +36,7 @@ export default function App () {
         alert('Failed to clear camera status')
         console.error(error)
       }
+      setResetDone(true)
     })()
   }, [])
 
@@ -42,21 +44,51 @@ export default function App () {
   useServerSockets(serverList)
 
   // Syncronize camera list when servers change
+  const [syncronizedServers, setSyncronizedServers] = React.useState([])
   React.useEffect(() => {
     // Async function to refresh list of cameras
     const updateCameraList = async () => {
       if (Array.isArray(serverList)) {
+        // Keep track of changes to the list of syncronized servers
+        let changed = false
+        const newSyncServers = [...syncronizedServers]
+
+        // go through and syncronized any servers that have been added or activated
         for (let i = 0; i < serverList.length; i++) {
-          if (!serverList[i].deactivated) {
-            await reloadCameraList(serverList[i])
+          const server = serverList[i]
+
+          // If it's deactivated, make sure it is NOT in the syncronized list
+          if (server.deactivated) {
+            const index = newSyncServers.findIndex(serverId => serverId === server.id)
+            if (index >= 0) {
+              console.log('SyncServ: removing', server.id)
+              newSyncServers.splice(index, 1)
+              changed = true
+            }
+          } else {
+            // Has this one been syncronized already
+            if (!newSyncServers.includes(server.id)) {
+              console.log('SyncServ: adding', server.id)
+              newSyncServers.push(server.id)
+              reloadCameraList(serverList[i])
+              changed = true
+            }
           }
+        }
+
+        // Update list of synchronized servers only if needed
+        if (changed) {
+          console.log('Updating sync servers', newSyncServers)
+          setSyncronizedServers(newSyncServers)
         }
       }
     }
 
     // Start async function
-    updateCameraList()
-  }, [serverList])
+    if (resetDone) {
+      updateCameraList()
+    }
+  }, [resetDone, serverList, syncronizedServers])
 
   return (
     <React.Fragment>

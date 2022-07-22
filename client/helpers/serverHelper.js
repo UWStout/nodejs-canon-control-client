@@ -22,9 +22,10 @@ export function getCameraDetails (server, camera) {
   // Skip deactivated servers
   if (server.deactivated) return Promise.resolve({})
 
-  console.log(`Retrieving details for camera ${camera.index} on ${server?.nickname} server`)
+  const camIndex = (typeof camera === 'number' ? camera : camera?.index)
+  console.log(`Retrieving details for camera ${camIndex} on ${server?.nickname} server`)
   return new Promise((resolve, reject) => {
-    axios.get(`https://${server.IP}:${server.port}/camera/${camera.index}`)
+    axios.get(`https://${server.IP}:${server.port}/camera/${camIndex}`)
       .then((response) => {
         resolve(response.data)
       })
@@ -38,9 +39,10 @@ export function getCameraProperty (server, camera, propID) {
   // Skip deactivated servers
   if (server.deactivated) return Promise.resolve({})
 
-  console.log(`Retrieving property <${propID}> for camera ${camera.index} on ${server?.nickname} server`)
+  const camIndex = (typeof camera === 'number' ? camera : camera?.index)
+  console.log(`Retrieving property <${propID}> for camera ${camIndex} on ${server?.nickname} server`)
   return new Promise((resolve, reject) => {
-    axios.get(`https://${server.IP}:${server.port}/camera/${camera.index}/${propID}`)
+    axios.get(`https://${server.IP}:${server.port}/camera/${camIndex}/${propID}`)
       .then((response) => {
         resolve(response.data)
       })
@@ -54,9 +56,10 @@ export function getAllowedPropertyValues (server, camera, propID) {
   // Skip deactivated servers
   if (server.deactivated) return Promise.resolve({})
 
-  console.log(`Retrieving property <${propID}> allowed values for camera ${camera.index} at ${server?.nickname}  server`)
+  const camIndex = (typeof camera === 'number' ? camera : camera?.index)
+  console.log(`Retrieving property <${propID}> allowed values for camera ${camIndex} at ${server?.nickname}  server`)
   return new Promise((resolve, reject) => {
-    axios.get(`https://${server.IP}:${server.port}/camera/${camera.index}/${propID}/allowed`)
+    axios.get(`https://${server.IP}:${server.port}/camera/${camIndex}/${propID}/allowed`)
       .then((response) => {
         resolve(response.data)
       })
@@ -70,10 +73,11 @@ export function setCameraProperty (server, camera, propID, valueOrLabel) {
   // Skip deactivated servers
   if (server.deactivated) return Promise.resolve({})
 
-  console.log(`Setting property <${propID}>="${valueOrLabel}" for camera ${camera?.index || camera} on ${server?.nickname} server`)
+  const camIndex = (typeof camera === 'number' ? camera : camera?.index)
+  console.log(`Setting property <${propID}>="${valueOrLabel}" for camera ${camIndex} on ${server?.nickname} server`)
   return new Promise((resolve, reject) => {
     axios.post(
-      `https://${server.IP}:${server.port}/camera/${camera.index || camera}/${propID}`,
+      `https://${server.IP}:${server.port}/camera/${camIndex}/${propID}`,
       { value: valueOrLabel }
     ).then((response) => {
       resolve(response.data)
@@ -87,10 +91,11 @@ export function setCameraProperties (server, camera, propertyObject) {
   // Skip deactivated servers
   if (server.deactivated) return Promise.resolve({})
 
-  console.log(`Setting bulk properties for camera ${camera?.index || camera} on ${server?.nickname} server`)
+  const camIndex = (typeof camera === 'number' ? camera : camera?.index)
+  console.log(`Setting bulk properties for camera ${camIndex} on ${server?.nickname} server`)
   return new Promise((resolve, reject) => {
     axios.post(
-      `https://${server.IP}:${server.port}/camera/${camera.index || camera}`,
+      `https://${server.IP}:${server.port}/camera/${camIndex}`,
       propertyObject
     ).then((response) => {
       resolve(response.data)
@@ -104,9 +109,10 @@ export function takeAPhoto (server, camera) {
   // Skip deactivated servers
   if (server.deactivated) return Promise.resolve({})
 
-  console.log(`Taking photo using camera ${camera?.index || camera} on ${server?.nickname} server`)
+  const camIndex = (typeof camera === 'number' ? camera : camera?.index)
+  console.log(`Taking photo using camera ${camIndex} on ${server?.nickname} server`)
   return new Promise((resolve, reject) => {
-    axios.post(`https://${server.IP}:${server.port}/camera/${camera.index || camera}/trigger`)
+    axios.post(`https://${server.IP}:${server.port}/camera/${camIndex}/trigger`)
       .then((response) => {
         resolve(response.data)
       })
@@ -120,9 +126,10 @@ export function doAutoFocus (server, camera) {
   // Skip deactivated servers
   if (server.deactivated) return Promise.resolve({})
 
-  console.log(`Doing auto-focus on camera ${camera?.index || camera} on ${server?.nickname} server`)
+  const camIndex = (typeof camera === 'number' ? camera : camera?.index)
+  console.log(`Doing auto-focus on camera ${camIndex} on ${server?.nickname} server`)
   return new Promise((resolve, reject) => {
-    axios.post(`https://${server.IP}:${server.port}/camera/${camera.index || camera}/halfShutter`)
+    axios.post(`https://${server.IP}:${server.port}/camera/${camIndex}/halfShutter`)
       .then((response) => {
         resolve(response.data)
       })
@@ -136,9 +143,10 @@ export function releaseShutter (server, camera) {
   // Skip deactivated servers
   if (server.deactivated) return Promise.resolve({})
 
-  console.log(`Releasing shutter without focus on camera ${camera?.index || camera} on ${server?.nickname} server`)
+  const camIndex = (typeof camera === 'number' ? camera : camera?.index)
+  console.log(`Releasing shutter without focus on camera ${camIndex} on ${server?.nickname} server`)
   return new Promise((resolve, reject) => {
-    axios.post(`https://${server.IP}:${server.port}/camera/${camera.index || camera}/fullShutter`)
+    axios.post(`https://${server.IP}:${server.port}/camera/${camIndex}/fullShutter`)
       .then((response) => {
         resolve(response.data)
       })

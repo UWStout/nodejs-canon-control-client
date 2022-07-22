@@ -108,6 +108,7 @@ export default function CameraActionAndPropertyButtons (props) {
         if (!server || !camera) {
           throw new Error(`Cannot release shutter: server and/or camera are null (${server?.id}/${camera?.id})`)
         } else {
+          console.log('Releasing for', camera)
           await releaseShutter(server, camera)
         }
       } catch (error) {
