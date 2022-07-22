@@ -22,7 +22,7 @@ export function getCameraDetails (server, camera) {
   // Skip deactivated servers
   if (server.deactivated) return Promise.resolve({})
 
-  const camIndex = (typeof camera === 'number' ? camera : camera?.index)
+  const camIndex = (typeof camera === 'object' ? camera?.index : camera)
   console.log(`Retrieving details for camera ${camIndex} on ${server?.nickname} server`)
   return new Promise((resolve, reject) => {
     axios.get(`https://${server.IP}:${server.port}/camera/${camIndex}`)
@@ -39,7 +39,7 @@ export function getCameraProperty (server, camera, propID) {
   // Skip deactivated servers
   if (server.deactivated) return Promise.resolve({})
 
-  const camIndex = (typeof camera === 'number' ? camera : camera?.index)
+  const camIndex = (typeof camera === 'object' ? camera?.index : camera)
   console.log(`Retrieving property <${propID}> for camera ${camIndex} on ${server?.nickname} server`)
   return new Promise((resolve, reject) => {
     axios.get(`https://${server.IP}:${server.port}/camera/${camIndex}/${propID}`)
@@ -56,7 +56,7 @@ export function getAllowedPropertyValues (server, camera, propID) {
   // Skip deactivated servers
   if (server.deactivated) return Promise.resolve({})
 
-  const camIndex = (typeof camera === 'number' ? camera : camera?.index)
+  const camIndex = (typeof camera === 'object' ? camera?.index : camera)
   console.log(`Retrieving property <${propID}> allowed values for camera ${camIndex} at ${server?.nickname}  server`)
   return new Promise((resolve, reject) => {
     axios.get(`https://${server.IP}:${server.port}/camera/${camIndex}/${propID}/allowed`)
@@ -73,7 +73,7 @@ export function setCameraProperty (server, camera, propID, valueOrLabel) {
   // Skip deactivated servers
   if (server.deactivated) return Promise.resolve({})
 
-  const camIndex = (typeof camera === 'number' ? camera : camera?.index)
+  const camIndex = (typeof camera === 'object' ? camera?.index : camera)
   console.log(`Setting property <${propID}>="${valueOrLabel}" for camera ${camIndex} on ${server?.nickname} server`)
   return new Promise((resolve, reject) => {
     axios.post(
@@ -91,7 +91,7 @@ export function setCameraProperties (server, camera, propertyObject) {
   // Skip deactivated servers
   if (server.deactivated) return Promise.resolve({})
 
-  const camIndex = (typeof camera === 'number' ? camera : camera?.index)
+  const camIndex = (typeof camera === 'object' ? camera?.index : camera)
   console.log(`Setting bulk properties for camera ${camIndex} on ${server?.nickname} server`)
   return new Promise((resolve, reject) => {
     axios.post(
@@ -109,7 +109,7 @@ export function takeAPhoto (server, camera) {
   // Skip deactivated servers
   if (server.deactivated) return Promise.resolve({})
 
-  const camIndex = (typeof camera === 'number' ? camera : camera?.index)
+  const camIndex = (typeof camera === 'object' ? camera?.index : camera)
   console.log(`Taking photo using camera ${camIndex} on ${server?.nickname} server`)
   return new Promise((resolve, reject) => {
     axios.post(`https://${server.IP}:${server.port}/camera/${camIndex}/trigger`)
@@ -126,7 +126,7 @@ export function doAutoFocus (server, camera) {
   // Skip deactivated servers
   if (server.deactivated) return Promise.resolve({})
 
-  const camIndex = (typeof camera === 'number' ? camera : camera?.index)
+  const camIndex = (typeof camera === 'object' ? camera?.index : camera)
   console.log(`Doing auto-focus on camera ${camIndex} on ${server?.nickname} server`)
   return new Promise((resolve, reject) => {
     axios.post(`https://${server.IP}:${server.port}/camera/${camIndex}/halfShutter`)
@@ -143,7 +143,7 @@ export function releaseShutter (server, camera) {
   // Skip deactivated servers
   if (server.deactivated) return Promise.resolve({})
 
-  const camIndex = (typeof camera === 'number' ? camera : camera?.index)
+  const camIndex = (typeof camera === 'object' ? camera?.index : camera)
   console.log(`Releasing shutter without focus on camera ${camIndex} on ${server?.nickname} server`)
   return new Promise((resolve, reject) => {
     axios.post(`https://${server.IP}:${server.port}/camera/${camIndex}/fullShutter`)

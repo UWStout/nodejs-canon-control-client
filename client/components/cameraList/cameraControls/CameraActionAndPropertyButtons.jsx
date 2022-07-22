@@ -3,7 +3,6 @@ import PropTypes from 'prop-types'
 
 import localDB from '../../../state/localDB.js'
 import { useLiveQuery } from 'dexie-react-hooks'
-// import useBulkTaskState from '../../../state/useBulkTaskState.js'
 
 import { Button, IconButton, Stack, Tooltip, Divider } from '@mui/material'
 import {
@@ -26,9 +25,6 @@ export default function CameraActionAndPropertyButtons (props) {
   // Needed browser data and state
   const serverList = useLiveQuery(() => localDB.servers.toArray())
 
-  // Task list state
-  // const { addBulkTask } = useBulkTaskState(state => state)
-
   // Menu anchor refs
   const exposureAnchorRef = React.useRef()
 
@@ -44,9 +40,8 @@ export default function CameraActionAndPropertyButtons (props) {
       for (let i = 0; i < serverList.length; i++) {
         const server = serverList[i]
         try {
-          const result = takeAPhoto(server, '*')
-          const snackbarKey = enqueueSnackbar(`Bulk photo capture started for ${server.nickname}`)
-          // addBulkTask(result.taskId, 'Bulk photo capture', snackbarKey, server.nickname)
+          takeAPhoto(server, '*')
+          enqueueSnackbar(`Bulk photo capture started for ${server.nickname}`)
         } catch (error) {
           enqueueSnackbar(`Bulk photo capture failed for ${server.nickname}`, { variant: 'error' })
         }
@@ -70,9 +65,8 @@ export default function CameraActionAndPropertyButtons (props) {
       for (let i = 0; i < serverList.length; i++) {
         const server = serverList[i]
         try {
-          const result = await doAutoFocus(server, '*')
-          const snackbarKey = enqueueSnackbar(`Bulk auto-focus started for ${server.nickname}`)
-          // addBulkTask(result.taskId, 'Bulk auto-focus', snackbarKey, server.nickname)
+          doAutoFocus(server, '*')
+          enqueueSnackbar(`Bulk auto-focus started for ${server.nickname}`)
         } catch (error) {
           enqueueSnackbar(`Bulk auto-focus failed for ${server.nickname}`, { variant: 'error' })
         }
@@ -96,9 +90,8 @@ export default function CameraActionAndPropertyButtons (props) {
       for (let i = 0; i < serverList.length; i++) {
         const server = serverList[i]
         try {
-          const result = await releaseShutter(server, '*')
-          const snackbarKey = enqueueSnackbar(`Bulk shutter release started for ${server.nickname}`)
-          // addBulkTask(result.taskId, 'Bulk shutter release', snackbarKey, server.nickname)
+          releaseShutter(server, '*')
+          enqueueSnackbar(`Bulk shutter release started for ${server.nickname}`)
         } catch (error) {
           enqueueSnackbar(`Bulk shutter release failed for ${server.nickname}`, { variant: 'error' })
         }
