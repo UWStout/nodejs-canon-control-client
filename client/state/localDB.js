@@ -15,6 +15,7 @@ db.version(4).stores({
 
 // Flag for syncronizing async DB queries and preventing race conditions
 let DB_BUSY = false
+const DEFAULT_DB_TIMEOUT = 7000
 
 /**
  * Create a promise that will only resolve once the database has been locked. It will
@@ -23,7 +24,7 @@ let DB_BUSY = false
  * @param {number} timeout How long to wait (in milliseconds) before rejecting
  * @returns {Promise} Returns a promise that resolves when and if the DB is locked
  */
-function waitForDBLock (timeout = 5000) {
+function waitForDBLock (timeout = DEFAULT_DB_TIMEOUT) {
   let elapsed = 0
   return new Promise((resolve, reject) => {
     if (DB_BUSY) {
