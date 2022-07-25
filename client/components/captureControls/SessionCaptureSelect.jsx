@@ -3,7 +3,7 @@ import React from 'react'
 import localDB, { addNewSession, addNewCapture, updateSetting } from '../../state/localDB.js'
 import { useLiveQuery } from 'dexie-react-hooks'
 
-import { Box, FormControl, InputLabel, Select, MenuItem, Stack, Paper, Typography } from '@mui/material'
+import { Box, FormControl, InputLabel, Select, MenuItem, Stack, Paper, Typography, Grid } from '@mui/material'
 import {
   ArrowForwardIosRounded as RightArrowIcon,
   KeyboardArrowDownRounded as DownArrowIcon
@@ -24,15 +24,6 @@ export default function SessionCaptureSelect (props) {
   const sessionList = useLiveQuery(() => localDB.sessions.toArray())
 
   const [readyStatus, setReadyStatus] = React.useState('unready')
-
-  // Syncronize session list when database responds
-  // React.useEffect(() => {
-  //   if (sessionDataList !== undefined) {
-  //     const values = Object.values(sessionDataList)
-  //     values.pop() // Remove Last element (The name of the array object)
-  //     setSessionList(values)
-  //   }
-  // }, [sessionDataList])
 
   // Build capture menu items
   const captures = sessionList?.find(element => element.id === currentSessionField?.value)?.captures || []
@@ -73,15 +64,14 @@ export default function SessionCaptureSelect (props) {
   }
 
   return (
-    <Box {...props}>
-      <Stack
-        width='100%'
-        direction={{ xs: 'column', lg: 'row' }}
-        spacing={1}
-        alignItems='center'
-        sx={{ bgcolor: 'background.capture', padding: 1, paddingBottom: 0 }}
-      >
-        <FormControl sx={{ m: 1, minWidth: 300 }} size='small'>
+    <Grid
+      container
+      alignItems='center'
+      justifyContent='space-around'
+      // sx={{ bgcolor: 'background.capture', width: '100%' }}
+    >
+      <Grid item xs={11} sm={5} md={3}>
+        <FormControl fullWidth sx={{ m: 1 }} size='small'>
           <InputLabel id="session-select-label">Session</InputLabel>
           <Select
             labelId="session-select-label"
@@ -94,8 +84,12 @@ export default function SessionCaptureSelect (props) {
             {sessionMenuItems}
           </Select>
         </FormControl>
-        <RightArrowIcon />
-        <FormControl sx={{ m: 1, minWidth: 300 }} size='small'>
+      </Grid>
+      <Grid item xs={1}>
+        <RightArrowIcon sx={{ textAlign: 'center', width: '100%' }} />
+      </Grid>
+      <Grid item xs={11} sm={5} md={3}>
+        <FormControl fullWidth sx={{ m: 1 }} size='small'>
           <InputLabel id="capture-select-label">Capture</InputLabel>
           <Select
             labelId="capture-select-label"
@@ -108,15 +102,17 @@ export default function SessionCaptureSelect (props) {
             {captureMenuItems}
           </Select>
         </FormControl>
-        <RightArrowIcon />
-        <Box >
-          <Paper sx={{ bgcolor: readyColors[readyStatus], m: 1, minWidth: 300, height: 40 }}>
-            <Typography padding='7px' align='center'>
-              {readyMessage[readyStatus]}
-            </Typography>
-          </Paper>
-        </Box>
-      </Stack>
-    </Box>
+      </Grid>
+      <Grid item xs={1}>
+        <RightArrowIcon sx={{ textAlign: 'center', width: '100%' }} />
+      </Grid>
+      <Grid item xs={12} sm={6} md={4}>
+        <Paper sx={{ bgcolor: readyColors[readyStatus], m: 1, height: 40 }}>
+          <Typography padding='7px' align='center'>
+            {readyMessage[readyStatus]}
+          </Typography>
+        </Paper>
+      </Grid>
+    </Grid>
   )
 }

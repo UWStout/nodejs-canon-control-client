@@ -10,7 +10,6 @@ export default function CaptureControlsView () {
       {/* Quck Settings */}
       <Stack
         direction='row'
-        spacing={1}
         alignItems='center'
         sx={{ bgcolor: 'background.capture', padding: 1, paddingBottom: 0 }}
       >
