@@ -2,8 +2,7 @@ import React from 'react'
 
 import { Grid, Stack } from '@mui/material'
 
-import SessionCaptureSelect from './SessionCaptureSelect'
-
+import SessionCaptureSelect from './SessionCaptureSelect.jsx'
 
 export default function CaptureControlsView () {
   return (
@@ -16,7 +15,7 @@ export default function CaptureControlsView () {
         sx={{ bgcolor: 'background.capture', padding: 1, paddingBottom: 0 }}
       >
         <SessionCaptureSelect />
-        {/* 
+        {/*
         <ErrorsAtTopCheckbox sx={{ flexGrow: 1 }} />
         <BulkModeSwitch /> */}
       </Stack>

@@ -1,106 +1,82 @@
 import React from 'react'
 
-import localDB, { updateSetting } from '../../state/localDB.js'
+import localDB, { addNewSession, addNewCapture, updateSetting } from '../../state/localDB.js'
 import { useLiveQuery } from 'dexie-react-hooks'
 
-import { Box, FormControl, InputLabel, Select, MenuItem , Stack, Paper, Typography} from '@mui/material'
+import { Box, FormControl, InputLabel, Select, MenuItem, Stack, Paper, Typography } from '@mui/material'
 import {
   ArrowForwardIosRounded as RightArrowIcon,
   KeyboardArrowDownRounded as DownArrowIcon
 } from '@mui/icons-material'
-import KeyboardArrowDownRoundedIcon from '@mui/icons-material/KeyboardArrowDownRounded';
+import KeyboardArrowDownRoundedIcon from '@mui/icons-material/KeyboardArrowDownRounded'
 
 import { createNewSession, getSessionList } from '../../helpers/serverHelper.js'
 
+const readyColors = { ready: 'success.light', unready: 'warning.light' }
+const readyMessage = { ready: 'Ready For Capture', unready: 'Awaiting Setup' }
+
 export default function SessionCaptureSelect (props) {
-  // Subscribe to persistent settings
+  // Subscribe to current session and capture values
   const currentSessionField = useLiveQuery(() => localDB.settings.get('currentSessionField'))
   const currentCaptureField = useLiveQuery(() => localDB.settings.get('currentCaptureField'))
-  const serverList = useLiveQuery(() => localDB.servers.toArray())
-  const sessionDataList = useLiveQuery(() => localDB.settings.get('sessionDataList'))
-  
-  const [sessionList, setSessionList] = React.useState([])
-  const [readyStatus, setReadyStatus] = React.useState("unready")
+
+  // const serverList = useLiveQuery(() => localDB.servers.toArray())
+  const sessionList = useLiveQuery(() => localDB.sessions.toArray())
+
+  const [readyStatus, setReadyStatus] = React.useState('unready')
 
   // Syncronize session list when database responds
-  React.useEffect(() => {
-    if (sessionDataList != undefined)
-    {
-      const values = Object.values(sessionDataList)
-      values.pop() // Remove Last element (The name of the array object)
-      setSessionList(values)
-    }
-  }, [sessionDataList])
+  // React.useEffect(() => {
+  //   if (sessionDataList !== undefined) {
+  //     const values = Object.values(sessionDataList)
+  //     values.pop() // Remove Last element (The name of the array object)
+  //     setSessionList(values)
+  //   }
+  // }, [sessionDataList])
 
-  const readyColors = { ready: 'success.light', unready: 'warning.light' }
-  const readyMessage = { ready: 'Ready For Capture', unready: 'Awaiting Setup'}
+  // Build capture menu items
+  const captures = sessionList?.find(element => element.id === currentSessionField?.value)?.captures || []
+  const captureMenuItems = captures.map(capture => (
+    <MenuItem key={capture} value={capture}>{capture}</MenuItem>
+  ))
 
-  function numStrLeadZeros (num, digits) {
-    let numStr = ''
-    for (let i = num.toString().length; i < digits; ++i) {
-      numStr += '0'
+  // Build session menu items
+  const sessionMenuItems = (Array.isArray(sessionList)
+    ? sessionList.map(session => (
+      <MenuItem key={session.id} value={session.id}>{session.nickname}</MenuItem>
+    ))
+    : []
+  )
+
+  // Session dropdown callback
+  const onChangeSession = async (event) => {
+    // Is this a new session or an exiting session
+    if (event.target.value === 'NEW_SESSION') {
+      const sessionData = await addNewSession(Date.now())
+      await updateSetting('currentSessionField', sessionData.id)
+    } else {
+      await updateSetting('currentSessionField', event.target.value)
     }
-    return numStr + num
+
+    // Clear any selected capture field
+    await updateSetting('currentCaptureField', '')
   }
 
-  const createNewSessionInDB = (time, nickname = '') => {
-    nickname = nickname || time
-    const date = new Date(parseInt(time))
-    const path = `SES_${nickname || time}_AT_${numStrLeadZeros(date.getHours(), 2)}_${numStrLeadZeros(date.getMinutes(), 2)}_${date.toDateString()}`.replaceAll(' ', '_')
-    const sessionData =  {
-      nickname,
-      path,
-      time,
-      captures: []
+  // Capture dropdown callback
+  const onChangeCapture = async (event) => {
+    if (event.target.value === 'NEW_CAPTURE') {
+      const newValue = await addNewCapture(currentSessionField?.value)
+      await updateSetting('currentCaptureField', newValue)
+    } else {
+      await updateSetting('currentCaptureField', event.target.value)
     }
-    const newList = sessionList
-    newList.push(sessionData)
-    updateSetting('sessionDataList', newList)
-    return sessionData
-  }
-
-  const createNewCaptureInDB = (nickname = '') => {
-    const newList = sessionList
-    const session = newList.find(element => element.path === currentSessionField.value)
-    const captureData = nickname || `capture_${numStrLeadZeros(session.captures.length + 1, 3)}`
-    session.captures.push(captureData)
-    updateSetting('sessionDataList', newList)
-    return captureData
-  }
-
-  const getCaptureMenuItems = () => {
-    const captures = sessionList.find(element => element.path === currentSessionField.value)?.captures || []
-    return captures.map(capture => (<MenuItem key={capture} value={capture}>{capture}</MenuItem> ))
-  }
-
-  const sessionMenuItems = (Array.isArray(sessionList) && sessionList.length > 0) ?
-    sessionList.map(session => ( <MenuItem key={session.time} value={session.path}>{session.nickname}</MenuItem> )) : []
-
-  const captureMenuItems = getCaptureMenuItems()
-
-  const onChangeSession = (event) => {
-    if (event.target.value === 'NEW_SESSION')
-    {
-      const sessionData = createNewSessionInDB(Date.now())  
-      updateSetting('currentSessionField', sessionData.path)
-    }
-    else
-    {
-      updateSetting('currentSessionField', event.target.value)
-    }
-    updateSetting('currentCaptureField', 'EMPTY')
-  }
-
-  const onChangeCapture = (event) => {
-    const newValue = (event.target.value === 'NEW_CAPTURE') ? createNewCaptureInDB() : event.target.value
-    updateSetting('currentCaptureField', newValue)
   }
 
   return (
     <Box {...props}>
       <Stack
         width='100%'
-        direction={{xs: 'column', lg: 'row'}}
+        direction={{ xs: 'column', lg: 'row' }}
         spacing={1}
         alignItems='center'
         sx={{ bgcolor: 'background.capture', padding: 1, paddingBottom: 0 }}
@@ -110,37 +86,37 @@ export default function SessionCaptureSelect (props) {
           <Select
             labelId="session-select-label"
             id="session-select"
-            value={currentSessionField?.value || 'id'}
+            value={(sessionMenuItems.length > 0 && currentSessionField?.value) || ''}
             label="Session"
-            onChange={(e) => onChangeSession(e)}
+            onChange={onChangeSession}
           >
             <MenuItem value={'NEW_SESSION'}>Create New Session</MenuItem>
             {sessionMenuItems}
           </Select>
         </FormControl>
-        <RightArrowIcon/>
+        <RightArrowIcon />
         <FormControl sx={{ m: 1, minWidth: 300 }} size='small'>
           <InputLabel id="capture-select-label">Capture</InputLabel>
           <Select
             labelId="capture-select-label"
             id="capture-select"
-            value={currentCaptureField?.value || 'id'}
+            value={(captureMenuItems.length > 0 && currentCaptureField?.value) || ''}
             label="Capture"
-            onChange={(e) => onChangeCapture(e)}
+            onChange={onChangeCapture}
           >
             <MenuItem value={'NEW_CAPTURE'}>Create New Capture</MenuItem>
             {captureMenuItems}
           </Select>
-          </FormControl>
-          <RightArrowIcon/>
-          <Box >
-            <Paper sx={{ bgcolor: readyColors[readyStatus], m: 1, minWidth: 300, height: 40}}>
-              <Typography padding='7px' align='center'>
-                {readyMessage[readyStatus]}
-              </Typography>
-            </Paper>
-          </Box>
-        </Stack>
+        </FormControl>
+        <RightArrowIcon />
+        <Box >
+          <Paper sx={{ bgcolor: readyColors[readyStatus], m: 1, minWidth: 300, height: 40 }}>
+            <Typography padding='7px' align='center'>
+              {readyMessage[readyStatus]}
+            </Typography>
+          </Paper>
+        </Box>
+      </Stack>
     </Box>
   )
 }

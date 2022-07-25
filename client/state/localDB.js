@@ -6,9 +6,10 @@ import { getCameraDetails, getCameraList } from '../helpers/serverHelper'
 
 // Initialize the database
 const db = new Dexie('c4-database')
-db.version(3).stores({
+db.version(4).stores({
   servers: '++id, IP',
   cameras: 'id, serverId',
+  sessions: '++id, path',
   settings: 'name'
 })
 
@@ -194,6 +195,46 @@ export async function refreshCameraDetails (serverID, cameraID) {
     console.error(error)
   }
   unlockDB()
+}
+
+/**
+ * Add a new session with no captures to the sessions table.
+ * @param {number} time Time of session creation in epoch milliseconds
+ * @param {string} nickname A nickname to help remember this session (defaults to the time)
+ * @returns {Object} A session object with id, path, time, nickname, and captures array
+ */
+export async function addNewSession (time, nickname = '') {
+  // Fall back to time if nickname is not provided
+  nickname = nickname || ('' + time)
+
+  // Build path string
+  const date = new Date(parseInt(time))
+  const hourStr = date.getHours().toFixed().padStart(2, '0')
+  const minuteStr = date.getMinutes().toFixed().padStart(2, '0')
+  const path = `SES_${nickname}_AT_${hourStr}_${minuteStr}_${date.toDateString()}`.replaceAll(' ', '_')
+
+  // Insert and return session object
+  const sessionData = { nickname, path, time, captures: [] }
+  const id = await db.sessions.put(sessionData)
+  return { id, ...sessionData }
+}
+
+/**
+ * Add a new, empty capture to a session
+ * @param {number} sessionId The key for the session to add the capture to
+ * @param {string} nickname A nickname to remember this session (defaults to capture_#)
+ * @returns {string} Name/path for this capture
+ */
+export async function addNewCapture (sessionId, nickname = '') {
+  // Lookup session object
+  const session = await db.sessions.get(sessionId)
+
+  // Build and append new capture path
+  const newCapture = nickname || `capture_${(session.captures.length + 1).toFixed().padStart(3, '0')}`
+  await db.sessions.update(sessionId, { captures: [...session.captures, newCapture] })
+
+  // Return the capture path
+  return newCapture
 }
 
 /**
