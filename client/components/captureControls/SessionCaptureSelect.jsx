@@ -3,7 +3,7 @@ import React from 'react'
 import localDB, { addNewSession, addNewCapture, updateSetting } from '../../state/localDB.js'
 import { useLiveQuery } from 'dexie-react-hooks'
 
-import { FormControl, InputLabel, Select, MenuItem, Paper, Typography, Grid } from '@mui/material'
+import { FormControl, InputLabel, Select, MenuItem, Paper, Typography, Grid, Divider } from '@mui/material'
 import { ArrowForwardIosRounded as RightArrowIcon } from '@mui/icons-material'
 
 import NicknameFormDialog from './NicknameFormDialog.jsx'
@@ -28,8 +28,7 @@ export default function SessionCaptureSelect (props) {
   // Close session dialog, create new session, and set form field
   const closeNewSession = async (confirmed, sessionNickname = '') => {
     setShowCreateSession(false)
-    if (confirmed)
-    {
+    if (confirmed) {
       const sessionData = await addNewSession(Date.now(), sessionNickname)
       await updateSetting('currentSessionField', sessionData.id)
     }
@@ -38,8 +37,7 @@ export default function SessionCaptureSelect (props) {
   // Close capture dialog, create new capture, and set form field
   const closeNewCapture = async (confirmed, captureNickname = '') => {
     setShowCreateCapture(false)
-    if (confirmed)
-    {
+    if (confirmed) {
       const newCapture = await addNewCapture(currentSessionField?.value, captureNickname)
       await updateSetting('currentCaptureField', newCapture)
     }
@@ -99,6 +97,7 @@ export default function SessionCaptureSelect (props) {
               onChange={onChangeSession}
             >
               <MenuItem value={'NEW_SESSION'}>Create New Session</MenuItem>
+              <Divider />
               {sessionMenuItems}
             </Select>
           </FormControl>
@@ -117,6 +116,7 @@ export default function SessionCaptureSelect (props) {
               onChange={onChangeCapture}
             >
               <MenuItem value={'NEW_CAPTURE'}>Create New Capture</MenuItem>
+              <Divider />
               {captureMenuItems}
             </Select>
           </FormControl>
@@ -132,8 +132,8 @@ export default function SessionCaptureSelect (props) {
           </Paper>
         </Grid>
       </Grid>
-      <NicknameFormDialog title="Create New Session" open={showCreateSession} onClose={closeNewSession}/>
-      <NicknameFormDialog title="Create new Capture" open={showCreateCapture} onClose={closeNewCapture}/>
+      <NicknameFormDialog title="Create New Session" open={showCreateSession} onClose={closeNewSession} />
+      <NicknameFormDialog title="Create new Capture" open={showCreateCapture} onClose={closeNewCapture} />
     </React.Fragment>
   )
 }

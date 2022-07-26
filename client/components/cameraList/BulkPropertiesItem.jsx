@@ -3,7 +3,7 @@ import React from 'react'
 import localDB, { setExposureStatus } from '../../state/localDB.js'
 import { useLiveQuery } from 'dexie-react-hooks'
 
-import { Collapse, List, ListItem, ListItemAvatar, Avatar, ListItemText } from '@mui/material'
+import { List, ListItem, ListItemAvatar, Avatar, ListItemText } from '@mui/material'
 import { PhotoCamera as CameraIcon } from '@mui/icons-material'
 import { useSnackbar } from 'notistack'
 
@@ -13,7 +13,6 @@ export default function BulkPropertiesItem () {
   const { enqueueSnackbar } = useSnackbar()
 
   // Subscribe to bulk mode changes
-  const bulkModeEnabled = useLiveQuery(() => localDB.settings.get('bulkModeEnabled'))
   const bulkExposureSettings = useLiveQuery(() => localDB.settings.get('bulkExposureSettings'))
 
   // Grab the server list and the first camera in the first server
@@ -65,31 +64,29 @@ export default function BulkPropertiesItem () {
   }, [bulkExposureSettings, enqueueSnackbar, serverList])
 
   return (
-    <Collapse in={bulkModeEnabled?.value} timeout="auto" unmountOnExit>
-      <List sx={{ padding: 0, width: '100%', bgcolor: 'background.paper' }}>
-        <ListItem
-          secondaryAction={
-            // Buttons for controlling the camera and setting properties
-            <CameraActionAndPropertyButtons
-              camera={camera}
-              server={server}
-              useBulkValues
-              onApply={applyExposureValues}
-              disableApply={applyBusy || !changesDetected}
-            />
-          }
-        >
-          {/* Basic camera icon indicating status */}
-          <ListItemAvatar>
-            <Avatar>
-              <CameraIcon />
-            </Avatar>
-          </ListItemAvatar>
+    <List sx={{ padding: 0, width: '100%', bgcolor: 'background.paper' }}>
+      <ListItem
+        secondaryAction={
+          // Buttons for controlling the camera and setting properties
+          <CameraActionAndPropertyButtons
+            camera={camera}
+            server={server}
+            useBulkValues
+            onApply={applyExposureValues}
+            disableApply={applyBusy || !changesDetected}
+          />
+        }
+      >
+        {/* Basic camera icon indicating status */}
+        <ListItemAvatar>
+          <Avatar>
+            <CameraIcon />
+          </Avatar>
+        </ListItemAvatar>
 
-          {/* Camera Text Info with a nickname that can be edited */}
-          <ListItemText primary="Bulk Mode Control/Settings" />
-        </ListItem>
-      </List>
-    </Collapse>
+        {/* Camera Text Info with a nickname that can be edited */}
+        <ListItemText primary="Bulk Mode Control/Settings" />
+      </ListItem>
+    </List>
   )
 }
