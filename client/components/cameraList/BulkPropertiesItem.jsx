@@ -38,6 +38,9 @@ export default function BulkPropertiesItem () {
     const propertyObject = { ...bulkExposureSettings }
     delete propertyObject.name
 
+    // Always set to save to the host
+    propertyObject.SaveTo = 'Host'
+
     // Start applying changes
     setApplyBusy(true)
     const results = await Promise.allSettled(

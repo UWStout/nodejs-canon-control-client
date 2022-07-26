@@ -2,13 +2,12 @@ import React from 'react'
 
 import localDB, { addNewSession, addNewCapture, updateSetting } from '../../state/localDB.js'
 import { useLiveQuery } from 'dexie-react-hooks'
+import { useServerCaptureSession } from './serverCaptureHooks.js'
 
-import { FormControl, InputLabel, Select, MenuItem, Paper, Typography, Grid, Divider } from '@mui/material'
+import { FormControl, InputLabel, Select, MenuItem, Paper, Typography, Grid, Divider, TextField } from '@mui/material'
 import { ArrowForwardIosRounded as RightArrowIcon } from '@mui/icons-material'
 
 import NicknameFormDialog from './NicknameFormDialog.jsx'
-
-import { createNewSession, getSessionList } from '../../helpers/serverHelper.js'
 
 const readyColors = { ready: 'success.light', unready: 'warning.light' }
 const readyMessage = { ready: 'Ready For Capture', unready: 'Awaiting Setup' }
@@ -17,13 +16,27 @@ export default function SessionCaptureSelect (props) {
   // Subscribe to current session and capture values
   const currentSessionField = useLiveQuery(() => localDB.settings.get('currentSessionField'))
   const currentCaptureField = useLiveQuery(() => localDB.settings.get('currentCaptureField'))
+  const currentCaptureNumber = useLiveQuery(() => localDB.settings.get('currentCaptureNumber'))
 
   const sessionList = useLiveQuery(() => localDB.sessions.toArray())
 
   // Initialize states
-  const [readyStatus, setReadyStatus] = React.useState('unready')
   const [showCreateSession, setShowCreateSession] = React.useState(false)
   const [showCreateCapture, setShowCreateCapture] = React.useState(false)
+  const [captureNumber, setCaptureNumber] = React.useState(0)
+
+  React.useEffect(() => {
+    if (typeof currentCaptureNumber?.value === 'number') {
+      setCaptureNumber(currentCaptureNumber.value)
+    }
+  }, [currentCaptureNumber])
+
+  // Syncronize session capture state with servers
+  const readyStatus = useServerCaptureSession(
+    sessionList?.find(element => element.id === currentSessionField?.value),
+    currentCaptureField?.value,
+    currentCaptureNumber?.value
+  )
 
   // Close session dialog, create new session, and set form field
   const closeNewSession = async (confirmed, sessionNickname = '') => {
@@ -79,6 +92,17 @@ export default function SessionCaptureSelect (props) {
     }
   }
 
+  // Capture number text field callback
+  const captureNumberKeyPress = async (event) => {
+    if (event.key === 'Enter') {
+      await updateSetting('currentCaptureNumber', captureNumber)
+    }
+  }
+
+  const captureNumberBlur = async () => {
+    await updateSetting('currentCaptureNumber', captureNumber)
+  }
+
   return (
     <React.Fragment>
       <Grid
@@ -105,7 +129,7 @@ export default function SessionCaptureSelect (props) {
         <Grid item xs={1}>
           <RightArrowIcon sx={{ textAlign: 'center', width: '100%' }} />
         </Grid>
-        <Grid item xs={11} sm={5} md={3}>
+        <Grid item xs={9} sm={3} md={3}>
           <FormControl fullWidth sx={{ m: 1 }} size='small'>
             <InputLabel id="capture-select-label">Capture</InputLabel>
             <Select
@@ -121,10 +145,21 @@ export default function SessionCaptureSelect (props) {
             </Select>
           </FormControl>
         </Grid>
+        <Grid item xs={2} md={1}>
+          <TextField
+            size='small'
+            value={captureNumber}
+            onChange={e => setCaptureNumber(parseInt(e.target.value))}
+            onKeyPress={captureNumberKeyPress}
+            onBlur={captureNumberBlur}
+            inputProps={{ inputMode: 'numeric', pattern: '[0-9]*' }}
+            sx={{ width: '100%', paddingLeft: 2 }}
+          />
+        </Grid>
         <Grid item xs={1}>
           <RightArrowIcon sx={{ textAlign: 'center', width: '100%' }} />
         </Grid>
-        <Grid item xs={12} sm={6} md={4}>
+        <Grid item xs={12} sm={5} md={3}>
           <Paper sx={{ bgcolor: readyColors[readyStatus], m: 1, height: 40 }}>
             <Typography padding='7px' align='center'>
               {readyMessage[readyStatus]}
