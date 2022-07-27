@@ -3,8 +3,7 @@ import create from 'zustand'
 // Track the progress of a capture
 const useCaptureState = create(set => ({
   // Basic capture info
-  readyForCapture: false,
-  expectedCount: -1,
+  expectedCount: 116,
 
   // Lists of cameras downloading
   inProgress: [],
@@ -12,11 +11,9 @@ const useCaptureState = create(set => ({
   failed: [],
 
   // Clear current capture and prepare for a new one
-  newCapture: (expectedCount, isReady = false) => set(state => {
-    console.log('Clearing for new capture' + (!isReady ? ' (not yet ready)' : ''))
+  newCapture: (expectedCount) => set(state => {
     return {
       // Basic capture info
-      readyForCapture: isReady,
       expectedCount,
 
       // Clear lists
@@ -47,12 +44,12 @@ const useCaptureState = create(set => ({
     if (failed) {
       return {
         inProgress: filteredInProgress,
-        failedList: [...state.failedList, cameraInfo]
+        failed: [...state.failed, cameraInfo]
       }
     } else {
       return {
         inProgress: filteredInProgress,
-        successList: [...state.successList, cameraInfo]
+        succeeded: [...state.succeeded, cameraInfo]
       }
     }
   })

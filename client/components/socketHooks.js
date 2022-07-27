@@ -40,11 +40,9 @@ export function useServerSockets (serverList) {
       socket.off('DownloadStart')
       socket.off('DownloadEnd')
       socket.on('DownloadStart', ({ camIndex }) => {
-        console.log('Download started for camera', camIndex, 'on server', serverId)
         downloadStarted(serverId, camIndex)
       })
       socket.on('DownloadEnd', ({ camIndex }) => {
-        console.log('Download complete for camera', camIndex, 'on server', serverId)
         downloadFinished(serverId, camIndex, false)
       })
 

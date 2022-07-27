@@ -3,62 +3,62 @@ import React from 'react'
 import localDB, { updateSetting } from '../../state/localDB.js'
 import { useLiveQuery } from 'dexie-react-hooks'
 import { useSnackbar } from 'notistack'
-
-import { subscribe } from '../../sockets/socketComms.js'
+import useCaptureState from '../../state/useCaptureState.js'
 
 import ProgressBarBufferedLabeled from './ProgressBarBufferedLabeled.jsx'
 
-export default function ImageDownloadBar() {
-
+export default function ImageDownloadBar () {
   const { enqueueSnackbar } = useSnackbar()
-  
-  const [currentValue, setCurrentValue] = React.useState(0)
-  const [maxValue, setMaxValue] = React.useState(1)
-  const [currentBuffer, setCurrentBuffer] = React.useState(0)
-  const [downloadInProgress, setDownloadInProgress] = React.useState(true)
 
+  // Local GUI state
+  const [currentValue, setCurrentValue] = React.useState(0)
+  const [maxValue, setMaxValue] = React.useState(0)
+  const [currentBuffer, setCurrentBuffer] = React.useState(0)
+  const [downloadInProgress, setDownloadInProgress] = React.useState(false)
+
+  // Global settings
   const autoIncrementCapture = useLiveQuery(() => localDB.settings.get('autoIncrementCapture'))
   const currentCaptureNumber = useLiveQuery(() => localDB.settings.get('currentCaptureNumber'))
-  
-  const serverList = useLiveQuery(() => localDB.servers.toArray())
 
-  const incrementValue = () =>
-  {
-    console.log('value++')
-    setCurrentValue(currentValue + 1)
-  }
+  // Subscribe to changes in the capture state
+  const { newCapture, expected, inProgress, succeeded, failed } = useCaptureState(state => ({
+    newCapture: state.newCapture,
+    expected: state.expectedCount,
+    inProgress: state.inProgress.length,
+    succeeded: state.succeeded.length,
+    failed: state.failed.length
+  }))
 
-  const incrementBuffer = () =>
-  {
-    console.log('buffer++')
-    setCurrentBuffer(currentBuffer + 1)
-  }
-
-  
+  // Syncronize with the capture state
   React.useEffect(() => {
-    if (Array.isArray(serverList)) {
-      serverList.forEach(server => {
-        // Skip deactivated servers
-        if (server.deactivated) return 
-        subscribe('DownloadStart', incrementBuffer, server.hostname, server.port)
-        subscribe('DownloadEnd', incrementValue, server.hostname, server.port)
-      })
-    }
-  })
+    setMaxValue(expected)
+    setCurrentBuffer(inProgress)
+    setDownloadInProgress(inProgress > 0 || (succeeded + failed) > 0)
+    setCurrentValue(succeeded + failed)
+  }, [expected, failed, inProgress, succeeded])
 
+  // Detect a completed capture
+  React.useEffect(() => {
+    if (downloadInProgress && currentValue === maxValue) {
+      enqueueSnackbar('Image Download Completed', { variant: 'success' })
+      if (autoIncrementCapture?.value) {
+        // Watch out for an undefined setting value
+        const currentNumber = (typeof currentCaptureNumber?.value === 'number'
+          ? currentCaptureNumber.value
+          : 0
+        )
 
-  if (downloadInProgress && currentValue === maxValue)
-  {
-    enqueueSnackbar('Image Download Completed', { variant: 'success' })
-    setDownloadInProgress(false)
-    if (autoIncrementCapture)
-    {
-      updateSetting('currentCaptureNumber', currentCaptureNumber + 1)
+        // Wait a short time and then increment the capture number
+        setTimeout(() => {
+          updateSetting('currentCaptureNumber', currentNumber + 1)
+          newCapture(116)
+        }, 3000)
+      }
     }
-  }
+  }, [autoIncrementCapture?.value, currentCaptureNumber, currentValue, downloadInProgress, enqueueSnackbar, maxValue, newCapture])
 
   return (
-    <ProgressBarBufferedLabeled 
+    <ProgressBarBufferedLabeled
       currentValue={currentValue}
       maxValue={maxValue}
       currentBuffer={currentBuffer}
