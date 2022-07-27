@@ -37,7 +37,8 @@ export const PropertyIDsShape = {
   Av: ReactRefType,
   ISOSpeed: ReactRefType,
   ImageQuality: ReactRefType,
-  WhiteBalance: ReactRefType
+  WhiteBalance: ReactRefType,
+  SaveTo: ReactRefType
 }
 
 export const CameraObjShape = {

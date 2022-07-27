@@ -9,7 +9,7 @@ import useSocketState from '../state/useSocketState.js'
 export function useServerSockets (serverList) {
   // Subscribe to socket.io connection state
   const { socketList, updateServerSockets } = useSocketState(state => state)
-  const { completeBulkTask, addBulkTask } = useBulkTaskState(state => state)
+  const completeBulkTask = useBulkTaskState(state => state.completeBulkTask)
 
   // Ensure the low-level socket connections are up to date
   React.useEffect(() => {
@@ -21,8 +21,6 @@ export function useServerSockets (serverList) {
   React.useEffect(() => {
     // Setup callbacks for all the sockets in the list
     socketList.forEach(({ socket, serverId }) => {
-      const server = serverList.find(curServer => curServer.id === serverId)
-
       // Subscribe to the events we are interested in
       socket.emit('subscribe', ['CameraList', 'Download-*'])
 
@@ -47,18 +45,12 @@ export function useServerSockets (serverList) {
       socket.off('BulkTaskStarted')
       socket.off('BulkTaskSucceeded')
       socket.off('BulkTaskFailed')
-      socket.on('BulkTaskStarted', ({ taskId, type }) => {
-        console.log('Bulk task started', taskId)
-        addBulkTask(taskId, type, -1, server?.nickname)
-      })
       socket.on('BulkTaskSucceeded', ({ taskId, summary }) => {
-        console.log('Bulk task finished', taskId)
         completeBulkTask(taskId, false, summary)
       })
       socket.on('BulkTaskFailed', ({ taskId, summary }) => {
-        console.error('Failed bulk task', taskId)
         completeBulkTask(taskId, true, summary)
       })
     })
-  }, [addBulkTask, completeBulkTask, serverList, socketList])
+  }, [completeBulkTask, serverList, socketList])
 }

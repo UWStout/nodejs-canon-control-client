@@ -156,6 +156,23 @@ export function releaseShutter (server, camera) {
   })
 }
 
+export function syncronizeTime (server, camera) {
+  // Skip deactivated servers
+  if (server.deactivated) return Promise.resolve({})
+
+  const camIndex = (typeof camera === 'object' ? camera?.index : camera)
+  console.log(`Syncronizing clock on camera ${camIndex} on ${server?.nickname} server`)
+  return new Promise((resolve, reject) => {
+    axios.post(`https://${server.IP}:${server.port}/camera/${camIndex}/syncTime`)
+      .then((response) => {
+        resolve(response.data)
+      })
+      .catch((error) => {
+        reject(error)
+      })
+  })
+}
+
 export function ensureSessionOnServer (server, nickname, path, time, allowCreation = false) {
   console.log('Creating new Session Storage')
   return new Promise((resolve, reject) => {

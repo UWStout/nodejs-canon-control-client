@@ -8,7 +8,8 @@ import {
   Camera as ApertureIcon,
   Exposure as ISOSpeedIcon,
   PhotoSizeSelectLarge as SizeQualityIcon,
-  WbSunny as WhiteBalanceIcon
+  WbSunny as WhiteBalanceIcon,
+  SaveAlt as SaveToIcon
 } from '@mui/icons-material'
 
 import localDB from '../../../state/localDB.js'
@@ -31,7 +32,8 @@ export default function ExposurePropertiesMenu (props) {
     Av: <ApertureIcon />,
     ISOSpeed: <ISOSpeedIcon />,
     ImageQuality: <SizeQualityIcon />,
-    WhiteBalance: <WhiteBalanceIcon />
+    WhiteBalance: <WhiteBalanceIcon />,
+    SaveTo: <SaveToIcon />
   }
 
   const handleMenuClose = (e, reason) => {
@@ -53,7 +55,8 @@ export default function ExposurePropertiesMenu (props) {
     Av: React.useRef(),
     ISOSpeed: React.useRef(),
     ImageQuality: React.useRef(),
-    WhiteBalance: React.useRef()
+    WhiteBalance: React.useRef(),
+    SaveTo: React.useRef()
   }
 
   return (
