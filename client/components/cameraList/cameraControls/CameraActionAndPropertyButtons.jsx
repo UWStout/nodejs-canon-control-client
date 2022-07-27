@@ -3,24 +3,32 @@ import PropTypes from 'prop-types'
 
 import localDB from '../../../state/localDB.js'
 import { useLiveQuery } from 'dexie-react-hooks'
+import useBulkTaskState from '../../../state/useBulkTaskState.js'
 
 import { Button, IconButton, Stack, Tooltip, Divider } from '@mui/material'
 import {
   AddPhotoAlternate as TakePhotoIcon,
   CenterFocusStrong as FocusIcon,
   Camera as ReleaseSutterIcon,
+  AvTimer as SyncClockIcon,
   SettingsSuggest as ExposurePropertiesIcon
 } from '@mui/icons-material'
 import { useSnackbar } from 'notistack'
 
 import ExposurePropertiesMenu from './ExposurePropertiesMenu.jsx'
 
-import { takeAPhoto, doAutoFocus, releaseShutter } from '../../../helpers/serverHelper.js'
+import { takeAPhoto, doAutoFocus, releaseShutter, syncronizeTime } from '../../../helpers/serverHelper.js'
 import { CameraObjShape, ServerObjShape } from '../../../state/dataModel.js'
 
 export default function CameraActionAndPropertyButtons (props) {
   const { server, camera, readOnly, useBulkValues, onApply, disableApply } = props
   const { enqueueSnackbar } = useSnackbar()
+
+  // Subscribe to the bits of bulk state we need
+  const bulkState = useBulkTaskState(state => ({
+    newBulkTask: state.newBulkTask,
+    done: state.done
+  }))
 
   // Needed browser data and state
   const serverList = useLiveQuery(() => localDB.servers.toArray())
@@ -37,14 +45,24 @@ export default function CameraActionAndPropertyButtons (props) {
   // Camera control callbacks
   const onTakePhoto = async () => {
     if (useBulkValues) {
+      if (!bulkState.done) {
+        enqueueSnackbar('Please wait for current task to finish', { variant: 'warning' })
+        return
+      }
+
+      const taskIds = []
       for (let i = 0; i < serverList.length; i++) {
         const server = serverList[i]
         try {
-          takeAPhoto(server, '*')
-          enqueueSnackbar(`Bulk photo capture started for ${server.nickname}`)
+          const results = await takeAPhoto(server, '*')
+          taskIds.push(results.taskId)
         } catch (error) {
           enqueueSnackbar(`Bulk photo capture failed for ${server.nickname}`, { variant: 'error' })
         }
+      }
+      if (taskIds.length > 0) {
+        enqueueSnackbar('Bulk photo capture started')
+        bulkState.newBulkTask('Bulk photo capture', taskIds)
       }
     } else {
       try {
@@ -62,14 +80,24 @@ export default function CameraActionAndPropertyButtons (props) {
 
   const onAutoFocus = async () => {
     if (useBulkValues) {
+      if (!bulkState.done) {
+        enqueueSnackbar('Please wait for current task to finish', { variant: 'warning' })
+        return
+      }
+
+      const taskIds = []
       for (let i = 0; i < serverList.length; i++) {
         const server = serverList[i]
         try {
-          doAutoFocus(server, '*')
-          enqueueSnackbar(`Bulk auto-focus started for ${server.nickname}`)
+          const results = await doAutoFocus(server, '*')
+          taskIds.push(results.taskId)
         } catch (error) {
           enqueueSnackbar(`Bulk auto-focus failed for ${server.nickname}`, { variant: 'error' })
         }
+      }
+      if (taskIds.length > 0) {
+        enqueueSnackbar('Bulk auto-focus started')
+        bulkState.newBulkTask('Bulk auto-focus', taskIds)
       }
     } else {
       try {
@@ -87,14 +115,24 @@ export default function CameraActionAndPropertyButtons (props) {
 
   const onReleaseShutter = async () => {
     if (useBulkValues) {
+      if (!bulkState.done) {
+        enqueueSnackbar('Please wait for current task to finish', { variant: 'warning' })
+        return
+      }
+
+      const taskIds = []
       for (let i = 0; i < serverList.length; i++) {
         const server = serverList[i]
         try {
-          releaseShutter(server, '*')
-          enqueueSnackbar(`Bulk shutter release started for ${server.nickname}`)
+          const results = await releaseShutter(server, '*')
+          taskIds.push(results.taskId)
         } catch (error) {
           enqueueSnackbar(`Bulk shutter release failed for ${server.nickname}`, { variant: 'error' })
         }
+      }
+      if (taskIds.length > 0) {
+        enqueueSnackbar('Bulk shutter release started')
+        bulkState.newBulkTask('Bulk shutter release', taskIds)
       }
     } else {
       try {
@@ -111,6 +149,42 @@ export default function CameraActionAndPropertyButtons (props) {
     }
   }
 
+  const onSyncTime = async () => {
+    if (useBulkValues) {
+      if (!bulkState.done) {
+        enqueueSnackbar('Please wait for current task to finish', { variant: 'warning' })
+        return
+      }
+
+      const taskIds = []
+      for (let i = 0; i < serverList.length; i++) {
+        const server = serverList[i]
+        try {
+          const results = await syncronizeTime(server, '*')
+          taskIds.push(results.taskId)
+        } catch (error) {
+          enqueueSnackbar(`Bulk clock sync failed for ${server.nickname}`, { variant: 'error' })
+        }
+      }
+      if (taskIds.length > 0) {
+        enqueueSnackbar('Bulk clock sync started')
+        bulkState.newBulkTask('Bulk clock sync', taskIds)
+      }
+    } else {
+      try {
+        if (!server || !camera) {
+          throw new Error(`Cannot sync clock: server and/or camera are null (${server?.id}/${camera?.id})`)
+        } else {
+          console.log('Releasing for', camera)
+          await releaseShutter(server, camera)
+        }
+      } catch (error) {
+        enqueueSnackbar(`Clock sync failed on camera ${camera?.nickname || camera?.ProductName?.value}`, { variant: 'error' })
+        console.error(error)
+      }
+    }
+  }
+
   return (
     <React.Fragment>
       <Stack direction='row' spacing={1} alignItems="center">
@@ -120,7 +194,7 @@ export default function CameraActionAndPropertyButtons (props) {
             <IconButton
               role={undefined}
               size='large'
-              disabled={readOnly}
+              disabled={readOnly || disableApply}
               onClick={readOnly ? null : onTakePhoto}
             >
               <TakePhotoIcon />
@@ -134,7 +208,7 @@ export default function CameraActionAndPropertyButtons (props) {
             <IconButton
               role={undefined}
               size='large'
-              disabled={readOnly}
+              disabled={readOnly || disableApply}
               onClick={readOnly ? null : onAutoFocus}
             >
               <FocusIcon />
@@ -148,10 +222,24 @@ export default function CameraActionAndPropertyButtons (props) {
             <IconButton
               role={undefined}
               size='large'
-              disabled={readOnly}
+              disabled={readOnly || disableApply}
               onClick={readOnly ? null : onReleaseShutter}
             >
               <ReleaseSutterIcon />
+            </IconButton>
+          </span>
+        </Tooltip>
+
+        {/* Clock Sync Button */}
+        <Tooltip placement="top" title={'Syncronize Clock'}>
+          <span>
+            <IconButton
+              role={undefined}
+              size='large'
+              disabled={readOnly || disableApply}
+              onClick={readOnly ? null : onSyncTime}
+            >
+              <SyncClockIcon />
             </IconButton>
           </span>
         </Tooltip>
@@ -165,7 +253,7 @@ export default function CameraActionAndPropertyButtons (props) {
             <IconButton
               role={undefined}
               size="large"
-              disabled={readOnly}
+              disabled={readOnly || disableApply}
               onClick={readOnly ? null : onOpenMenu}
             >
               <ExposurePropertiesIcon />

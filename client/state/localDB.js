@@ -6,14 +6,16 @@ import { getCameraDetails, getCameraList } from '../helpers/serverHelper'
 
 // Initialize the database
 const db = new Dexie('c4-database')
-db.version(3).stores({
+db.version(4).stores({
   servers: '++id, IP',
   cameras: 'id, serverId',
+  sessions: '++id, path',
   settings: 'name'
 })
 
 // Flag for syncronizing async DB queries and preventing race conditions
 let DB_BUSY = false
+const DEFAULT_DB_TIMEOUT = 7000
 
 /**
  * Create a promise that will only resolve once the database has been locked. It will
@@ -22,7 +24,7 @@ let DB_BUSY = false
  * @param {number} timeout How long to wait (in milliseconds) before rejecting
  * @returns {Promise} Returns a promise that resolves when and if the DB is locked
  */
-function waitForDBLock (timeout = 5000) {
+function waitForDBLock (timeout = DEFAULT_DB_TIMEOUT) {
   let elapsed = 0
   return new Promise((resolve, reject) => {
     if (DB_BUSY) {
@@ -67,14 +69,24 @@ export async function exportLocalData () {
  * @param {blob} dataBlob A file or dataBlob containing the data to import.
  * @param {boolean} [includeServers=true] Import data in the servers table
  * @param {boolean} [includeCameras=true] Import data in the cameras table
+ * @param {boolean} [includeSessions=true] Import data in the sessions table
+ * @param {boolean} [includeSettings=false] Import data in the settings table
  */
-export async function importLocalData (dataBlob, includeServers = true, includeCameras = true) {
+export async function importLocalData (
+  dataBlob,
+  includeServers = true,
+  includeCameras = true,
+  includeSessions = true,
+  includeSettings = false
+) {
   await waitForDBLock()
   await importInto(db, dataBlob, {
     overwriteValues: true,
-    filter: (table, value, key) => {
+    filter: (table) => {
       if (!includeServers && table === 'servers') return false
       if (!includeCameras && table === 'cameras') return false
+      if (!includeSessions && table === 'sessions') return false
+      if (!includeSettings && table === 'settings') return false
       return true
     }
   })
@@ -194,6 +206,46 @@ export async function refreshCameraDetails (serverID, cameraID) {
     console.error(error)
   }
   unlockDB()
+}
+
+/**
+ * Add a new session with no captures to the sessions table.
+ * @param {number} time Time of session creation in epoch milliseconds
+ * @param {string} nickname A nickname to help remember this session (defaults to the time)
+ * @returns {Object} A session object with id, path, time, nickname, and captures array
+ */
+export async function addNewSession (time, nickname = '') {
+  // Fall back to time if nickname is not provided
+  nickname = nickname || ('' + time)
+
+  // Build path string
+  const date = new Date(parseInt(time))
+  const hourStr = date.getHours().toFixed().padStart(2, '0')
+  const minuteStr = date.getMinutes().toFixed().padStart(2, '0')
+  const path = `SES_${nickname}_AT_${hourStr}_${minuteStr}_${date.toDateString()}`.replaceAll(' ', '_')
+
+  // Insert and return session object
+  const sessionData = { nickname, path, time, captures: [] }
+  const id = await db.sessions.put(sessionData)
+  return { id, ...sessionData }
+}
+
+/**
+ * Add a new, empty capture to a session
+ * @param {number} sessionId The key for the session to add the capture to
+ * @param {string} nickname A nickname to remember this session (defaults to capture_#)
+ * @returns {string} Name/path for this capture
+ */
+export async function addNewCapture (sessionId, nickname = '') {
+  // Lookup session object
+  const session = await db.sessions.get(sessionId)
+
+  // Build and append new capture path
+  const newCapture = nickname || `capture_${(session.captures.length + 1).toFixed().padStart(3, '0')}`
+  await db.sessions.update(sessionId, { captures: [...session.captures, newCapture] })
+
+  // Return the capture path
+  return newCapture
 }
 
 /**

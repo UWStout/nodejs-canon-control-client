@@ -1,13 +1,23 @@
 import React from 'react'
 
-import { Grid, Typography } from '@mui/material'
+import { Divider, Stack } from '@mui/material'
+
+import SessionCaptureSelect from './SessionCaptureSelect.jsx'
+import BulkPropertiesItem from '../cameraList/BulkPropertiesItem.jsx'
 
 export default function CaptureControlsView () {
   return (
-    <Grid container sx={{ bgcolor: 'background.capture', padding: 2 }}>
-      <Grid item xs={12}>
-        <Typography variant="body1">Capture Controls Coming Soon</Typography>
-      </Grid>
-    </Grid>
+    <Stack
+      alignItems='center'
+      spacing={2}
+      sx={{ bgcolor: 'background.capture', padding: 2 }}
+    >
+      {/* Session and capture settings */}
+      <SessionCaptureSelect />
+      <Divider sx={{ width: '100%' }} />
+
+      {/* Bulk Exposure settings */}
+      <BulkPropertiesItem />
+    </Stack>
   )
 }

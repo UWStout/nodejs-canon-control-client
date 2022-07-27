@@ -6,10 +6,15 @@ import { Button, FormGroup, FormControlLabel, Checkbox, Typography, Dialog, Dial
 export default function ConfirmImportDialog (props) {
   const { onClose, open, ...other } = props
 
+  // State of the various checkboxes
   const [servers, setServers] = React.useState(true)
   const [cameras, setCameras] = React.useState(true)
+  const [sessions, setSessions] = React.useState(true)
+  const [settings, setSettings] = React.useState(false)
+
+  // Callbacks for accepting or canceling the dialog
   const handleCancel = () => { onClose(false) }
-  const handleOk = () => { onClose(true, servers, cameras) }
+  const handleOk = () => { onClose(true, servers, cameras, sessions, settings) }
 
   return (
     <Dialog maxWidth="xs" open={open} {...other}>
@@ -28,6 +33,18 @@ export default function ConfirmImportDialog (props) {
               <Checkbox checked={cameras} onChange={e => setCameras(e.target.checked)} />
             }
             label="Include Camera Data"
+          />
+          <FormControlLabel
+            control={
+              <Checkbox checked={sessions} onChange={e => setSessions(e.target.checked)} />
+            }
+            label="Include Session Data"
+          />
+          <FormControlLabel
+            control={
+              <Checkbox checked={settings} onChange={e => setSettings(e.target.checked)} />
+            }
+            label="Include Local Settings"
           />
         </FormGroup>
       </DialogContent>

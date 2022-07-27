@@ -155,3 +155,91 @@ export function releaseShutter (server, camera) {
       })
   })
 }
+
+export function syncronizeTime (server, camera) {
+  // Skip deactivated servers
+  if (server.deactivated) return Promise.resolve({})
+
+  const camIndex = (typeof camera === 'object' ? camera?.index : camera)
+  console.log(`Syncronizing clock on camera ${camIndex} on ${server?.nickname} server`)
+  return new Promise((resolve, reject) => {
+    axios.post(`https://${server.IP}:${server.port}/camera/${camIndex}/syncTime`)
+      .then((response) => {
+        resolve(response.data)
+      })
+      .catch((error) => {
+        reject(error)
+      })
+  })
+}
+
+export function ensureSessionOnServer (server, nickname, path, time, allowCreation = false) {
+  console.log('Creating new Session Storage')
+  return new Promise((resolve, reject) => {
+    axios.post(`https://${server.IP}:${server.port}/server/session/${allowCreation ? 'create' : 'confirm'}`, {
+      nickname,
+      path,
+      time
+    }).then((response) => {
+      resolve(response.data)
+    }).catch((error) => {
+      reject(error)
+    })
+  })
+}
+
+export function getSessionList (server) {
+  console.log('Fetching list of sessions')
+  return new Promise((resolve, reject) => {
+    axios.get(`https://${server.IP}:${server.port}/server/sessions`)
+      .then((response) => {
+        resolve(response.data)
+      })
+      .catch((error) => {
+        reject(error)
+      })
+  })
+}
+
+export function ensureCaptureOnServer (server, sessionPath, captureName, captureNumber, allowCreation = false) {
+  console.log('Creating new Capture Storage')
+  return new Promise((resolve, reject) => {
+    axios.post(`https://${server.IP}:${server.port}/server/capture/${allowCreation ? 'create' : 'confirm'}`, {
+      sessionPath,
+      captureName,
+      captureNumber
+    }).then((response) => {
+      resolve(response.data)
+    }).catch((error) => {
+      reject(error)
+    })
+  })
+}
+
+export function getCaptureOnServer (server) {
+  console.log('Setting target Capture Storage')
+  return new Promise((resolve, reject) => {
+    axios.get(`https://${server.IP}:${server.port}/server/capture/current`)
+      .then((response) => {
+        resolve(response.data)
+      })
+      .catch((error) => {
+        reject(error)
+      })
+  })
+}
+
+export function setCaptureOnServer (server, sessionPath, captureName, captureNumber) {
+  console.log('Setting target Capture Storage')
+  return new Promise((resolve, reject) => {
+    axios.post(`https://${server.IP}:${server.port}/server/capture/select`, {
+      sessionPath,
+      captureName,
+      captureNumber
+    }).then((response) => {
+      resolve(response.data)
+    }).catch((error) => {
+      reject(error)
+    })
+  })
+}

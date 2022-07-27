@@ -6,7 +6,7 @@ import { useLiveQuery } from 'dexie-react-hooks'
 import { List, ListSubheader, Grid, Stack, Typography } from '@mui/material'
 
 import CameraListItem from './CameraListItem.jsx'
-import BulkPropertiesItem from './BulkPropertiesItem.jsx'
+import BulkPropertiesCollapse from './BulkPropertiesCollapse.jsx'
 
 export default function CameraList () {
   // Subscribe to changes to servers and cameras
@@ -98,7 +98,7 @@ export default function CameraList () {
     <React.StrictMode>
       <Grid container spacing={2}>
         <Grid item xs={12}>
-          <BulkPropertiesItem />
+          <BulkPropertiesCollapse />
         </Grid>
 
         <Grid item xs={12}>

@@ -2,6 +2,7 @@ import React from 'react'
 
 import localDB, { clearCameraStatus, reloadCameraList } from '../state/localDB.js'
 import { useLiveQuery } from 'dexie-react-hooks'
+import { useServerSockets } from './socketHooks.js'
 
 import { CssBaseline, ThemeProvider, Container } from '@mui/material'
 import { SnackbarProvider } from 'notistack'
@@ -19,11 +20,12 @@ import ImportExportDialog from './settings/ImportExportDialog.jsx'
 
 import C4_THEME from './C4Theme.js'
 
-import { useServerSockets } from './socketHooks.js'
-
 export default function C4MainApp () {
   // Subscribe to changes in the server list
   const serverList = useLiveQuery(() => localDB.servers.toArray())
+
+  // Setup and syncronize the socket.io connections
+  useServerSockets(serverList)
 
   // Always reset camera status on first render
   const [resetDone, setResetDone] = React.useState(false)
@@ -39,9 +41,6 @@ export default function C4MainApp () {
       setResetDone(true)
     })()
   }, [])
-
-  // Setup and syncronize the socket.io connections
-  useServerSockets(serverList)
 
   // Syncronize camera list when servers change
   const [syncronizedServers, setSyncronizedServers] = React.useState([])
