@@ -8,6 +8,7 @@ import { FormControl, InputLabel, Select, MenuItem, Paper, Typography, Grid, Div
 import { ArrowForwardIosRounded as RightArrowIcon } from '@mui/icons-material'
 
 import NicknameFormDialog from './NicknameFormDialog.jsx'
+import AutoIncrementSwitch from './AutoIncrementSwitch.jsx'
 
 const readyColors = { ready: 'success.light', unready: 'warning.light' }
 const readyMessage = { ready: 'Ready For Capture', unready: 'Awaiting Setup' }
@@ -110,6 +111,9 @@ export default function SessionCaptureSelect (props) {
         alignItems='center'
         justifyContent='space-around'
       >
+        <Grid item xs={12}>
+          <AutoIncrementSwitch/>
+        </Grid>
         <Grid item xs={11} sm={5} md={3}>
           <FormControl fullWidth sx={{ m: 1 }} size='small'>
             <InputLabel id="session-select-label">Session</InputLabel>

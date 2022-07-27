@@ -4,6 +4,7 @@ import { Divider, Stack } from '@mui/material'
 
 import SessionCaptureSelect from './SessionCaptureSelect.jsx'
 import BulkPropertiesItem from '../cameraList/BulkPropertiesItem.jsx'
+import ImageDownloadBar from './ImageDownloadBar.jsx'
 
 export default function CaptureControlsView () {
   return (
@@ -18,6 +19,9 @@ export default function CaptureControlsView () {
 
       {/* Bulk Exposure settings */}
       <BulkPropertiesItem />
+      <Divider sx={{ width: '100%' }} />
+
+      <ImageDownloadBar/>
     </Stack>
   )
 }
