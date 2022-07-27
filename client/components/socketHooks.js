@@ -2,6 +2,7 @@ import React from 'react'
 
 import { refreshCameraList } from '../state/localDB.js'
 import useBulkTaskState from '../state/useBulkTaskState.js'
+import useCaptureState from '../state/useCaptureState.js'
 
 // State of the underlying Socket.io connections
 import useSocketState from '../state/useSocketState.js'
@@ -10,6 +11,10 @@ export function useServerSockets (serverList) {
   // Subscribe to socket.io connection state
   const { socketList, updateServerSockets } = useSocketState(state => state)
   const completeBulkTask = useBulkTaskState(state => state.completeBulkTask)
+  const { downloadStarted, downloadFinished } = useCaptureState(state => ({
+    downloadStarted: state.downloadStarted,
+    downloadFinished: state.downloadFinished
+  }))
 
   // Ensure the low-level socket connections are up to date
   React.useEffect(() => {
@@ -36,9 +41,11 @@ export function useServerSockets (serverList) {
       socket.off('DownloadEnd')
       socket.on('DownloadStart', ({ camIndex }) => {
         console.log('Download started for camera', camIndex, 'on server', serverId)
+        downloadStarted(serverId, camIndex)
       })
       socket.on('DownloadEnd', ({ camIndex }) => {
         console.log('Download complete for camera', camIndex, 'on server', serverId)
+        downloadFinished(serverId, camIndex, false)
       })
 
       // Receive bulk task events
@@ -52,5 +59,5 @@ export function useServerSockets (serverList) {
         completeBulkTask(taskId, true, summary)
       })
     })
-  }, [completeBulkTask, serverList, socketList])
+  }, [completeBulkTask, downloadFinished, downloadStarted, serverList, socketList])
 }

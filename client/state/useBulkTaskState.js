@@ -24,8 +24,6 @@ const useBulkTaskState = create(set => ({
       const newServerInfo = [...state.serverInfo]
       newServerInfo[index].summary = summary
       const done = (state.completeCount + 1 === newServerInfo.length)
-
-      console.log(`${state.completeCount + 1} of ${state.serverInfo.length} sub tasks completed`)
       if (done) {
         console.log('Bulk task complete')
       }
