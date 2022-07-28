@@ -19,6 +19,14 @@ const useGlobalState = create(set => ({
     return { importExportDialogVisible: false }
   }),
 
+  cameraNicknameSyncDialogVisible: false,
+  showCameraNicknameSyncDialog: () => set(state => {
+    return { cameraNicknameSyncDialogVisible: true }
+  }),
+  hideCameraNicknameSyncDialog: () => set(state => {
+    return { cameraNicknameSyncDialogVisible: false }
+  }),
+
   // Bulk mode global values
   bulkProperties: null,
   updateBulkProperties: (newProperties) => set(state => {

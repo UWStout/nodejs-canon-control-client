@@ -24,18 +24,18 @@ const useCaptureState = create(set => ({
   }),
 
   // Keep track of started downloads
-  downloadStarted: (serverId, cameraIndex) => set(state => {
+  downloadStarted: (serverId, cameraIndex, filename) => set(state => {
     // Build info updates
-    const cameraInfo = { cameraIndex, serverId }
+    const cameraInfo = { cameraIndex, serverId, filename }
     return {
       inProgress: [...state.inProgress, cameraInfo]
     }
   }),
 
   // Count finished downloads and save info about successes and failures
-  downloadFinished: (serverId, cameraIndex, failed = false) => set(state => {
+  downloadFinished: (serverId, cameraIndex, filename, exposureInfo, failed = false) => set(state => {
     // Build info object and update inProgress array
-    const cameraInfo = { cameraIndex, serverId }
+    const cameraInfo = { cameraIndex, serverId, filename, exposureInfo }
     const filteredInProgress = state.inProgress.filter(
       info => (info.cameraIndex !== cameraIndex || info.serverId !== serverId)
     )

@@ -39,11 +39,11 @@ export function useServerSockets (serverList) {
       // Receive download events
       socket.off('DownloadStart')
       socket.off('DownloadEnd')
-      socket.on('DownloadStart', ({ camIndex }) => {
-        downloadStarted(serverId, camIndex)
+      socket.on('DownloadStart', ({ camIndex, filename }) => {
+        downloadStarted(serverId, camIndex, filename)
       })
-      socket.on('DownloadEnd', ({ camIndex }) => {
-        downloadFinished(serverId, camIndex, false)
+      socket.on('DownloadEnd', ({ camIndex, filename, exposureInfo }) => {
+        downloadFinished(serverId, camIndex, filename, exposureInfo, false)
       })
 
       // Receive bulk task events

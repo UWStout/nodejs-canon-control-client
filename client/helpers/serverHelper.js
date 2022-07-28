@@ -173,6 +173,22 @@ export function syncronizeTime (server, camera) {
   })
 }
 
+export function syncronizeCameraNicknames (server, nicknameList) {
+  // Skip deactivated servers
+  if (server.deactivated) return Promise.resolve({})
+
+  console.log(`Syncronizing camera nickname list on ${server?.nickname} server`)
+  return new Promise((resolve, reject) => {
+    axios.post(`https://${server.IP}:${server.port}/server/nicknames`, nicknameList)
+      .then((response) => {
+        resolve(response.data)
+      })
+      .catch((error) => {
+        reject(error)
+      })
+  })
+}
+
 export function ensureSessionOnServer (server, nickname, path, time, allowCreation = false) {
   console.log('Creating new Session Storage')
   return new Promise((resolve, reject) => {
