@@ -1,5 +1,6 @@
 import React from 'react'
 import { LinearProgress, Typography, Box } from '@mui/material'
+import { PropTypes } from 'prop-types'
 
 export default function ProgressBarBufferedLabeled(props) {
   const { currentValue, maxValue, currentBuffer, label, hidden } = props
@@ -24,4 +25,20 @@ export default function ProgressBarBufferedLabeled(props) {
       </Typography>  
     </Box>
   )
+}
+
+ProgressBarBufferedLabeled.propTypes = {
+  currentValue: PropTypes.number,
+  maxValue: PropTypes.number,
+  currentBuffer: PropTypes.number,
+  labal: PropTypes.string,
+  hidden: PropTypes.bool
+}
+
+ProgressBarBufferedLabeled.defaultProps = {
+  currentValue: 0,
+  maxValue: 0,
+  currentBuffer: 0,
+  labal: '',
+  hidden: true
 }

@@ -5,7 +5,7 @@ import { Dialog, DialogTitle, DialogContent, Button, ButtonGroup, TextField } fr
 
 export default function NicknameFormDialog (props) {
   // Deconstruct props
-  const { open, onClose, title, ...other } = props
+  const { open, onClose, title } = props
 
   // Initialize state
   const [nickname, setNickname] = React.useState('')
@@ -37,7 +37,12 @@ export default function NicknameFormDialog (props) {
   )
 
   return (
-    <Dialog open={open} onClose={onCancel} fullWidth maxWidth="sm" {...other}>
+    <Dialog
+      open={open}
+      onClose={onCancel}
+      fullWidth maxWidth="sm"
+      onKeyDown={(e) => { if (e.key == 'Enter' && !invalidEntry) {onConfirm()} } }
+    >
       <DialogTitle>{title}</DialogTitle>
       <DialogContent dividers>
         <TextField
