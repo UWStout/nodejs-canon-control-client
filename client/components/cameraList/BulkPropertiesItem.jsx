@@ -25,10 +25,8 @@ export default function BulkPropertiesItem () {
   const camera = useLiveQuery(() => localDB.cameras.toCollection().first())
 
   // Do the bulk mode values have any changes
-  const [changesDetected, setChangesDetected] = React.useState(false)
   React.useEffect(() => {
     if (bulkExposureSettings) {
-      setChangesDetected(true)
       setExposureStatus('bad')
     }
   }, [bulkExposureSettings])
@@ -63,7 +61,7 @@ export default function BulkPropertiesItem () {
             server={server}
             useBulkValues
             onApply={applyExposureValues}
-            disableApply={!bulkTaskDone || !changesDetected}
+            bulkBusy={!bulkTaskDone}
           />
         }
       >

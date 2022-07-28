@@ -21,7 +21,7 @@ import { takeAPhoto, doAutoFocus, releaseShutter, syncronizeTime } from '../../.
 import { CameraObjShape, ServerObjShape } from '../../../state/dataModel.js'
 
 export default function CameraActionAndPropertyButtons (props) {
-  const { server, camera, readOnly, useBulkValues, onApply, disableApply } = props
+  const { server, camera, readOnly, useBulkValues, onApply, bulkBusy } = props
   const { enqueueSnackbar } = useSnackbar()
 
   // Subscribe to the bits of bulk state we need
@@ -194,7 +194,7 @@ export default function CameraActionAndPropertyButtons (props) {
             <IconButton
               role={undefined}
               size='large'
-              disabled={readOnly || disableApply}
+              disabled={readOnly || (useBulkValues && bulkBusy)}
               onClick={readOnly ? null : onTakePhoto}
             >
               <TakePhotoIcon />
@@ -208,7 +208,7 @@ export default function CameraActionAndPropertyButtons (props) {
             <IconButton
               role={undefined}
               size='large'
-              disabled={readOnly || disableApply}
+              disabled={readOnly || (useBulkValues && bulkBusy)}
               onClick={readOnly ? null : onAutoFocus}
             >
               <FocusIcon />
@@ -222,7 +222,7 @@ export default function CameraActionAndPropertyButtons (props) {
             <IconButton
               role={undefined}
               size='large'
-              disabled={readOnly || disableApply}
+              disabled={readOnly || (useBulkValues && bulkBusy)}
               onClick={readOnly ? null : onReleaseShutter}
             >
               <ReleaseSutterIcon />
@@ -236,7 +236,7 @@ export default function CameraActionAndPropertyButtons (props) {
             <IconButton
               role={undefined}
               size='large'
-              disabled={readOnly || disableApply}
+              disabled={readOnly || (useBulkValues && bulkBusy)}
               onClick={readOnly ? null : onSyncTime}
             >
               <SyncClockIcon />
@@ -253,7 +253,7 @@ export default function CameraActionAndPropertyButtons (props) {
             <IconButton
               role={undefined}
               size="large"
-              disabled={readOnly || disableApply}
+              disabled={readOnly || (useBulkValues && bulkBusy)}
               onClick={readOnly ? null : onOpenMenu}
             >
               <ExposurePropertiesIcon />
@@ -268,7 +268,7 @@ export default function CameraActionAndPropertyButtons (props) {
               <Button
                 size="small"
                 variant="contained"
-                disabled={disableApply}
+                disabled={!!(useBulkValues && bulkBusy)}
                 onClick={onApply}
               >
                 {'Apply'}
@@ -295,7 +295,7 @@ CameraActionAndPropertyButtons.propTypes = {
   readOnly: PropTypes.bool,
   useBulkValues: PropTypes.bool,
   onApply: PropTypes.func,
-  disableApply: PropTypes.bool
+  bulkBusy: PropTypes.bool
 }
 
 CameraActionAndPropertyButtons.defaultProps = {
@@ -304,5 +304,5 @@ CameraActionAndPropertyButtons.defaultProps = {
   readOnly: false,
   useBulkValues: false,
   onApply: null,
-  disableApply: true
+  bulkBusy: true
 }
