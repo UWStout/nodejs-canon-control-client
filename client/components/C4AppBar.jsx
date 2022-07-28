@@ -37,7 +37,7 @@ export default function C4AppBar (props) {
         enqueueSnackbar(`${bulkState.task?.type} complete`, { variant: 'success' })
       }
     }
-  }, [bulkState.completeCount, bulkState.done, bulkState.failedCount, bulkState.task?.type, enqueueSnackbar])
+  }, [bulkState, enqueueSnackbar])
 
   return (
     <AppBar position="static">

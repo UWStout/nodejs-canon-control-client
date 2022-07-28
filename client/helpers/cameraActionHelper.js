@@ -3,7 +3,7 @@ export async function bulkAction (type, actionCB, serverList, bulkState, enqueue
   const taskIds = []
   for (let i = 0; i < serverList.length; i++) {
     const server = serverList[i]
-    if (!server.disabled) {
+    if (!server.deactivated) {
       try {
         const results = await actionCB(server, '*')
         taskIds.push(results.taskId)

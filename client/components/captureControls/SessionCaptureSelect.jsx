@@ -96,12 +96,12 @@ export default function SessionCaptureSelect () {
   // Capture number text field callback
   const captureNumberKeyPress = async (event) => {
     if (event.key === 'Enter') {
-      await updateSetting('currentCaptureNumber', captureNumber)
+      await updateSetting('currentCaptureNumber', localCaptureNumber)
     }
   }
 
   const captureNumberBlur = async () => {
-    await updateSetting('currentCaptureNumber', captureNumber)
+    await updateSetting('currentCaptureNumber', localCaptureNumber)
   }
 
   return (
@@ -112,7 +112,7 @@ export default function SessionCaptureSelect () {
         justifyContent='space-around'
       >
         <Grid item xs={12}>
-          <AutoIncrementSwitch/>
+          <AutoIncrementSwitch />
         </Grid>
         <Grid item xs={11} sm={5} md={3}>
           <FormControl fullWidth sx={{ m: 1 }} size='small'>
