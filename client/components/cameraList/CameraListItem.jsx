@@ -8,7 +8,7 @@ import { ListItem, ListItemAvatar, Avatar } from '@mui/material'
 import { PhotoCamera as CameraIcon } from '@mui/icons-material'
 
 import EditableListItemText from './EditableListItemText.jsx'
-import CameraActionAndPropertyButtons from './cameraControls/CameraActionAndPropertyButtons.jsx'
+import CameraSettingsCollapse from './cameraControls/CameraSettingsCollapse.jsx'
 
 export default function CameraListItem (props) {
   const { cameraID, serverID, readOnly } = props
@@ -16,6 +16,9 @@ export default function CameraListItem (props) {
   // Subscribe to changes to the camera and server objects
   const camera = useLiveQuery(() => localDB.cameras.get(cameraID), [cameraID], null)
   const server = useLiveQuery(() => localDB.servers.get(serverID), [serverID], null)
+
+  // Monitor if mouse is hovering 
+  const [mouseOver, setMouseOver] = React.useState(false)
 
   // Track if camera details refresh is needed
   const [needsRefresh, setNeedsRefresh] = React.useState(false)
@@ -64,9 +67,12 @@ export default function CameraListItem (props) {
 
   return (
     <ListItem
+      onMouseEnter={() => setMouseOver(true)}
+      onMouseLeave={() => setMouseOver(false)}
       secondaryAction={
         // Buttons for controlling the camera and setting properties
-        <CameraActionAndPropertyButtons
+        <CameraSettingsCollapse
+          hidden={!mouseOver}
           server={server}
           camera={camera}
           readOnly={readOnly}
