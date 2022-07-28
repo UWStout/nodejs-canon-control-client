@@ -13,7 +13,7 @@ import AutoIncrementSwitch from './AutoIncrementSwitch.jsx'
 const readyColors = { ready: 'success.light', unready: 'warning.light' }
 const readyMessage = { ready: 'Ready For Capture', unready: 'Awaiting Setup' }
 
-export default function SessionCaptureSelect (props) {
+export default function SessionCaptureSelect () {
   // Subscribe to current session and capture values
   const currentSessionField = useLiveQuery(() => localDB.settings.get('currentSessionField'))
   const currentCaptureField = useLiveQuery(() => localDB.settings.get('currentCaptureField'))
@@ -24,11 +24,11 @@ export default function SessionCaptureSelect (props) {
   // Initialize states
   const [showCreateSession, setShowCreateSession] = React.useState(false)
   const [showCreateCapture, setShowCreateCapture] = React.useState(false)
-  const [captureNumber, setCaptureNumber] = React.useState(0)
+  const [localCaptureNumber, setLocalCaptureNumber] = React.useState(0)
 
   React.useEffect(() => {
     if (typeof currentCaptureNumber?.value === 'number') {
-      setCaptureNumber(currentCaptureNumber.value)
+      setLocalCaptureNumber(currentCaptureNumber.value)
     }
   }, [currentCaptureNumber])
 
@@ -152,8 +152,8 @@ export default function SessionCaptureSelect (props) {
         <Grid item xs={2} md={1}>
           <TextField
             size='small'
-            value={captureNumber}
-            onChange={e => setCaptureNumber(parseInt(e.target.value))}
+            value={localCaptureNumber}
+            onChange={e => setLocalCaptureNumber(parseInt(e.target.value) || 0)}
             onKeyPress={captureNumberKeyPress}
             onBlur={captureNumberBlur}
             inputProps={{ inputMode: 'numeric', pattern: '[0-9]*' }}
