@@ -17,7 +17,9 @@ import { useSnackbar } from 'notistack'
 
 import ExposurePropertiesMenu from './ExposurePropertiesMenu.jsx'
 
+import { bulkAction, singleCamAction } from '../../../helpers/cameraActionHelper.js'
 import { takeAPhoto, doAutoFocus, releaseShutter, syncronizeTime } from '../../../helpers/serverHelper.js'
+
 import { CameraObjShape, ServerObjShape } from '../../../state/dataModel.js'
 
 export default function CameraActionAndPropertyButtons (props) {
@@ -33,48 +35,16 @@ export default function CameraActionAndPropertyButtons (props) {
   // Needed browser data and state
   const serverList = useLiveQuery(() => localDB.servers.toArray())
 
-  // Menu anchor refs
-  const exposureAnchorRef = React.useRef()
-
-  // Menu anchor state
-  const [exposureMenuAnchor, setExposureMenuAnchor] = React.useState(null)
-  const onOpenMenu = () => {
-    setExposureMenuAnchor(exposureAnchorRef.current)
-  }
-
   // Camera control callbacks
-  const onTakePhoto = async () => {
+  const onTakePhoto = () => {
     if (useBulkValues) {
       if (!bulkState.done) {
         enqueueSnackbar('Please wait for current task to finish', { variant: 'warning' })
         return
       }
-
-      const taskIds = []
-      for (let i = 0; i < serverList.length; i++) {
-        const server = serverList[i]
-        try {
-          const results = await takeAPhoto(server, '*')
-          taskIds.push(results.taskId)
-        } catch (error) {
-          enqueueSnackbar(`Bulk photo capture failed for ${server.nickname}`, { variant: 'error' })
-        }
-      }
-      if (taskIds.length > 0) {
-        enqueueSnackbar('Bulk photo capture started')
-        bulkState.newBulkTask('Bulk photo capture', taskIds)
-      }
+      bulkAction('Bulk photo capture', takeAPhoto, serverList, bulkState, enqueueSnackbar)
     } else {
-      try {
-        if (!server || !camera) {
-          throw new Error(`Cannot take photo: server and/or camera are null (${server?.id}/${camera?.id})`)
-        } else {
-          await takeAPhoto(server, camera)
-        }
-      } catch (error) {
-        enqueueSnackbar(`Failed to take photo on camera ${camera?.nickname || camera?.BodyIDEx?.value}`, { variant: 'error' })
-        console.error(error)
-      }
+      singleCamAction('take photo', takeAPhoto, server, camera, enqueueSnackbar)
     }
   }
 
@@ -84,32 +54,9 @@ export default function CameraActionAndPropertyButtons (props) {
         enqueueSnackbar('Please wait for current task to finish', { variant: 'warning' })
         return
       }
-
-      const taskIds = []
-      for (let i = 0; i < serverList.length; i++) {
-        const server = serverList[i]
-        try {
-          const results = await doAutoFocus(server, '*')
-          taskIds.push(results.taskId)
-        } catch (error) {
-          enqueueSnackbar(`Bulk auto-focus failed for ${server.nickname}`, { variant: 'error' })
-        }
-      }
-      if (taskIds.length > 0) {
-        enqueueSnackbar('Bulk auto-focus started')
-        bulkState.newBulkTask('Bulk auto-focus', taskIds)
-      }
+      bulkAction('Bulk auto-focus', doAutoFocus, serverList, bulkState, enqueueSnackbar)
     } else {
-      try {
-        if (!server || !camera) {
-          throw new Error(`Cannot auto-focus: server and/or camera are null (${server?.id}/${camera?.id})`)
-        } else {
-          await doAutoFocus(server, camera)
-        }
-      } catch (error) {
-        enqueueSnackbar(`Auto-focus failed on camera ${camera?.nickname || camera?.BodyIDEx?.value}`, { variant: 'error' })
-        console.error(error)
-      }
+      singleCamAction('auto-focus', doAutoFocus, server, camera, enqueueSnackbar)
     }
   }
 
@@ -119,33 +66,9 @@ export default function CameraActionAndPropertyButtons (props) {
         enqueueSnackbar('Please wait for current task to finish', { variant: 'warning' })
         return
       }
-
-      const taskIds = []
-      for (let i = 0; i < serverList.length; i++) {
-        const server = serverList[i]
-        try {
-          const results = await releaseShutter(server, '*')
-          taskIds.push(results.taskId)
-        } catch (error) {
-          enqueueSnackbar(`Bulk shutter release failed for ${server.nickname}`, { variant: 'error' })
-        }
-      }
-      if (taskIds.length > 0) {
-        enqueueSnackbar('Bulk shutter release started')
-        bulkState.newBulkTask('Bulk shutter release', taskIds)
-      }
+      bulkAction('Bulk shutter release', releaseShutter, serverList, bulkState, enqueueSnackbar)
     } else {
-      try {
-        if (!server || !camera) {
-          throw new Error(`Cannot release shutter: server and/or camera are null (${server?.id}/${camera?.id})`)
-        } else {
-          console.log('Releasing for', camera)
-          await releaseShutter(server, camera)
-        }
-      } catch (error) {
-        enqueueSnackbar(`Shutter release failed on camera ${camera?.nickname || camera?.ProductName?.value}`, { variant: 'error' })
-        console.error(error)
-      }
+      singleCamAction('release shutter', releaseShutter, server, camera, enqueueSnackbar)
     }
   }
 
@@ -155,34 +78,19 @@ export default function CameraActionAndPropertyButtons (props) {
         enqueueSnackbar('Please wait for current task to finish', { variant: 'warning' })
         return
       }
-
-      const taskIds = []
-      for (let i = 0; i < serverList.length; i++) {
-        const server = serverList[i]
-        try {
-          const results = await syncronizeTime(server, '*')
-          taskIds.push(results.taskId)
-        } catch (error) {
-          enqueueSnackbar(`Bulk clock sync failed for ${server.nickname}`, { variant: 'error' })
-        }
-      }
-      if (taskIds.length > 0) {
-        enqueueSnackbar('Bulk clock sync started')
-        bulkState.newBulkTask('Bulk clock sync', taskIds)
-      }
+      bulkAction('Bulk clock sync', syncronizeTime, serverList, bulkState, enqueueSnackbar)
     } else {
-      try {
-        if (!server || !camera) {
-          throw new Error(`Cannot sync clock: server and/or camera are null (${server?.id}/${camera?.id})`)
-        } else {
-          console.log('Releasing for', camera)
-          await releaseShutter(server, camera)
-        }
-      } catch (error) {
-        enqueueSnackbar(`Clock sync failed on camera ${camera?.nickname || camera?.ProductName?.value}`, { variant: 'error' })
-        console.error(error)
-      }
+      singleCamAction('sync clock', syncronizeTime, server, camera, enqueueSnackbar)
     }
+  }
+
+  // Menu anchor refs
+  const exposureAnchorRef = React.useRef()
+
+  // Menu anchor state
+  const [exposureMenuAnchor, setExposureMenuAnchor] = React.useState(null)
+  const onOpenMenu = () => {
+    setExposureMenuAnchor(exposureAnchorRef.current)
   }
 
   return (
