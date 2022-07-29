@@ -27,6 +27,14 @@ const useGlobalState = create(set => ({
     return { cameraNicknameSyncDialogVisible: false }
   }),
 
+  liveViewDialogVisible: false,
+  showLiveViewDialog: () => set(state => {
+    return { liveViewDialogVisible: true }
+  }),
+  hideLiveViewDialog: () => set(state => {
+    return { liveViewDialogVisible: false }
+  }),
+
   // Bulk mode global values
   bulkProperties: null,
   updateBulkProperties: (newProperties) => set(state => {

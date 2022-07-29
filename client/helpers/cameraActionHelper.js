@@ -1,4 +1,7 @@
 export async function bulkAction (type, actionCB, serverList, bulkState, enqueueSnackbar) {
+  // Wait 10 seconds
+  await new Promise((resolve) => setTimeout(() => resolve(), 10000))
+
   // Loop through servers and start bulk tasks
   const taskIds = []
   for (let i = 0; i < serverList.length; i++) {

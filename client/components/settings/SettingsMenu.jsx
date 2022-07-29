@@ -7,7 +7,7 @@ import { Settings as SettingsIcon } from '@mui/icons-material'
 
 export default function SettingsMenu (props) {
   // Functions to show the appropriate settings dialogs
-  const { showServerEditDialog, showImportExportDialog, showCameraNicknameSyncDialog } = useGlobalState(state => state)
+  const { showServerEditDialog, showImportExportDialog, showCameraNicknameSyncDialog, showLiveViewDialog } = useGlobalState(state => state)
 
   // Control anchor element of menu
   const [anchorEl, setAnchorEl] = React.useState(null)
@@ -29,6 +29,12 @@ export default function SettingsMenu (props) {
   // Trigger the nickname sync dialog and close the menu
   const onSyncronizeCameraNicknames = () => {
     showCameraNicknameSyncDialog()
+    handleSettingsClose()
+  }
+
+  // Trigger the live-view dialog and close the menu
+  const onShowLiveViewDialog = () => {
+    showLiveViewDialog()
     handleSettingsClose()
   }
 
@@ -62,6 +68,7 @@ export default function SettingsMenu (props) {
         <MenuItem onClick={onViewEditServers}>View / Edit Servers</MenuItem>
         <MenuItem onClick={onImportExportLocalData}>Import / Export Local Data</MenuItem>
         <MenuItem onClick={onSyncronizeCameraNicknames}>Syncronize Camera Nicknames</MenuItem>
+        <MenuItem onClick={onShowLiveViewDialog}>Show Camera Live View Dialog</MenuItem>
       </Menu>
     </React.Fragment>
   )

@@ -20,6 +20,7 @@ import ImportExportDialog from './settings/ImportExportDialog.jsx'
 
 import C4_THEME from './C4Theme.js'
 import CameraNicknameSyncDialog from './settings/CameraNicknameSyncDialog.jsx'
+import C4LiveViewDialog from './C4LiveViewDialog.jsx'
 
 export default function C4MainApp () {
   // Subscribe to changes in the server list
@@ -119,6 +120,7 @@ export default function C4MainApp () {
               <ServerSettingsDialog />
               <ImportExportDialog />
               <CameraNicknameSyncDialog />
+              <C4LiveViewDialog />
 
             </Container>
           </SnackbarProvider>
