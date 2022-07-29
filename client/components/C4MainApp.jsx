@@ -17,10 +17,10 @@ import TestingButtonsView from './testingButtons/TestingButonsView.jsx'
 
 import ServerSettingsDialog from './settings/ServerSettingsDialog.jsx'
 import ImportExportDialog from './settings/ImportExportDialog.jsx'
+import CameraNicknameSyncDialog from './settings/CameraNicknameSyncDialog.jsx'
+import LiveViewDialog from './liveView/LiveViewDialog.jsx'
 
 import C4_THEME from './C4Theme.js'
-import CameraNicknameSyncDialog from './settings/CameraNicknameSyncDialog.jsx'
-import C4LiveViewDialog from './C4LiveViewDialog.jsx'
 
 export default function C4MainApp () {
   // Subscribe to changes in the server list
@@ -120,7 +120,7 @@ export default function C4MainApp () {
               <ServerSettingsDialog />
               <ImportExportDialog />
               <CameraNicknameSyncDialog />
-              <C4LiveViewDialog />
+              <LiveViewDialog />
 
             </Container>
           </SnackbarProvider>
