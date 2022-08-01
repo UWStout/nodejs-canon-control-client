@@ -57,7 +57,7 @@ export default function CameraLiveView (props) {
         }
       }
     }
-  }, [cameraIndex, currentServer, serverId, socketList])
+  }, [cameraIndex, serverId, socketList])
 
   return (
     <Box sx={{ margins: 2, height: '90vh' }}>

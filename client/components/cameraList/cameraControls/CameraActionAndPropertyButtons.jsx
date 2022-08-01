@@ -3,6 +3,8 @@ import PropTypes from 'prop-types'
 
 import localDB from '../../../state/localDB.js'
 import { useLiveQuery } from 'dexie-react-hooks'
+
+import useGlobalState from '../../../state/useGlobalState.js'
 import useBulkTaskState from '../../../state/useBulkTaskState.js'
 
 import { Button, IconButton, Stack, Tooltip, Divider } from '@mui/material'
@@ -11,7 +13,8 @@ import {
   CenterFocusStrong as FocusIcon,
   Camera as ReleaseSutterIcon,
   AvTimer as SyncClockIcon,
-  SettingsSuggest as ExposurePropertiesIcon
+  SettingsSuggest as ExposurePropertiesIcon,
+  Cast as LiveViewIcon
 } from '@mui/icons-material'
 import { useSnackbar } from 'notistack'
 
@@ -25,6 +28,9 @@ import { CameraObjShape, ServerObjShape } from '../../../state/dataModel.js'
 export default function CameraActionAndPropertyButtons (props) {
   const { server, camera, readOnly, useBulkValues, onApply, bulkBusy } = props
   const { enqueueSnackbar } = useSnackbar()
+  const { liveViewDialogVisible, showLiveViewDialog } = useGlobalState(state => state)
+  const { liveViewServerSelection, setLiveViewServerSelection } = useGlobalState(state => state)
+  const { liveViewCameraSelection, setLiveViewCameraSelection } = useGlobalState(state => state)
 
   // Subscribe to the bits of bulk state we need
   const bulkState = useBulkTaskState(state => ({
@@ -82,6 +88,12 @@ export default function CameraActionAndPropertyButtons (props) {
     } else {
       singleCamAction('sync clock', syncronizeTime, server, camera, enqueueSnackbar)
     }
+  }
+
+  const onStartLiveView = () => {
+    showLiveViewDialog()
+    setLiveViewServerSelection(server.id)
+    setLiveViewCameraSelection(camera.index)
   }
 
   // Menu anchor refs
@@ -148,6 +160,20 @@ export default function CameraActionAndPropertyButtons (props) {
               onClick={readOnly ? null : onSyncTime}
             >
               <SyncClockIcon />
+            </IconButton>
+          </span>
+        </Tooltip>
+
+        {/* Start Live View Button */}
+        <Tooltip placement="top" title={'Start Live View'}>
+          <span>
+            <IconButton
+              role={undefined}
+              size='large'
+              disabled={readOnly || useBulkValues}
+              onClick={readOnly ? null : onStartLiveView}
+            >
+              <LiveViewIcon />
             </IconButton>
           </span>
         </Tooltip>

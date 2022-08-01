@@ -16,17 +16,16 @@ const Transition = React.forwardRef(function Transition (props, ref) {
 export default function LiveViewDialog () {
   // Global dialog visibility state
   const { liveViewDialogVisible, hideLiveViewDialog } = useGlobalState(state => state)
-
-  // Local GUI State
-  const [selectedServer, setSelectedServer] = React.useState(-1)
-  const [selectedCamera, setSelectedCamera] = React.useState(-1)
+  const { liveViewServerSelection, setLiveViewServerSelection } = useGlobalState(state => state)
+  const { liveViewCameraSelection, setLiveViewCameraSelection } = useGlobalState(state => state)
 
   // Clear selected camera whenever selected server changes
   React.useEffect(() => {
-    if (selectedServer >= 0) {
-      setSelectedCamera(-1)
+    if (liveViewServerSelection >= 0) {
+      console.log("Server Changed, reset Camera")
+      setLiveViewCameraSelection(-1)
     }
-  }, [selectedServer])
+  }, [liveViewServerSelection])
 
   // Subscribe to list of servers
   const serverList = useLiveQuery(() => localDB.servers.toArray())
@@ -43,19 +42,19 @@ export default function LiveViewDialog () {
           <LiveViewSettingButtons
             {...{
               serverList,
-              selectedServer,
-              selectedCamera,
-              setSelectedServer,
-              setSelectedCamera,
+              selectedServer: liveViewServerSelection,
+              selectedCamera: liveViewCameraSelection,
+              setSelectedServer: setLiveViewServerSelection,
+              setSelectedCamera: setLiveViewCameraSelection,
               onClose: hideLiveViewDialog
             }}
           />
         </Toolbar>
       </AppBar>
       <CameraLiveView
-        serverId={selectedServer}
-        cameraIndex={selectedCamera}
-        title={`Live view of camera ${selectedCamera} on server ${selectedServer}`}
+        serverId={liveViewServerSelection}
+        cameraIndex={liveViewCameraSelection}
+        title={`Live view of camera ${liveViewCameraSelection} on server ${liveViewServerSelection}`}
       />
     </Dialog>
   )
