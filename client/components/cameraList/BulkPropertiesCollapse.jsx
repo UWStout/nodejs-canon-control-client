@@ -11,7 +11,7 @@ export default function BulkPropertiesCollapse () {
   const bulkModeEnabled = useLiveQuery(() => localDB.settings.get('bulkModeEnabled'))
 
   return (
-    <Collapse in={bulkModeEnabled?.value} timeout="auto" unmountOnExit>
+    <Collapse in={bulkModeEnabled?.value} timeout="auto" unmountOnExit mountOnEnter>
       <BulkPropertiesItem />
     </Collapse>
   )

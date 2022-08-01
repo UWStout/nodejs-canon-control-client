@@ -10,7 +10,7 @@ import CameraLiveView from './CameraLiveView.jsx'
 import LiveViewSettingButtons from './LiveViewSettingButtons.jsx'
 
 const Transition = React.forwardRef(function Transition (props, ref) {
-  return <Slide direction="up" ref={ref} {...props} />
+  return <Slide direction="up" ref={ref} {...props} unmountOnExit mountOnEnter/>
 })
 
 export default function LiveViewDialog () {
