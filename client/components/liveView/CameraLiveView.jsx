@@ -21,20 +21,36 @@ export default function CameraLiveView (props) {
   const [currentServer, setCurrentServer] = React.useState(-1)
   const [currentCamera, setCurrentCamera] = React.useState(-1)
 
+  // Rotation state
+  const [rotation, setRotation] = React.useState(0)
+
+  const onRotateCCW = () => {
+    let newRotation = rotation - 90
+    if (newRotation > 180) { newRotation += 360 }
+    setRotation(newRotation)
+  }
+
+  const onRotateCW = () => {
+    let newRotation = rotation + 90
+    if (newRotation < -180) { newRotation -= 360 }
+    setRotation(newRotation)
+  }
+
   // Receive the current live-view image
-  const receiveImage = (message) => {
+  const receiveImage = React.useCallback((message) => {
     if (canvasTagRef?.current && message.imageData) {
       const img = new Image()
       img.src = 'data:image/jpeg;base64,' + message.imageData
       img.onload = () => {
-        const ctx = canvasTagRef?.current.getContext('2d')
+        const ctx = canvasTagRef.current.getContext('2d')
+        ctx.rotate(rotation)
         ctx.drawImage(img, 0, 0, canvasTagRef?.current.width, canvasTagRef?.current.height)
       }
       img.onerror = (error) => {
         console.error('Error drawing image:', error)
       }
     }
-  }
+  }, [rotation])
 
   // Synchronize the socket listeners
   React.useEffect(() => {
@@ -76,22 +92,7 @@ export default function CameraLiveView (props) {
         }
       }
     }
-  }, [cameraIndex, currentCamera, currentServer, serverId, socketList])
-
-  // Rotation state
-  const [rotation, setRotation] = React.useState(0)
-
-  const onRotateCCW = () => {
-    let newRotation = rotation - 90
-    if (newRotation > 180) { newRotation += 360 }
-    setRotation(newRotation)
-  }
-
-  const onRotateCW = () => {
-    let newRotation = rotation + 90
-    if (newRotation < -180) { newRotation -= 360 }
-    setRotation(newRotation)
-  }
+  }, [cameraIndex, currentCamera, currentServer, receiveImage, serverId, socketList])
 
   // Try to clean up and reconnect
   const onRefresh = () => {
@@ -103,7 +104,8 @@ export default function CameraLiveView (props) {
       <Box
         ref={canvasTagRef}
         component="canvas"
-        sx={{ width: 800, height: 600 }}
+        width="800"
+        height="600"
       />
       <Stack direction="row" spacing={2}>
         <IconButton onClick={onRotateCCW}><RotateCCWIcon /></IconButton>
