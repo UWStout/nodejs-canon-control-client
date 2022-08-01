@@ -52,11 +52,7 @@ export default function LiveViewDialog () {
           />
         </Toolbar>
       </AppBar>
-      <CameraLiveView
-        serverId={selectedServer}
-        cameraIndex={selectedCamera}
-        title={`Live view of camera ${selectedCamera} on server ${selectedServer}`}
-      />
+      <CameraLiveView serverId={selectedServer} cameraIndex={selectedCamera} />
     </Dialog>
   )
 }

@@ -116,12 +116,10 @@ export default function CameraLiveView (props) {
 
 CameraLiveView.propTypes = {
   serverId: PropTypes.number,
-  cameraIndex: PropTypes.number,
-  title: PropTypes.string
+  cameraIndex: PropTypes.number
 }
 
 CameraLiveView.defaultProps = {
   serverId: -1,
-  cameraIndex: -1,
-  title: ''
+  cameraIndex: -1
 }
