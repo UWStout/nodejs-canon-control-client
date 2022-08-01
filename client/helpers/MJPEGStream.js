@@ -18,6 +18,8 @@ export default class MJPEGConsumer extends EventEmitter {
 
     // Initialize remaining local state
     this.currentPhase = MJPEGPhase.STARTING
+    this.imageBuffer = null
+    this.lastChunkString = ''
 
     // Fetch the stream
     fetch(MJPEGUrl).then(response => {
@@ -65,31 +67,38 @@ export default class MJPEGConsumer extends EventEmitter {
 
       // Examine the chunk according to current phase
       const chunkData = chunkObject.value
-      const chunkString = chunkData.toString()
-      switch (this.currentPhase) {
-        case MJPEGPhase.STARTING:
-        case MJPEGPhase.SEARCHING_FOR_IMAGE: {
-          // 1) Scan the chunk data for recognizable start of multipart content
-          const boundaryIndex = chunkString.indexOf(this.boundary)
+      const chunkString = this.lastChunkString + chunkData.toString()
+      console.log('Chunk:', chunkString.slice(0, 100))
+      // switch (this.currentPhase) {
+      //   case MJPEGPhase.STARTING:
+      //   case MJPEGPhase.SEARCHING_FOR_IMAGE: {
+      //     // 1) Scan the chunk data for recognizable start of multipart content
+      //     const boundaryIndex = chunkString.indexOf(this.boundary)
 
-          // 2) If start of next part found
-          // 3)   - Clear the image buffer of any previous data
-          // 4)   - Update phase to 'EXTRACTING_IMAGE'
-          // 5)   - Append any image data already received
-        } break
+      //     // 2) If start of next part found
+      //     if (boundaryIndex >= 0) {
+      //       // 1) Find end of the part headers
+      //     // 2.1) - Clear the image buffer of any previous data
+      //     // 2.2) - Update phase to 'EXTRACTING_IMAGE'
+      //     // 2.3) - Append any image data already received
+      //     // 3) else, save data as most recent chunk
+      //     } else {
+      //       this.lastChunkString = chunkString
+      //     }
+      //   } break
 
-        case MJPEGPhase.EXTRACTING_IMAGE: {
-          // 1) Scan the chunk data for start of next part (as end of image)
-          const boundaryIndex = chunkString.indexOf(this.boundary)
+      //   case MJPEGPhase.EXTRACTING_IMAGE: {
+      //     // 1) Scan the chunk data for start of next part (as end of image)
+      //     const boundaryIndex = chunkString.indexOf(this.boundary)
 
-          // 3) If end of image was found
-          // 4)   - Append only the data up to the image end to the image buffer
-          // 5)   - Emit the image buffer as a 'data' event
-          // 6)   - Update phase to 'SEARCHING_FOR_IMAGE'
-          // 7) Else
-          // 8)   - Append all data to the image buffer
-        } break
-      }
+      //     // 3) If end of image was found
+      //     // 4)   - Append only the data up to the image end to the image buffer
+      //     // 5)   - Emit the image buffer as a 'data' event
+      //     // 6)   - Update phase to 'SEARCHING_FOR_IMAGE'
+      //     // 7) Else
+      //     // 8)   - Append all data to the image buffer
+      //   } break
+      // }
 
       // Recursively read the next chunk
       this.readImageFromStream()
