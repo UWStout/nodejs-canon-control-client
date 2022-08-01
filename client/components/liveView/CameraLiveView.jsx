@@ -1,5 +1,4 @@
 import * as React from 'react'
-import PropTypes from 'prop-types'
 
 // State of the underlying Socket.io connections
 import useSocketState from '../../state/useSocketState.js'
@@ -11,28 +10,27 @@ import {
 } from '@mui/icons-material/'
 
 export default function CameraLiveView (props) {
-  const { serverId, cameraIndex } = props
   const canvasTagRef = React.useRef()
 
   // Subscribe to socketList state changes
-  const { socketList } = useSocketState(state => state)
-
-  // The server id and camera index currently running a live view
-  const [currentServer, setCurrentServer] = React.useState(-1)
-  const [currentCamera, setCurrentCamera] = React.useState(-1)
+  const { setLiveViewCallback, startLiveView, stopLiveView } = useSocketState(state => ({
+    setLiveViewCallback: state.setLiveViewCallback,
+    startLiveView: state.startLiveView,
+    stopLiveView: state.stopLiveView
+  }))
 
   // Rotation state
   const [rotation, setRotation] = React.useState(0)
 
   const onRotateCCW = () => {
-    let newRotation = rotation - 90
-    if (newRotation > 180) { newRotation += 360 }
+    let newRotation = rotation - (Math.PI / 2)
+    if (newRotation > Math.PI) { newRotation += Math.PI * 2 }
     setRotation(newRotation)
   }
 
   const onRotateCW = () => {
-    let newRotation = rotation + 90
-    if (newRotation < -180) { newRotation -= 360 }
+    let newRotation = rotation + (Math.PI / 2)
+    if (newRotation < -Math.PI) { newRotation -= Math.PI * 2 }
     setRotation(newRotation)
   }
 
@@ -43,6 +41,7 @@ export default function CameraLiveView (props) {
       img.src = 'data:image/jpeg;base64,' + message.imageData
       img.onload = () => {
         const ctx = canvasTagRef.current.getContext('2d')
+        ctx.resetTransform()
         ctx.rotate(rotation)
         ctx.drawImage(img, 0, 0, canvasTagRef?.current.width, canvasTagRef?.current.height)
       }
@@ -52,47 +51,16 @@ export default function CameraLiveView (props) {
     }
   }, [rotation])
 
-  // Synchronize the socket listeners
+  // Start/Stop live view session
   React.useEffect(() => {
-    const hasChanged = (currentServer !== serverId || currentCamera !== cameraIndex)
-    if (Array.isArray(socketList)) {
-      // Stop any previously running liveView
-      if (currentServer >= 0 && hasChanged) {
-        const oldSocket = socketList.find(socket => socket.serverId === currentServer)
-        console.log('Stopping socket liveView on', currentServer)
-        oldSocket?.socket.emit('stopLiveView')
-        setCurrentServer(-1)
-        setCurrentCamera(-1)
-      }
+    startLiveView()
+    return () => { stopLiveView() }
+  }, [startLiveView, stopLiveView])
 
-      // Start up new one
-      if (serverId >= 0 && cameraIndex >= 0) {
-        const newSocket = socketList.find(socket => socket.serverId === serverId)
-        if (newSocket?.socket) {
-          // Reset the listener
-          newSocket.socket.off('LiveViewImage')
-          newSocket.socket.on('LiveViewImage', receiveImage)
-
-          // Start new Live view
-          console.log('Starting socket liveView on', serverId, 'for', cameraIndex)
-          newSocket.socket.emit('startLiveView', cameraIndex)
-          setCurrentServer(serverId)
-          setCurrentCamera(cameraIndex)
-
-          // When unmounting, clean up!
-          return () => {
-            console.log('CLEANUP: Stopping socket liveView on', serverId)
-            newSocket.socket.emit('stopLiveView')
-            newSocket.socket.off('LiveViewImage')
-            setCurrentServer(-1)
-            setCurrentCamera(-1)
-          }
-        } else {
-          console.error('No socket found for', serverId)
-        }
-      }
-    }
-  }, [cameraIndex, currentCamera, currentServer, receiveImage, serverId, socketList])
+  // Synchronize the live view callback
+  React.useEffect(() => {
+    setLiveViewCallback(receiveImage)
+  }, [receiveImage, setLiveViewCallback])
 
   // Try to clean up and reconnect
   const onRefresh = () => {
@@ -114,14 +82,4 @@ export default function CameraLiveView (props) {
       </Stack>
     </Stack>
   )
-}
-
-CameraLiveView.propTypes = {
-  serverId: PropTypes.number,
-  cameraIndex: PropTypes.number
-}
-
-CameraLiveView.defaultProps = {
-  serverId: -1,
-  cameraIndex: -1
 }

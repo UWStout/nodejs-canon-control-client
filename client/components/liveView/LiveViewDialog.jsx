@@ -16,16 +16,6 @@ const Transition = React.forwardRef(function Transition (props, ref) {
 export default function LiveViewDialog () {
   // Global dialog visibility state
   const { liveViewDialogVisible, hideLiveViewDialog } = useGlobalState(state => state)
-  const { liveViewServerSelection, setLiveViewServerSelection } = useGlobalState(state => state)
-  const { liveViewCameraSelection, setLiveViewCameraSelection } = useGlobalState(state => state)
-
-  // Clear selected camera whenever selected server changes
-  React.useEffect(() => {
-    if (liveViewServerSelection >= 0) {
-      console.log("Server Changed, reset Camera")
-      setLiveViewCameraSelection(-1)
-    }
-  }, [liveViewServerSelection])
 
   // Subscribe to list of servers
   const serverList = useLiveQuery(() => localDB.servers.toArray())
@@ -42,16 +32,12 @@ export default function LiveViewDialog () {
           <LiveViewSettingButtons
             {...{
               serverList,
-              selectedServer: liveViewServerSelection,
-              selectedCamera: liveViewCameraSelection,
-              setSelectedServer: setLiveViewServerSelection,
-              setSelectedCamera: setLiveViewCameraSelection,
               onClose: hideLiveViewDialog
             }}
           />
         </Toolbar>
       </AppBar>
-      <CameraLiveView serverId={selectedServer} cameraIndex={selectedCamera} />
+      <CameraLiveView />
     </Dialog>
   )
 }

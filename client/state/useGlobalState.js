@@ -35,18 +35,6 @@ const useGlobalState = create(set => ({
     return { liveViewDialogVisible: false }
   }),
 
-  liveViewServerSelection: -1,
-  setLiveViewServerSelection: (serverIndex) => set(state => {
-    console.log(`Server Set: ${serverIndex}`)
-    return { liveViewServerSelection: serverIndex }
-  }),
-
-  liveViewCameraSelection: -1,
-  setLiveViewCameraSelection: (cameraIndex) => set(state => {
-    console.log(`Camera Set: ${cameraIndex}`)
-    return { liveViewCameraSelection: cameraIndex }
-  }),
-
   // Bulk mode global values
   bulkProperties: null,
   updateBulkProperties: (newProperties) => set(state => {

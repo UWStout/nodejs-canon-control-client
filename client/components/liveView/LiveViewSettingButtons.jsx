@@ -3,6 +3,7 @@ import PropTypes from 'prop-types'
 
 import localDB from '../../state/localDB.js'
 import { useLiveQuery } from 'dexie-react-hooks'
+import useSocketState from '../../state/useSocketState.js'
 
 import { IconButton, Select, MenuItem, Divider, Stack, Typography } from '@mui/material'
 import { Close as CloseIcon } from '@mui/icons-material'
@@ -10,14 +11,28 @@ import { ServerObjShape } from '../../state/dataModel.js'
 
 export default function LiveViewSettingButtons (props) {
   // Props from parent's state
-  const { serverList, selectedServer, setSelectedServer, selectedCamera, setSelectedCamera, onClose } = props
+  const { serverList, onClose } = props
+
+  const liveViewState = useSocketState(state => ({
+    selectedServer: state.liveViewServerSelection,
+    selectedCamera: state.liveViewCameraSelection,
+    setLiveViewSelection: state.setLiveViewSelection
+  }))
 
   // Subscribe to list cameras for current server
   const cameraList = useLiveQuery(
-    () => localDB.cameras.where({ serverId: selectedServer }).toArray(),
-    [selectedServer],
+    () => localDB.cameras.where({ serverId: liveViewState.selectedServer }).toArray(),
+    [liveViewState.selectedServer],
     null
   )
+
+  const setSelectedServer = (newValue) => {
+    liveViewState.setLiveViewSelection(newValue, liveViewState.selectedCamera)
+  }
+
+  const setSelectedCamera = (newValue) => {
+    liveViewState.setLiveViewSelection(liveViewState.selectedServer, newValue)
+  }
 
   return (
     <Stack direction='row' spacing={2} alignItems='center' sx={{ width: '100%' }}>
@@ -35,7 +50,7 @@ export default function LiveViewSettingButtons (props) {
       </Typography>
 
       <Select
-        value={selectedServer}
+        value={liveViewState.selectedServer}
         label="Server"
         color="primary"
         onChange={(e) => setSelectedServer(e.target.value)}
@@ -50,7 +65,7 @@ export default function LiveViewSettingButtons (props) {
         ))}
       </Select>
       <Select
-        value={selectedCamera}
+        value={(Array.isArray(cameraList) && cameraList.length > 0) ? liveViewState.selectedCamera : -1}
         label="Camera"
         color="primary"
         onChange={(e) => setSelectedCamera(e.target.value)}
@@ -73,10 +88,6 @@ export default function LiveViewSettingButtons (props) {
 
 LiveViewSettingButtons.propTypes = {
   serverList: PropTypes.arrayOf(PropTypes.shape(ServerObjShape)),
-  selectedServer: PropTypes.number.isRequired,
-  setSelectedServer: PropTypes.func.isRequired,
-  selectedCamera: PropTypes.number.isRequired,
-  setSelectedCamera: PropTypes.func.isRequired,
   onClose: PropTypes.func.isRequired
 }
 

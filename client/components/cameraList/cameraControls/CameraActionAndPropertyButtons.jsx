@@ -5,6 +5,7 @@ import localDB from '../../../state/localDB.js'
 import { useLiveQuery } from 'dexie-react-hooks'
 
 import useGlobalState from '../../../state/useGlobalState.js'
+import useSocketState from '../../../state/useSocketState.js'
 import useBulkTaskState from '../../../state/useBulkTaskState.js'
 
 import { Button, IconButton, Stack, Tooltip, Divider } from '@mui/material'
@@ -28,9 +29,10 @@ import { CameraObjShape, ServerObjShape } from '../../../state/dataModel.js'
 export default function CameraActionAndPropertyButtons (props) {
   const { server, camera, readOnly, useBulkValues, onApply, bulkBusy } = props
   const { enqueueSnackbar } = useSnackbar()
-  const { liveViewDialogVisible, showLiveViewDialog } = useGlobalState(state => state)
-  const { liveViewServerSelection, setLiveViewServerSelection } = useGlobalState(state => state)
-  const { liveViewCameraSelection, setLiveViewCameraSelection } = useGlobalState(state => state)
+
+  // For starting up live view
+  const { showLiveViewDialog } = useGlobalState(state => state)
+  const { setLiveViewSelection } = useSocketState(state => state)
 
   // Subscribe to the bits of bulk state we need
   const bulkState = useBulkTaskState(state => ({
@@ -91,9 +93,8 @@ export default function CameraActionAndPropertyButtons (props) {
   }
 
   const onStartLiveView = () => {
+    setLiveViewSelection(server.id, camera.index)
     showLiveViewDialog()
-    setLiveViewServerSelection(server.id)
-    setLiveViewCameraSelection(camera.index)
   }
 
   // Menu anchor refs
