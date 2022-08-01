@@ -6,22 +6,20 @@ import useSocketState from '../../state/useSocketState.js'
 
 import { Box } from '@mui/material'
 
-// For decoding the imgBuffer
-const bufferDecoder = new TextDecoder()
-
 export default function CameraLiveView (props) {
   const { serverId, cameraIndex, title } = props
-  const { socketList } = useSocketState(state => state)
   const imgTagRef = React.useRef()
+
+  // Subscribe to socketList state changes
+  const { socketList } = useSocketState(state => state)
 
   // The server and index currently running a live view
   const [currentServer, setCurrentServer] = React.useState(-1)
 
   // Receive the current live-view image
   const receiveImage = (message) => {
-    console.log('Image Received')
     if (imgTagRef?.current && message.imageData) {
-      imgTagRef.current.src = `data:image/jpeg;base64,${bufferDecoder.decode(message.imageData)}`
+      imgTagRef.current.src = `data:image/jpeg;base64,${message.imageData}`
     }
   }
 
@@ -37,7 +35,7 @@ export default function CameraLiveView (props) {
 
       if (serverId >= 0 && cameraIndex >= 0) {
         // Start up new one
-        const newSocket = socketList.find(socket => socket.serverId === currentServer)
+        const newSocket = socketList.find(socket => socket.serverId === serverId)
         if (newSocket?.socket) {
           // Reset the listener
           newSocket.socket.off('LiveViewImage')
@@ -54,6 +52,8 @@ export default function CameraLiveView (props) {
             newSocket.socket.emit('stopLiveView')
             newSocket.socket.off('LiveViewImage')
           }
+        } else {
+          console.error('No socket found for', serverId)
         }
       }
     }
