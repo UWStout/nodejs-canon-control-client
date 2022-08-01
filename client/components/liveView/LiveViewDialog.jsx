@@ -31,13 +31,6 @@ export default function LiveViewDialog () {
   // Subscribe to list of servers
   const serverList = useLiveQuery(() => localDB.servers.toArray())
 
-  // Build the live view URL if we can
-  const curServer = serverList?.find(server => server.id === selectedServer)
-  let liveViewURL = ''
-  if (curServer && selectedCamera >= 0) {
-    liveViewURL = `https://${curServer.IP}:${curServer.port}/camera/${selectedCamera}/liveView`
-  }
-
   return (
     <Dialog
       fullScreen
@@ -60,8 +53,9 @@ export default function LiveViewDialog () {
         </Toolbar>
       </AppBar>
       <CameraLiveView
-        liveViewURL={liveViewURL}
-        title={`Live view of camera ${selectedCamera} on server ${curServer?.nickname}`}
+        serverId={selectedServer}
+        cameraIndex={selectedCamera}
+        title={`Live view of camera ${selectedCamera} on server ${selectedServer}`}
       />
     </Dialog>
   )
