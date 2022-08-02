@@ -23,14 +23,29 @@ const useSocketState = create(set => ({
   // Socket based live view settings
   liveViewActive: false,
   liveViewCallback: null,
+  liveViewOrientation: 0,
   liveViewServerSelection: -1,
   liveViewCameraSelection: -1,
 
+  setLiveViewOrientation: (newOrientation) => set(state => {
+    return { liveViewOrientation: newOrientation }
+  }),
+
   setLiveViewSelection: (serverId, cameraIndex) => set(state => {
     if (state.liveViewServerSelection !== serverId || state.liveViewCameraSelection !== cameraIndex) {
-      // TODO: Be careful when server changes
+      // If live view is active, then stop on old server before changing
+      if (state.liveViewActive && state.liveViewServerSelection !== serverId) {
+        // Stop previous server
+        const oldSocket = state.socketList.find(socket => socket.serverId === state.liveViewServerSelection)
+        if (oldSocket?.socket) {
+          // Stop the live view
+          console.log('Stopping socket liveView on', state.liveViewServerSelection)
+          oldSocket.socket.off('LiveViewImage')
+          oldSocket.socket.emit('stopLiveView')
+        }
+      }
 
-      // Syncronize live view state
+      // Syncronize live view state on NEW server (if ready)
       if (state.liveViewServerSelection >= 0) {
         const serverSocket = state.socketList.find(socket => socket.serverId === serverId)
         if (serverSocket?.socket) {

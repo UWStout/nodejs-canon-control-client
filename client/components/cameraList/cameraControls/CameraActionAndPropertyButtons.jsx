@@ -22,7 +22,7 @@ import { useSnackbar } from 'notistack'
 import ExposurePropertiesMenu from './ExposurePropertiesMenu.jsx'
 
 import { bulkAction, singleCamAction } from '../../../helpers/cameraActionHelper.js'
-import { takeAPhoto, doAutoFocus, releaseShutter, syncronizeTime } from '../../../helpers/serverHelper.js'
+import { takeAPhoto, doAutoFocus, releaseShutter, syncronizeTime, getCameraImagePropeties } from '../../../helpers/serverHelper.js'
 
 import { CameraObjShape, ServerObjShape } from '../../../state/dataModel.js'
 
@@ -32,7 +32,10 @@ export default function CameraActionAndPropertyButtons (props) {
 
   // For starting up live view
   const { showLiveViewDialog } = useGlobalState(state => state)
-  const { setLiveViewSelection } = useSocketState(state => state)
+  const { setLiveViewOrientation, setLiveViewSelection } = useSocketState(state => ({
+    setLiveViewOrientation: state.setLiveViewOrientation,
+    setLiveViewSelection: state.setLiveViewSelection
+  }))
 
   // Subscribe to the bits of bulk state we need
   const bulkState = useBulkTaskState(state => ({
@@ -92,7 +95,16 @@ export default function CameraActionAndPropertyButtons (props) {
     }
   }
 
-  const onStartLiveView = () => {
+  const onStartLiveView = async () => {
+    console.log('Reading image info')
+    try {
+      const imageProps = await getCameraImagePropeties(server, camera)
+      setLiveViewOrientation(imageProps.orientation)
+    } catch (error) {
+      console.error('Failed to read orientation')
+      console.error(error)
+    }
+
     setLiveViewSelection(server.id, camera.index)
     showLiveViewDialog()
   }

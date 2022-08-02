@@ -8,12 +8,14 @@ import useSocketState from '../../state/useSocketState.js'
 import { IconButton, Select, MenuItem, Divider, Stack, Typography } from '@mui/material'
 import { Close as CloseIcon } from '@mui/icons-material'
 import { ServerObjShape } from '../../state/dataModel.js'
+import { getCameraImagePropeties } from '../../helpers/serverHelper.js'
 
 export default function LiveViewSettingButtons (props) {
   // Props from parent's state
   const { serverList, onClose } = props
 
   const liveViewState = useSocketState(state => ({
+    setLiveViewOrientation: state.setLiveViewOrientation,
     selectedServer: state.liveViewServerSelection,
     selectedCamera: state.liveViewCameraSelection,
     setLiveViewSelection: state.setLiveViewSelection
@@ -24,13 +26,25 @@ export default function LiveViewSettingButtons (props) {
     () => localDB.cameras.where({ serverId: liveViewState.selectedServer }).toArray(),
     [liveViewState.selectedServer],
     null
-  )
+  )?.sort((A, B) => A.nickname.localeCompare(B.nickname))
 
   const setSelectedServer = (newValue) => {
     liveViewState.setLiveViewSelection(newValue, liveViewState.selectedCamera)
   }
 
-  const setSelectedCamera = (newValue) => {
+  const setSelectedCamera = async (newValue) => {
+    console.log('Reading image info')
+    try {
+      const imageProps = await getCameraImagePropeties(
+        serverList.find(server => server.id === liveViewState.selectedServer),
+        newValue
+      )
+      liveViewState.setLiveViewOrientation(imageProps.orientation)
+    } catch (error) {
+      console.error('Failed to read orientation')
+      console.error(error)
+    }
+
     liveViewState.setLiveViewSelection(liveViewState.selectedServer, newValue)
   }
 
