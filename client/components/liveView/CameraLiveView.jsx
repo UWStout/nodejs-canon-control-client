@@ -8,6 +8,7 @@ import {
   Rotate90DegreesCcw as RotateCCWIcon,
   Rotate90DegreesCw as RotateCWIcon
 } from '@mui/icons-material/'
+import { drawImageToCanvas } from '../../helpers/canvasHelper.js'
 
 export default function CameraLiveView (props) {
   const canvasTagRef = React.useRef()
@@ -58,39 +59,8 @@ export default function CameraLiveView (props) {
   // Update the canvas whenever the image changes
   React.useEffect(() => {
     if (canvasTagRef?.current && imageData !== null) {
-      const img = new Image()
-      img.src = 'data:image/jpeg;base64,' + imageData
-      img.onload = () => {
-        // Determine image dims with rotation
-        const imgDims = { width: img.width, height: img.height }
-        if (Math.abs(rotation) === 1) {
-          imgDims.width = img.height
-          imgDims.height = img.width
-        }
-
-        // Resize canvas
-        if (canvasTagRef.current.width !== imgDims.width) {
-          canvasTagRef.current.width = imgDims.width
-          canvasTagRef.current.height = imgDims.height
-        }
-
-        // Clear the canvas context
-        const ctx = canvasTagRef.current.getContext('2d')
-        ctx.resetTransform()
-        ctx.clearRect(0, 0, canvasTagRef.current.width, canvasTagRef.current.height)
-
-        // Setup the rotation transform
-        ctx.translate(imgDims.width / 2, imgDims.height / 2)
-        ctx.rotate(rotation * Math.PI / 2)
-        ctx.translate(-img.width / 2, -img.height / 2)
-
-        // Draw the image
-        ctx.drawImage(img, 0, 0, img.width, img.height)
-      }
-
-      img.onerror = (error) => {
-        console.error('Error drawing image:', error)
-      }
+      drawImageToCanvas(canvasTagRef.current, imageData, rotation, true)
+      // drawCenterTargetToCanvas(canvasTagRef.current, 100, 2)
     }
   }, [imageData, rotation, canvasTagRef])
 
