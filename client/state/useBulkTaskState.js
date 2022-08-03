@@ -34,6 +34,8 @@ const useBulkTaskState = create(set => ({
         completeCount: state.completeCount + 1,
         done
       }
+    } else {
+      console.error('Bulk task not found', taskId)
     }
   })
 }))

@@ -9,7 +9,9 @@ import { PhotoCamera as CameraIcon } from '@mui/icons-material'
 import { useSnackbar } from 'notistack'
 
 import CameraActionAndPropertyButtons from './cameraControls/CameraActionAndPropertyButtons.jsx'
+import { bulkAction } from '../../helpers/cameraActionHelper.js'
 import { setCameraProperties } from '../../helpers/serverHelper.js'
+
 export default function BulkPropertiesItem () {
   const { enqueueSnackbar } = useSnackbar()
 
@@ -17,7 +19,10 @@ export default function BulkPropertiesItem () {
   const bulkExposureSettings = useLiveQuery(() => localDB.settings.get('bulkExposureSettings'))
 
   // Subscribe to the bits of bulk state we need
-  const bulkTaskDone = useBulkTaskState(state => state.done)
+  const { bulkTaskDone, ...bulkState } = useBulkTaskState(state => ({
+    newBulkTask: state.newBulkTask,
+    bulkTaskDone: state.done
+  }))
 
   // Grab the server list and the first camera in the first server
   const serverList = useLiveQuery(() => localDB.servers.toArray())
@@ -33,23 +38,18 @@ export default function BulkPropertiesItem () {
 
   // Apply exposure settings in bulk to all cameras
   const applyExposureValues = React.useCallback(async () => {
+    if (!bulkTaskDone) {
+      enqueueSnackbar('Please wait for current task to finish', { variant: 'warning' })
+      return
+    }
+
     // Build exposure settings object without the 'name' property
     const propertyObject = { ...bulkExposureSettings }
     delete propertyObject.name
 
     // Start applying changes
-    if (Array.isArray(serverList) && serverList.length > 0) {
-      for (let i = 0; i < serverList.length; i++) {
-        const server = serverList[i]
-        try {
-          setCameraProperties(server, '*', propertyObject)
-          enqueueSnackbar(`Bulk property setting started for ${server.nickname}`)
-        } catch (error) {
-          enqueueSnackbar(`Bulk property setting failed for ${server.nickname}`, { variant: 'error' })
-        }
-      }
-    }
-  }, [bulkExposureSettings, enqueueSnackbar, serverList])
+    bulkAction('Bulk property setting', setCameraProperties, serverList, bulkState, enqueueSnackbar, propertyObject)
+  }, [bulkExposureSettings, bulkState, bulkTaskDone, enqueueSnackbar, serverList])
 
   return (
     <List sx={{ padding: 0, width: '100%', bgcolor: 'background.paper' }}>

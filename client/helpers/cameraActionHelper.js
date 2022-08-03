@@ -1,11 +1,11 @@
-export async function bulkAction (type, actionCB, serverList, bulkState, enqueueSnackbar) {
+export async function bulkAction (type, actionCB, serverList, bulkState, enqueueSnackbar, CBParam) {
   // Loop through servers and start bulk tasks
   const taskIds = []
   for (let i = 0; i < serverList.length; i++) {
     const server = serverList[i]
     if (!server.deactivated) {
       try {
-        const results = await actionCB(server, '*')
+        const results = await actionCB(server, '*', CBParam)
         taskIds.push(results.taskId)
       } catch (error) {
         enqueueSnackbar(`${type} failed for ${server.nickname}`, { variant: 'error' })
