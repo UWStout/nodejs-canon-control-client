@@ -37,7 +37,7 @@ export function getCameraDetails (server, camera) {
 
 export function getCameraImagePropeties (server, camera) {
   // Skip deactivated servers
-  if (server.deactivated) return Promise.resolve({})
+  if (!server || server.deactivated) return Promise.resolve({})
 
   const camIndex = (typeof camera === 'object' ? camera?.index : camera)
   console.log(`Retrieving image properties for camera ${camIndex} on ${server?.nickname} server`)

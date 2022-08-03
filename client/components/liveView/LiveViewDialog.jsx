@@ -37,7 +37,7 @@ export default function LiveViewDialog () {
           />
         </Toolbar>
       </AppBar>
-      <CameraLiveView />
+      <CameraLiveView serverList={serverList} />
     </Dialog>
   )
 }

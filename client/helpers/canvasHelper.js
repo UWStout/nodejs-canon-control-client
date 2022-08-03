@@ -5,7 +5,7 @@
  * @param {number} rotation Rotation value in 90 deg units
  * @param {boolean} clear Should we clear the canvas first
  */
-export function drawImageToCanvas (canvas, imageData, rotation, clear = false) {
+export function drawImageToCanvas (canvas, imageData, rotation, zoomScale, clear = false) {
   const img = new Image()
   img.src = 'data:image/jpeg;base64,' + imageData
   img.onload = () => {
@@ -22,17 +22,26 @@ export function drawImageToCanvas (canvas, imageData, rotation, clear = false) {
       canvas.height = imgDims.height
     }
 
-    // Clear the canvas context
+    // Clear the canvas if requested
+    if (clear) { clearCanvas(canvas) }
+
+    // Get a clean context
     const ctx = canvas.getContext('2d')
     ctx.resetTransform()
-    if (clear) {
-      ctx.clearRect(0, 0, canvas.width, canvas.height)
-    }
 
-    // Setup the rotation transform
+    // Apply any rotation
     ctx.translate(imgDims.width / 2, imgDims.height / 2)
     ctx.rotate(rotation * Math.PI / 2)
     ctx.translate(-img.width / 2, -img.height / 2)
+
+    // Add the zoom scaling and recenter
+    if (zoomScale !== 1.0) {
+      ctx.translate(
+        canvas.width / 2 - zoomScale * imgDims.width / 2,
+        canvas.height / 2 - zoomScale * imgDims.height / 2
+      )
+      ctx.scale(zoomScale, zoomScale)
+    }
 
     // Draw the image
     ctx.drawImage(img, 0, 0, img.width, img.height)
@@ -41,8 +50,12 @@ export function drawImageToCanvas (canvas, imageData, rotation, clear = false) {
   img.onerror = (error) => {
     console.error('Error drawing image:', error)
   }
+}
 
-  drawCenterTargetToCanvas(canvas, 50, 1)
+export function clearCanvas (canvas) {
+  const ctx = canvas.getContext('2d')
+  ctx.resetTransform()
+  ctx.clearRect(0, 0, canvas.width, canvas.height)
 }
 
 /**
