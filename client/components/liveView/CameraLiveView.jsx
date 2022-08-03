@@ -3,11 +3,16 @@ import * as React from 'react'
 // State of the underlying Socket.io connections
 import useSocketState from '../../state/useSocketState.js'
 
+import localDB, { updateSetting } from '../../state/localDB.js'
+import { useLiveQuery } from 'dexie-react-hooks'
+
 import { Stack, Box, IconButton, Button } from '@mui/material'
 import {
   Rotate90DegreesCcw as RotateCCWIcon,
   Rotate90DegreesCw as RotateCWIcon
 } from '@mui/icons-material/'
+
+import BasicSwitch from './BasicSwitch'
 
 export default function CameraLiveView (props) {
   const canvasTagRef = React.useRef()
@@ -22,16 +27,21 @@ export default function CameraLiveView (props) {
 
   // Rotation state (in 90deg units)
   const [rotation, setRotation] = React.useState(0)
+  const doLVAutoRotate = useLiveQuery(() => localDB.settings.get('doLVAutoRotate'))
 
   React.useEffect(() => {
-    switch (liveViewOrientation) {
-      case 0: case 1: setRotation(0); break
-      case 3: setRotation(2); break
-      case 6: setRotation(1); break
-      case 8: setRotation(-1); break
-      default: console.error('Unknown Orientation:', liveViewOrientation); break
+    if (!!doLVAutoRotate?.value) {
+      switch (liveViewOrientation) {
+        case 0: case 1: setRotation(0); break
+        case 3: setRotation(2); break
+        case 6: setRotation(1); break
+        case 8: setRotation(-1); break
+        default: console.error('Unknown Orientation:', liveViewOrientation); break
+      }
+    } else {
+      setRotation(0)
     }
-  }, [liveViewOrientation])
+  }, [liveViewOrientation, doLVAutoRotate])
 
   const onRotateCCW = () => {
     let newRotation = rotation - 1
@@ -123,6 +133,11 @@ export default function CameraLiveView (props) {
       <Stack direction="row" spacing={2} sx={{ paddingLeft: 2, paddingRight: 2 }}>
         <IconButton onClick={onRotateCCW}><RotateCCWIcon /></IconButton>
         <IconButton onClick={onRotateCW}><RotateCWIcon /></IconButton>
+        <BasicSwitch
+          label="Auto Rotate"
+          checked={!!doLVAutoRotate?.value}
+          setChecked={(newValue) => updateSetting('doLVAutoRotate', newValue)}
+        />
         <Button variant="contained" onClick={onRefresh} sx={{ flexGrow: 1 }}>{'Refresh'}</Button>
       </Stack>
     </Stack>
