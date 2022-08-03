@@ -44,6 +44,7 @@ export default function SessionCaptureSelect () {
     setShowCreateSession(false)
     if (confirmed) {
       const sessionData = await addNewSession(Date.now(), sessionNickname)
+      await updateSetting('currentCaptureNumber', 1)
       await updateSetting('currentSessionField', sessionData.id)
     }
   }
@@ -53,6 +54,7 @@ export default function SessionCaptureSelect () {
     setShowCreateCapture(false)
     if (confirmed) {
       const newCapture = await addNewCapture(currentSessionField?.value, captureNickname)
+      await updateSetting('currentCaptureNumber', 1)
       await updateSetting('currentCaptureField', newCapture)
     }
   }
