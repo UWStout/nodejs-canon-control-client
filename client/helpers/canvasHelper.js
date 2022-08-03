@@ -29,11 +29,6 @@ export function drawImageToCanvas (canvas, imageData, rotation, zoomScale, clear
     const ctx = canvas.getContext('2d')
     ctx.resetTransform()
 
-    // Apply any rotation
-    ctx.translate(imgDims.width / 2, imgDims.height / 2)
-    ctx.rotate(rotation * Math.PI / 2)
-    ctx.translate(-img.width / 2, -img.height / 2)
-
     // Add the zoom scaling and recenter
     if (zoomScale !== 1.0) {
       ctx.translate(
@@ -42,6 +37,11 @@ export function drawImageToCanvas (canvas, imageData, rotation, zoomScale, clear
       )
       ctx.scale(zoomScale, zoomScale)
     }
+
+    // Apply any rotation
+    ctx.translate(imgDims.width / 2, imgDims.height / 2)
+    ctx.rotate(rotation * Math.PI / 2)
+    ctx.translate(-img.width / 2, -img.height / 2)
 
     // Draw the image
     ctx.drawImage(img, 0, 0, img.width, img.height)

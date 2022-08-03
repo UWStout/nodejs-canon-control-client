@@ -7,7 +7,7 @@ import { useLiveQuery } from 'dexie-react-hooks'
 // State of the underlying Socket.io connections
 import useSocketState from '../../state/useSocketState.js'
 
-import { Stack, Box, IconButton, FormGroup, FormControlLabel, Checkbox, Slider, Button, Divider } from '@mui/material'
+import { Stack, Box, IconButton, FormGroup, FormControlLabel, Slider, Button, Divider } from '@mui/material'
 import {
   Rotate90DegreesCcw as RotateCCWIcon,
   Rotate90DegreesCw as RotateCWIcon
@@ -19,12 +19,15 @@ import { clearCanvas, drawImageToCanvas } from '../../helpers/canvasHelper.js'
 import { ServerObjShape } from '../../state/dataModel.js'
 import { getCameraImagePropeties } from '../../helpers/serverHelper.js'
 
+import BasicSwitch from './BasicSwitch.jsx'
+
 export default function CameraLiveView (props) {
   const { serverList } = props
   const canvasTagRef = React.useRef()
 
   // Subscribe to persistent settings
   const showLiveViewCrosshair = useLiveQuery(() => localDB.settings.get('showLiveViewCrosshair'))
+  const doLVAutoRotate = useLiveQuery(() => localDB.settings.get('doLVAutoRotate'))
 
   // Coordinate local state and database
   const [localZoom, setLocalZoom] = React.useState(1.0)
@@ -54,16 +57,21 @@ export default function CameraLiveView (props) {
   const [rotation, setRotation] = React.useState(0)
 
   React.useEffect(() => {
-    switch (liveViewState.liveViewOrientation) {
-      case 0: case 1: setRotation(0); break
-      case 3: setRotation(2); break
-      case 6: setRotation(1); break
-      case 8: setRotation(-1); break
-      default: console.error('Unknown Orientation:', liveViewState.liveViewOrientation); break
+    if (doLVAutoRotate?.value) {
+      switch (liveViewState.liveViewOrientation) {
+        case 0: case 1: setRotation(0); break
+        case 3: setRotation(2); break
+        case 6: setRotation(1); break
+        case 8: setRotation(-1); break
+        default: console.error('Unknown Orientation:', liveViewState.liveViewOrientation); break
+      }
+    } else {
+      setRotation(0)
     }
+
     setImageData(null)
     if (canvasTagRef?.current) { clearCanvas(canvasTagRef.current) }
-  }, [liveViewState.liveViewOrientation])
+  }, [liveViewState.liveViewOrientation, doLVAutoRotate])
 
   const onRotateCCW = () => {
     let newRotation = rotation - 1
@@ -121,10 +129,6 @@ export default function CameraLiveView (props) {
     startLiveView()
   }
 
-  const onCrosshairChange = async (e) => {
-    await updateSetting('showLiveViewCrosshair', e.target.checked)
-  }
-
   return (
     <Stack spacing={2} sx={{ maxHeight: '80vh', marginBottom: 1 }}>
       <Box sx={{ margin: 2, marginBottom: 0, flexGrow: 1, textAlign: 'center', position: 'relative' }}>
@@ -148,16 +152,18 @@ export default function CameraLiveView (props) {
         {/* Rotation buttons */}
         <IconButton onClick={onRotateCCW}><RotateCCWIcon /></IconButton>
         <IconButton onClick={onRotateCW}><RotateCWIcon /></IconButton>
+        <BasicSwitch
+          label="Auto Rotate"
+          checked={!!doLVAutoRotate?.value}
+          setChecked={(newValue) => updateSetting('doLVAutoRotate', newValue)}
+        />
 
         {/* Crosshair checkbox */}
-        <FormGroup>
-          <FormControlLabel
-            label="Show Crosshair"
-            control={
-              <Checkbox checked={showLiveViewCrosshair?.value || false} onChange={onCrosshairChange} />
-            }
-          />
-        </FormGroup>
+        <BasicSwitch
+          label="Show Crosshair"
+          checked={!!showLiveViewCrosshair?.value}
+          setChecked={(newValue) => updateSetting('showLiveViewCrosshair', newValue)}
+        />
         <Divider orientation="vertical" variant="middle" flexItem />
 
         {/* Zoom Slider */}
