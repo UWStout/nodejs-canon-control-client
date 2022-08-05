@@ -9,6 +9,7 @@ const useCaptureState = create(set => ({
   inProgress: [],
   succeeded: [],
   failed: [],
+  missing: [],
 
   // Clear current capture and prepare for a new one
   newCapture: (expectedCount) => set(state => {
@@ -19,8 +20,24 @@ const useCaptureState = create(set => ({
       // Clear lists
       inProgress: [],
       succeeded: [],
-      failed: []
+      failed: [],
+      missing: []
     }
+  }),
+
+  // Halt the capture and count up missing cameras
+  haltCapture: (cameraList) => set(state => {
+    const allResults = [...state.inProgress, ...state.succeeded, ...state.failed]
+    const missingList = cameraList.filter(camera => {
+      const result = allResults.find(info => info.filename.includes(camera.nickname))
+      return (!result)
+    }).map(camera => ({
+      nickname: camera.nickname,
+      serverId: camera.serverId,
+      index: camera.index
+    }))
+
+    return { missing: missingList }
   }),
 
   // Keep track of started downloads
