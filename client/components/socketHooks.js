@@ -26,9 +26,6 @@ export function useServerSockets (serverList) {
   React.useEffect(() => {
     // Setup callbacks for all the sockets in the list
     socketList.forEach(({ socket, serverId }) => {
-      // Subscribe to the events we are interested in
-      socket.emit('subscribe', ['CameraList', 'Download-*'])
-
       // Receive changes in the camera list
       socket.off('CameraListUpdate')
       socket.on('CameraListUpdate', (newList) => {

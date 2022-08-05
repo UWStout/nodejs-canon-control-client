@@ -8,6 +8,13 @@ function updateLiveView (socket, cameraIndex, callback) {
   socket.off('LiveViewImage')
   socket.on('LiveViewImage', callback)
 
+  socket.off('LiveViewError')
+  socket.on('LiveViewError', (data) => {
+    console.error('Failed to start live view')
+    console.error(data.message)
+    console.error(data.error.message)
+  })
+
   // Sync camera index
   if (cameraIndex >= 0) {
     console.log('Setting live view camera to', cameraIndex)
@@ -134,6 +141,12 @@ const useSocketState = create(set => ({
         // Make and return new socket session
         console.log(`SOCKET: connecting to ${server.id}`)
         const socket = io(`https://${server.IP}:${server.port}`, { path: '/socket.io' })
+
+        // Subscribe to needed events
+        socket.on('connect', () => {
+          socket.emit('subscribe', ['CameraList', 'Download-*'])
+        })
+
         return { serverId: server.id, socket }
       }
       return socketSession

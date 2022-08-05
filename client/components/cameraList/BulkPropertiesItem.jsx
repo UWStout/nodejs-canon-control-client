@@ -10,7 +10,7 @@ import { useSnackbar } from 'notistack'
 
 import CameraActionAndPropertyButtons from './cameraControls/CameraActionAndPropertyButtons.jsx'
 import { bulkAction } from '../../helpers/cameraActionHelper.js'
-import { setCameraProperties } from '../../helpers/serverHelper.js'
+import { setCameraProperties, resetCamera } from '../../helpers/serverHelper.js'
 
 export default function BulkPropertiesItem () {
   const { enqueueSnackbar } = useSnackbar()
@@ -51,6 +51,17 @@ export default function BulkPropertiesItem () {
     bulkAction('Bulk property setting', setCameraProperties, serverList, bulkState, enqueueSnackbar, propertyObject)
   }, [bulkExposureSettings, bulkState, bulkTaskDone, enqueueSnackbar, serverList])
 
+  // Reset all cameras in bulk
+  const resetCameras = React.useCallback(async () => {
+    if (!bulkTaskDone) {
+      enqueueSnackbar('Please wait for current task to finish', { variant: 'warning' })
+      return
+    }
+
+    // Start applying changes
+    bulkAction('Camera Reset', resetCamera, serverList, bulkState, enqueueSnackbar)
+  }, [bulkState, bulkTaskDone, enqueueSnackbar, serverList])
+
   return (
     <List sx={{ padding: 0, width: '100%', bgcolor: 'background.paper' }}>
       <ListItem
@@ -61,6 +72,7 @@ export default function BulkPropertiesItem () {
             server={server}
             useBulkValues
             onApply={applyExposureValues}
+            onReset={resetCameras}
             bulkBusy={!bulkTaskDone}
           />
         }

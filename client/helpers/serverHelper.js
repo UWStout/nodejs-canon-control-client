@@ -122,6 +122,23 @@ export function setCameraProperties (server, camera, propertyObject) {
   })
 }
 
+export function resetCamera (server, camera) {
+  // Skip deactivated servers
+  if (server.deactivated) return Promise.resolve({})
+
+  const camIndex = (typeof camera === 'object' ? camera?.index : camera)
+  console.log(`Resetting camera ${camIndex} on ${server?.nickname} server`)
+  return new Promise((resolve, reject) => {
+    axios.post(`https://${server.IP}:${server.port}/camera/${camIndex}/reset`)
+      .then((response) => {
+        resolve(response.data)
+      })
+      .catch((error) => {
+        reject(error)
+      })
+  })
+}
+
 export function takeAPhoto (server, camera) {
   // Skip deactivated servers
   if (server.deactivated) return Promise.resolve({})

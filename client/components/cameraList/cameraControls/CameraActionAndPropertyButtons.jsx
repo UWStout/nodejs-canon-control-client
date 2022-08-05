@@ -27,7 +27,7 @@ import { takeAPhoto, doAutoFocus, releaseShutter, syncronizeTime, getCameraImage
 import { CameraObjShape, ServerObjShape } from '../../../state/dataModel.js'
 
 export default function CameraActionAndPropertyButtons (props) {
-  const { server, camera, readOnly, useBulkValues, onApply, bulkBusy } = props
+  const { server, camera, readOnly, useBulkValues, onApply, onReset, bulkBusy } = props
   const { enqueueSnackbar } = useSnackbar()
 
   // For starting up live view
@@ -222,6 +222,21 @@ export default function CameraActionAndPropertyButtons (props) {
               </Button>
             </span>
           </Tooltip>}
+        {!!onReset &&
+          // Camera Reset Button
+          <Tooltip placement="top" title={'Reset Camera State'}>
+            <span>
+              <Button
+                size="small"
+                variant="contained"
+                disabled={!!(useBulkValues && bulkBusy)}
+                onClick={onReset}
+              >
+                {'Reset'}
+              </Button>
+            </span>
+          </Tooltip>}
+
       </Stack>
 
       {/* The actual exposure properties menu */}
@@ -242,6 +257,7 @@ CameraActionAndPropertyButtons.propTypes = {
   readOnly: PropTypes.bool,
   useBulkValues: PropTypes.bool,
   onApply: PropTypes.func,
+  onReset: PropTypes.func,
   bulkBusy: PropTypes.bool
 }
 
@@ -251,5 +267,6 @@ CameraActionAndPropertyButtons.defaultProps = {
   readOnly: false,
   useBulkValues: false,
   onApply: null,
+  onReset: null,
   bulkBusy: true
 }
