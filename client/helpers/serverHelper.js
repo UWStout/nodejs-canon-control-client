@@ -293,3 +293,29 @@ export function setCaptureOnServer (server, sessionPath, captureName, captureNum
     })
   })
 }
+
+export async function getTriggerBoxList (server) {
+  console.log(`Retrieving trigger box list on ${server.nickname}`)
+  return new Promise((resolve, reject) => {
+    axios.get(`https://${server.IP}:${server.port}/trigger`)
+      .then((response) => {
+        resolve(response.data)
+      })
+      .catch((error) => {
+        reject(error)
+      })
+  })
+}
+
+export async function releaseTriggerBox (server, boxIndex) {
+  console.log(`Releasing shutter for trigger box ${boxIndex} on ${server.nickname}`)
+  return new Promise((resolve, reject) => {
+    axios.post(`https://${server.IP}:${server.port}/trigger/${boxIndex}/release`)
+      .then((response) => {
+        resolve(response.data)
+      })
+      .catch((error) => {
+        reject(error)
+      })
+  })
+}
