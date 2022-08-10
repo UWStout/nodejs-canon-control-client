@@ -144,7 +144,7 @@ const useSocketState = create(set => ({
 
         // Subscribe to needed events
         socket.on('connect', () => {
-          socket.emit('subscribe', ['CameraList', 'Download-*'])
+          socket.emit('subscribe', ['CameraList', 'Download-*', 'TriggerBox-*'])
         })
 
         return { serverId: server.id, socket }

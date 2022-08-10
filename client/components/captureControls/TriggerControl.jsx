@@ -2,6 +2,7 @@ import React from 'react'
 
 import localDB from '../../state/localDB.js'
 import { useLiveQuery } from 'dexie-react-hooks'
+import useTriggerTaskState from '../../state/useTriggerTaskState.js'
 
 import { FormControl, InputLabel, Select, MenuItem, Button, Grid, Divider } from '@mui/material'
 
@@ -11,9 +12,17 @@ export default function TriggerControl () {
   // Subscribe to changes to servers and cameras
   const serverList = useLiveQuery(() => localDB.servers.toArray(), [], [])
 
+  // Subscribe to global trigger task state
+  const triggerTask = useTriggerTaskState(state => state)
+
   // Initialize states
+  const [disableButtons, setDisableButtons] = React.useState(false)
   const [selectedTrigger, setSelectedTrigger] = React.useState('NONE')
   const [triggerList, setTriggerList] = React.useState([])
+
+  React.useEffect(() => {
+    setDisableButtons(triggerTask.triggerActive)
+  }, [triggerTask.triggerActive])
 
   const onChangeTrigger = (event) => {
     setSelectedTrigger(event.target.value)
@@ -41,6 +50,9 @@ export default function TriggerControl () {
     // Determine server and index
     const trigger = triggerList.find(trigger => trigger.label === selectedTrigger)
     if (trigger) {
+      // Start new task
+      triggerTask.startTriggerTask(trigger.server.id, trigger.boxIndex)
+
       // send release command
       await releaseTriggerBox(trigger.server, trigger.boxIndex)
     }
@@ -71,12 +83,12 @@ export default function TriggerControl () {
         </FormControl>
       </Grid>
       <Grid item xs={2}>
-        <Button variant='contained' onClick={fireTrigger} disabled={selectedTrigger === 'NONE'}>
+        <Button variant='contained' onClick={fireTrigger} disabled={selectedTrigger === 'NONE' || disableButtons}>
           {'Fire'}
         </Button>
       </Grid>
       <Grid item xs={3}>
-        <Button variant='contained' onClick={refreshList}>
+        <Button variant='contained' onClick={refreshList} disabled={disableButtons}>
           {'Refresh List'}
         </Button>
       </Grid>
