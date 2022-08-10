@@ -7,7 +7,6 @@ const useTriggerTaskState = create(set => ({
   currentState: '',
 
   startTriggerTask: (serverId, boxIndex) => set(state => {
-    console.log('New Trigger Task:', serverId, boxIndex)
     return {
       triggerActive: true,
       serverId,
