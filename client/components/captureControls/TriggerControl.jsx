@@ -4,7 +4,7 @@ import localDB from '../../state/localDB.js'
 import { useLiveQuery } from 'dexie-react-hooks'
 import useTriggerTaskState from '../../state/useTriggerTaskState.js'
 
-import { FormControl, InputLabel, Select, MenuItem, Button, Grid, Divider } from '@mui/material'
+import { FormControl, InputLabel, Select, MenuItem, Button, Divider, Stack, Typography } from '@mui/material'
 
 import { getTriggerBoxList, releaseTriggerBox } from '../../helpers/serverHelper.js'
 
@@ -62,36 +62,49 @@ export default function TriggerControl () {
     refreshList()
   }, [refreshList])
 
+  // Determine current status
+  let statusString = 'Select a box'
+  if (selectedTrigger !== 'NONE') {
+    if (!triggerTask.triggerActive) {
+      statusString = 'Ready'
+    } else {
+      switch (triggerTask.currentState) {
+        case 'release:starting': statusString = 'Starting'; break
+        case 'release:connecting': statusString = 'Connecting to box'; break
+        case 'release:configuring': statusString = 'Configuring box'; break
+        case 'release:focusing': statusString = 'Focusing cameras'; break
+        case 'release:firing': statusString = 'Releasing Shutter'; break
+        case 'release:cleanup': statusString = 'Cleanup'; break
+        default: statusString = 'Unknown/Error'; break
+      }
+    }
+  }
+
   return (
-    <Grid container alignItems="center" spacing={2}>
-      <Grid item xs={7}>
-        <FormControl fullWidth sx={{ m: 1 }} size='small'>
-          <InputLabel id="trigger-select-label">Trigger Box</InputLabel>
-          <Select
-            labelId="trigger-select-label"
-            id="trigger-select"
-            value={(triggerList.length > 0 && selectedTrigger) || ''}
-            label="Trigger Box"
-            onChange={onChangeTrigger}
-          >
-            <MenuItem value={'NONE'}>Select a Trigger Box</MenuItem>
-            <Divider />
-            {triggerList.map((trigger, i) => (
-              <MenuItem key={i} value={trigger.label}>{trigger.label}</MenuItem>
-            ))}
-          </Select>
-        </FormControl>
-      </Grid>
-      <Grid item xs={2}>
-        <Button variant='contained' onClick={fireTrigger} disabled={selectedTrigger === 'NONE' || disableButtons}>
-          {'Fire'}
-        </Button>
-      </Grid>
-      <Grid item xs={3}>
-        <Button variant='contained' onClick={refreshList} disabled={disableButtons}>
-          {'Refresh List'}
-        </Button>
-      </Grid>
-    </Grid>
+    <Stack direction="row" alignItems="center" spacing={2} sx={{ width: '100%' }}>
+      <FormControl fullWidth sx={{ m: 1, flexGrow: 0.5 }} size='small'>
+        <InputLabel id="trigger-select-label">Trigger Box</InputLabel>
+        <Select
+          labelId="trigger-select-label"
+          id="trigger-select"
+          value={(triggerList.length > 0 && selectedTrigger) || ''}
+          label="Trigger Box"
+          onChange={onChangeTrigger}
+        >
+          <MenuItem value={'NONE'}>Select a Trigger Box</MenuItem>
+          <Divider />
+          {triggerList.map((trigger, i) => (
+            <MenuItem key={i} value={trigger.label}>{trigger.label}</MenuItem>
+          ))}
+        </Select>
+      </FormControl>
+      <Typography variant="body1" sx={{ minWidth: '300px' }}>{`Status: ${statusString}`}</Typography>
+      <Button variant='contained' onClick={fireTrigger} disabled={selectedTrigger === 'NONE' || disableButtons}>
+        {'Fire'}
+      </Button>
+      <Button variant='contained' onClick={refreshList} disabled={disableButtons} sx={{ minWidth: '200px' }}>
+        {'Refresh List'}
+      </Button>
+    </Stack>
   )
 }
