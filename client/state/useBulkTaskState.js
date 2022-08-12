@@ -19,6 +19,7 @@ const useBulkTaskState = create(set => ({
   }),
 
   completeBulkTask: (taskId, failed = false, summary) => set(state => {
+    console.log(summary)
     const index = state.serverInfo.findIndex(info => info.taskId === taskId)
     if (index >= 0) {
       const newServerInfo = [...state.serverInfo]

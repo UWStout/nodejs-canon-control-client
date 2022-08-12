@@ -2,6 +2,7 @@ import React from 'react'
 
 import { refreshCameraList } from '../state/localDB.js'
 import useBulkTaskState from '../state/useBulkTaskState.js'
+import useTriggerTaskState from '../state/useTriggerTaskState.js'
 import useCaptureState from '../state/useCaptureState.js'
 
 // State of the underlying Socket.io connections
@@ -10,11 +11,15 @@ import useSocketState from '../state/useSocketState.js'
 export function useServerSockets (serverList) {
   // Subscribe to socket.io connection state
   const { socketList, updateServerSockets } = useSocketState(state => state)
+
+  // Subscribe to various global state to keep it updated
   const completeBulkTask = useBulkTaskState(state => state.completeBulkTask)
   const { downloadStarted, downloadFinished } = useCaptureState(state => ({
     downloadStarted: state.downloadStarted,
     downloadFinished: state.downloadFinished
   }))
+
+  const updateTriggerTask = useTriggerTaskState(state => state.updateTriggerTask)
 
   // Ensure the low-level socket connections are up to date
   React.useEffect(() => {
@@ -26,9 +31,6 @@ export function useServerSockets (serverList) {
   React.useEffect(() => {
     // Setup callbacks for all the sockets in the list
     socketList.forEach(({ socket, serverId }) => {
-      // Subscribe to the events we are interested in
-      socket.emit('subscribe', ['CameraList', 'Download-*'])
-
       // Receive changes in the camera list
       socket.off('CameraListUpdate')
       socket.on('CameraListUpdate', (newList) => {
@@ -46,6 +48,10 @@ export function useServerSockets (serverList) {
         downloadFinished(serverId, camIndex, filename, exposureInfo, false)
       })
 
+      // Receive trigger task events
+      socket.off('TriggerBoxEvent')
+      socket.on('TriggerBoxEvent', updateTriggerTask)
+
       // Receive bulk task events
       socket.off('BulkTaskStarted')
       socket.off('BulkTaskSucceeded')
@@ -57,5 +63,5 @@ export function useServerSockets (serverList) {
         completeBulkTask(taskId, true, summary)
       })
     })
-  }, [completeBulkTask, downloadFinished, downloadStarted, serverList, socketList])
+  }, [completeBulkTask, downloadFinished, downloadStarted, serverList, socketList, updateTriggerTask])
 }

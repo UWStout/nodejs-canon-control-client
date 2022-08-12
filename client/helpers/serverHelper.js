@@ -122,6 +122,23 @@ export function setCameraProperties (server, camera, propertyObject) {
   })
 }
 
+export function resetCamera (server, camera) {
+  // Skip deactivated servers
+  if (server.deactivated) return Promise.resolve({})
+
+  const camIndex = (typeof camera === 'object' ? camera?.index : camera)
+  console.log(`Resetting camera ${camIndex} on ${server?.nickname} server`)
+  return new Promise((resolve, reject) => {
+    axios.post(`https://${server.IP}:${server.port}/camera/${camIndex}/reset`)
+      .then((response) => {
+        resolve(response.data)
+      })
+      .catch((error) => {
+        reject(error)
+      })
+  })
+}
+
 export function takeAPhoto (server, camera) {
   // Skip deactivated servers
   if (server.deactivated) return Promise.resolve({})
@@ -207,6 +224,9 @@ export function syncronizeCameraNicknames (server, nicknameList) {
 }
 
 export function ensureSessionOnServer (server, nickname, path, time, allowCreation = false) {
+  // Skip deactivated servers
+  if (server.deactivated) return Promise.resolve({})
+
   console.log('Creating new Session Storage')
   return new Promise((resolve, reject) => {
     axios.post(`https://${server.IP}:${server.port}/server/session/${allowCreation ? 'create' : 'confirm'}`, {
@@ -222,6 +242,9 @@ export function ensureSessionOnServer (server, nickname, path, time, allowCreati
 }
 
 export function getSessionList (server) {
+  // Skip deactivated servers
+  if (server.deactivated) return Promise.resolve({})
+
   console.log('Fetching list of sessions')
   return new Promise((resolve, reject) => {
     axios.get(`https://${server.IP}:${server.port}/server/sessions`)
@@ -235,6 +258,9 @@ export function getSessionList (server) {
 }
 
 export function ensureCaptureOnServer (server, sessionPath, captureName, captureNumber, allowCreation = false) {
+  // Skip deactivated servers
+  if (server.deactivated) return Promise.resolve({})
+
   console.log('Creating new Capture Storage')
   return new Promise((resolve, reject) => {
     axios.post(`https://${server.IP}:${server.port}/server/capture/${allowCreation ? 'create' : 'confirm'}`, {
@@ -250,7 +276,10 @@ export function ensureCaptureOnServer (server, sessionPath, captureName, capture
 }
 
 export function getCaptureOnServer (server) {
-  console.log('Setting target Capture Storage')
+  // Skip deactivated servers
+  if (server.deactivated) return Promise.resolve({})
+
+  console.log('Getting Current Capture Storage')
   return new Promise((resolve, reject) => {
     axios.get(`https://${server.IP}:${server.port}/server/capture/current`)
       .then((response) => {
@@ -263,6 +292,9 @@ export function getCaptureOnServer (server) {
 }
 
 export function setCaptureOnServer (server, sessionPath, captureName, captureNumber) {
+  // Skip deactivated servers
+  if (server.deactivated) return Promise.resolve({})
+
   console.log('Setting target Capture Storage')
   return new Promise((resolve, reject) => {
     axios.post(`https://${server.IP}:${server.port}/server/capture/select`, {
@@ -274,6 +306,38 @@ export function setCaptureOnServer (server, sessionPath, captureName, captureNum
     }).catch((error) => {
       reject(error)
     })
+  })
+}
+
+export async function getTriggerBoxList (server) {
+  // Skip deactivated servers
+  if (server.deactivated) return Promise.resolve([])
+
+  console.log(`Retrieving trigger box list on ${server.nickname}`)
+  return new Promise((resolve, reject) => {
+    axios.get(`https://${server.IP}:${server.port}/trigger`)
+      .then((response) => {
+        resolve(response.data)
+      })
+      .catch((error) => {
+        reject(error)
+      })
+  })
+}
+
+export async function releaseTriggerBox (server, boxIndex) {
+  // Skip deactivated servers
+  if (server.deactivated) return Promise.resolve({})
+
+  console.log(`Releasing shutter for trigger box ${boxIndex} on ${server.nickname}`)
+  return new Promise((resolve, reject) => {
+    axios.post(`https://${server.IP}:${server.port}/trigger/${boxIndex}/release`)
+      .then((response) => {
+        resolve(response.data)
+      })
+      .catch((error) => {
+        reject(error)
+      })
   })
 }
 

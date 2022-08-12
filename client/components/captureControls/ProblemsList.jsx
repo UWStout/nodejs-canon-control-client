@@ -18,12 +18,17 @@ function buildExpectedExposure (bulkSettings) {
 }
 
 export default function ProblemsList () {
+  const serverList = useLiveQuery(() => localDB.servers.toArray(), [], [])
+
   // Subscribe to bulk mode changes
   const bulkExposureSettings = useLiveQuery(() => localDB.settings.get('bulkExposureSettings'))
   const expectedExposure = buildExpectedExposure(bulkExposureSettings)
 
   // Subscribe to changes in the capture state
-  const completedList = useCaptureState(state => (state.succeeded))
+  const { completedList, missing } = useCaptureState(state => ({
+    completedList: state.succeeded,
+    missing: state.missing
+  }))
 
   // Build list of problems
   const problemList = completedList.map((image) => {
@@ -46,6 +51,17 @@ export default function ProblemsList () {
     return ''
   }).filter(problemStr => problemStr !== '')
 
+  // Build list of missing camera messages
+  const missingList = missing.sort((A, B) => {
+    if (A.serverId === B.serverId) {
+      return A.nickname.localeCompare(B.nickname)
+    }
+    return B.serverId - A.serverId
+  }).map((camera) => {
+    const server = serverList.find(server => server.id === camera.serverId)
+    return `${camera.nickname} is missing (${server ? server.nickname : 'UNKNOWN'} server)`
+  })
+
   // If there are problems, show them
   if (problemList.length > 0) {
     return (
@@ -56,6 +72,7 @@ export default function ProblemsList () {
         </Typography>
         <Typography variant='body1' component='div' sx={{ whiteSpace: 'pre-wrap', width: '100%' }}>
           {problemList.map(problemString => `  - ${problemString}\n`)}
+          {missingList.map(problemString => `  - ${problemString}\n`)}
         </Typography>
       </React.Fragment>
     )
