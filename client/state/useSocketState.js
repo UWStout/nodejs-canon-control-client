@@ -1,12 +1,16 @@
 import create from 'zustand'
 import { io } from 'socket.io-client'
 
-function updateLiveView (socket, cameraIndex, callback) {
+function updateLiveView (socket, cameraIndex, callback, timeoutCallback) {
   console.log(`Syncing live view state: ${cameraIndex}`)
 
   // Make sure callback is in sync
   socket.off('LiveViewImage')
   socket.on('LiveViewImage', callback)
+
+  // Sync timeout callback
+  socket.off('LiveViewTimeout')
+  socket.on('LiveViewTimeout', timeoutCallback)
 
   // Sync camera index
   if (cameraIndex >= 0) {
@@ -26,6 +30,15 @@ const useSocketState = create(set => ({
   liveViewOrientation: 0,
   liveViewServerSelection: -1,
   liveViewCameraSelection: -1,
+  timeoutDialogVisible: false,
+
+  openTimeoutDialog: () => set (state => {
+    return { timeoutDialogVisible: true }
+  }),
+
+  closeTimeoutDialog: () => set(state => {
+    return { timeoutDialogVisible: false }
+  }),
 
   setLiveViewOrientation: (newOrientation) => set(state => {
     return { liveViewOrientation: newOrientation }
@@ -49,7 +62,7 @@ const useSocketState = create(set => ({
       if (state.liveViewServerSelection >= 0) {
         const serverSocket = state.socketList.find(socket => socket.serverId === serverId)
         if (serverSocket?.socket) {
-          updateLiveView(serverSocket.socket, cameraIndex, state.liveViewCallback)
+          updateLiveView(serverSocket.socket, cameraIndex, state.liveViewCallback, state.openTimeoutDialog)
         }
       }
 
@@ -67,7 +80,7 @@ const useSocketState = create(set => ({
       if (state.liveViewServerSelection >= 0) {
         const serverSocket = state.socketList.find(socket => socket.serverId === state.liveViewServerSelection)
         if (serverSocket?.socket) {
-          updateLiveView(serverSocket.socket, state.liveViewCameraSelection, newCallback)
+          updateLiveView(serverSocket.socket, state.liveViewCameraSelection, newCallback, state.openTimeoutDialog)
         }
       }
 
@@ -82,7 +95,7 @@ const useSocketState = create(set => ({
       if (state.liveViewServerSelection >= 0) {
         const serverSocket = state.socketList.find(socket => socket.serverId === state.liveViewServerSelection)
         if (serverSocket?.socket) {
-          updateLiveView(serverSocket.socket, state.liveViewCameraSelection, state.liveViewCallback)
+          updateLiveView(serverSocket.socket, state.liveViewCameraSelection, state.liveViewCallback, state.openTimeoutDialog)
         }
       }
 
