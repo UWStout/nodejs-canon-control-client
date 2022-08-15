@@ -39,3 +39,24 @@ export function useTraceUpdate (props) {
     prev.current = props
   })
 }
+
+/**
+ * Convert a millisecond time into a human readable string
+ * @param {string|number} time number to be converted
+ * @returns {string} The propertyValue with any leading names
+ *                       "Never" if time is 0, or "UNKNOWN VALUE" if time is not a number
+ */
+export function timeString (time) {
+  if (isNaN(time)) { return "UNKNOWN VALUE" }
+   
+  const intTime = parseInt(time)
+  if (intTime === 0) {
+    return "Never"
+  } else if (intTime >= 3600000) {
+    return `${parseInt(intTime / 3600000)} Hours`
+  } else if (intTime >= 60000) {
+    return `${parseInt(intTime / 60000)} Minutes`
+  } else {
+    return `${parseInt(intTime / 1000)} Seconds`
+  }
+}

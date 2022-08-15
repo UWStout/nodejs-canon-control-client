@@ -8,6 +8,7 @@ import { Dialog, AppBar, Toolbar, Slide } from '@mui/material'
 
 import CameraLiveView from './CameraLiveView.jsx'
 import LiveViewSettingButtons from './LiveViewSettingButtons.jsx'
+import LiveViewTimoutDialog from './LiveViewTimoutDialog.jsx'
 
 const Transition = React.forwardRef(function Transition (props, ref) {
   return <Slide direction="up" ref={ref} {...props} unmountOnExit mountOnEnter />
@@ -38,6 +39,7 @@ export default function LiveViewDialog () {
         </Toolbar>
       </AppBar>
       <CameraLiveView serverList={serverList} />
+      <LiveViewTimoutDialog serverList={serverList}/>
     </Dialog>
   )
 }

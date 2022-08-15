@@ -340,3 +340,27 @@ export async function releaseTriggerBox (server, boxIndex) {
       })
   })
 }
+
+export function getLiveViewTimeoutOnServer (server) {
+  return new Promise((resolve, reject) => {
+    axios.get(`https://${server.IP}:${server.port}/server/liveview/timeout`)
+      .then((response) => {
+        resolve(response.data)
+      })
+      .catch((error) => {
+        reject(error)
+      })
+  })
+}
+
+export function setLiveViewTimeoutOnServer (server, timeout) {
+  return new Promise((resolve, reject) => {
+    axios.post(`https://${server.IP}:${server.port}/server/liveview/timeout/${timeout}`)
+      .then((response) => {
+        resolve(response.data)
+      })
+      .catch((error) => {
+        reject(error)
+      })
+  })
+}

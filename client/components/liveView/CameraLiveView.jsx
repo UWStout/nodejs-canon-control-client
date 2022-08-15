@@ -20,6 +20,7 @@ import { ServerObjShape } from '../../state/dataModel.js'
 import { getCameraImagePropeties } from '../../helpers/serverHelper.js'
 
 import BasicSwitch from './BasicSwitch.jsx'
+import LiveViewTimoutSelect from './LiveViewTimoutSelect.jsx'
 
 export default function CameraLiveView (props) {
   const { serverList } = props
@@ -186,7 +187,9 @@ export default function CameraLiveView (props) {
           />
         </FormGroup>
         <Divider orientation="vertical" variant="middle" flexItem />
-
+        {/* Change Live View Timeout */}
+        <LiveViewTimoutSelect serverList={serverList} />
+        <Divider orientation="vertical" variant="middle" flexItem />
         {/* Live View Reset Button */}
         <Button variant="contained" onClick={onResetLiveView}>{'Reset Live View'}</Button>
       </Stack>
