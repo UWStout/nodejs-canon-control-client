@@ -6,7 +6,7 @@ import useTriggerTaskState from '../../state/useTriggerTaskState.js'
 
 import { FormControl, InputLabel, Select, MenuItem, Button, Divider, Stack, Typography } from '@mui/material'
 
-import { getTriggerBoxList, releaseTriggerBox } from '../../helpers/serverHelper.js'
+import { getTriggerBoxList, releaseTriggerBox, focusTriggerBox, primeTriggerBox, firePrimedTriggerBox, flushPrimedTriggerBox } from '../../helpers/serverHelper.js'
 
 export default function TriggerControl () {
   // Subscribe to changes to servers and cameras
@@ -19,6 +19,8 @@ export default function TriggerControl () {
   const [disableButtons, setDisableButtons] = React.useState(false)
   const [selectedTrigger, setSelectedTrigger] = React.useState('NONE')
   const [triggerList, setTriggerList] = React.useState([])
+  const [statusString, setStatusString] = React.useState('---')
+  const [primed, setPrimed] = React.useState(false)
 
   React.useEffect(() => {
     setDisableButtons(triggerTask.triggerActive)
@@ -46,15 +48,57 @@ export default function TriggerControl () {
     }
   }, [serverList])
 
-  const fireTrigger = async () => {
+  const fullRelease = async () => {
     // Determine server and index
     const trigger = triggerList.find(trigger => trigger.label === selectedTrigger)
     if (trigger) {
       // Start new task
-      triggerTask.startTriggerTask(trigger.server.id, trigger.boxIndex)
+      triggerTask.startTriggerTask(trigger.server.id, trigger.boxIndex, 'Take a photo')
 
       // send release command
       await releaseTriggerBox(trigger.server, trigger.boxIndex)
+    }
+  }
+
+  const focus = async () => {
+    // Determine server and index
+    const trigger = triggerList.find(trigger => trigger.label === selectedTrigger)
+    if (trigger) {
+      // Start new task
+      triggerTask.startTriggerTask(trigger.server.id, trigger.boxIndex, 'Focus')
+
+      // send release command
+      await focusTriggerBox(trigger.server, trigger.boxIndex)
+    }
+  }
+
+  const prime = async () => {
+    // Determine server and index
+    const trigger = triggerList.find(trigger => trigger.label === selectedTrigger)
+    if (trigger) {
+      // Start new task
+      triggerTask.startTriggerTask(trigger.server.id, trigger.boxIndex, 'Prime')
+
+      // send release command
+      await primeTriggerBox(trigger.server, trigger.boxIndex)
+    }
+  }
+
+  const fire = async () => {
+    // Determine server and index
+    const trigger = triggerList.find(trigger => trigger.label === selectedTrigger)
+    if (trigger) {
+      // send release command
+      await firePrimedTriggerBox(trigger.server)
+    }
+  }
+
+  const flush = async () => {
+    // Determine server and index
+    const trigger = triggerList.find(trigger => trigger.label === selectedTrigger)
+    if (trigger) {
+      // send release command
+      await flushPrimedTriggerBox(trigger.server)
     }
   }
 
@@ -63,26 +107,49 @@ export default function TriggerControl () {
   }, [refreshList])
 
   // Determine current status
-  let statusString = 'Select a box'
-  if (selectedTrigger !== 'NONE') {
-    if (!triggerTask.triggerActive) {
-      statusString = 'Ready'
-    } else {
-      switch (triggerTask.currentState) {
-        case 'release:starting': statusString = 'Starting'; break
-        case 'release:connecting': statusString = 'Connecting to box'; break
-        case 'release:configuring': statusString = 'Configuring box'; break
-        case 'release:focusing': statusString = 'Focusing cameras'; break
-        case 'release:firing': statusString = 'Releasing Shutter'; break
-        case 'release:cleanup': statusString = 'Cleanup'; break
-        default: statusString = 'Unknown/Error'; break
-      }
+  React.useEffect(() => {
+    switch (triggerTask.currentState) {
+      // Taking photo / Priming
+      case 'release:starting': case 'prime:starting':
+        setStatusString('Starting')
+        break
+      case 'release:connecting': case 'prime:connecting':
+        setStatusString('Connecting')
+        break
+      case 'release:configuring': case 'prime:configuring':
+        setStatusString('Configuring')
+        break
+      case 'release:focusing': case 'prime:focusing':
+        setStatusString('Focusing')
+        break
+
+      // Primed state
+      case 'prime:complete': case 'fire:complete':
+        setPrimed(true)
+        break
+
+      // Unprimed release
+      case 'release:firing':
+        setStatusString('Releasing')
+        break
+
+      // Cleanup/Flush
+      case 'flush:cleanup': case 'release:cleanup':
+        setPrimed(false)
+        setStatusString('Cleanup')
+        break
+
+      // Errors
+      case 'prime:error': case 'fire:error': case 'flush:error': case 'release:error':
+        setPrimed(false)
+        setStatusString('Error')
+        break
     }
-  }
+  }, [triggerTask.currentState])
 
   return (
     <Stack direction="row" alignItems="center" spacing={2} sx={{ width: '100%' }}>
-      <FormControl fullWidth sx={{ m: 1, flexGrow: 0.5 }} size='small'>
+      <FormControl fullWidth sx={{ m: 1 }} size='small'>
         <InputLabel id="trigger-select-label">Trigger Box</InputLabel>
         <Select
           labelId="trigger-select-label"
@@ -98,11 +165,31 @@ export default function TriggerControl () {
           ))}
         </Select>
       </FormControl>
-      <Typography variant="body1" sx={{ minWidth: '300px' }}>{`Status: ${statusString}`}</Typography>
-      <Button variant='contained' onClick={fireTrigger} disabled={selectedTrigger === 'NONE' || disableButtons}>
+      <Typography variant="body1" sx={{ minWidth: '150px' }}>
+        {
+          (selectedTrigger === 'NONE'
+            ? '---'
+            : (triggerTask.triggerActive
+                ? statusString
+                : (primed ? 'Primed' : 'Waiting'))
+                )
+        }
+      </Typography>
+      <Button variant='contained' onClick={fullRelease} disabled={primed || selectedTrigger === 'NONE' || disableButtons}>
+        {'Photo'}
+      </Button>
+      <Button variant='contained' onClick={focus} disabled={primed || selectedTrigger === 'NONE' || disableButtons}>
+        {'Focus'}
+      </Button>
+      <Divider orientation="vertical" flexItem />
+      <Button variant='contained' onClick={primed ? flush : prime} disabled={selectedTrigger === 'NONE' || disableButtons} sx={{ minWidth: '100px' }}>
+        {primed ? 'Unprime' : 'Prime'}
+      </Button>
+      <Button variant='contained' onClick={fire} disabled={!primed || selectedTrigger === 'NONE' || disableButtons}>
         {'Fire'}
       </Button>
-      <Button variant='contained' onClick={refreshList} disabled={disableButtons} sx={{ minWidth: '200px' }}>
+      <Divider orientation="vertical" flexItem />
+      <Button variant='contained' onClick={refreshList} disabled={disableButtons} sx={{ minWidth: '150px' }}>
         {'Refresh List'}
       </Button>
     </Stack>

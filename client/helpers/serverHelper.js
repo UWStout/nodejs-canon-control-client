@@ -331,7 +331,71 @@ export async function releaseTriggerBox (server, boxIndex) {
 
   console.log(`Releasing shutter for trigger box ${boxIndex} on ${server.nickname}`)
   return new Promise((resolve, reject) => {
-    axios.post(`https://${server.IP}:${server.port}/trigger/${boxIndex}/release`)
+    axios.post(`https://${server.IP}:${server.port}/trigger/${boxIndex}/takePhoto`)
+      .then((response) => {
+        resolve(response.data)
+      })
+      .catch((error) => {
+        reject(error)
+      })
+  })
+}
+
+export async function focusTriggerBox (server, boxIndex) {
+  // Skip deactivated servers
+  if (server.deactivated) return Promise.resolve({})
+
+  console.log(`Focus only for trigger box ${boxIndex} on ${server.nickname}`)
+  return new Promise((resolve, reject) => {
+    axios.post(`https://${server.IP}:${server.port}/trigger/${boxIndex}/focus`)
+      .then((response) => {
+        resolve(response.data)
+      })
+      .catch((error) => {
+        reject(error)
+      })
+  })
+}
+
+export async function primeTriggerBox (server, boxIndex) {
+  // Skip deactivated servers
+  if (server.deactivated) return Promise.resolve({})
+
+  console.log(`Priming trigger box ${boxIndex} on ${server.nickname}`)
+  return new Promise((resolve, reject) => {
+    axios.post(`https://${server.IP}:${server.port}/trigger/${boxIndex}/prime`)
+      .then((response) => {
+        resolve(response.data)
+      })
+      .catch((error) => {
+        reject(error)
+      })
+  })
+}
+
+export async function firePrimedTriggerBox (server) {
+  // Skip deactivated servers
+  if (server.deactivated) return Promise.resolve({})
+
+  console.log(`Firimg primed trigger box on ${server.nickname}`)
+  return new Promise((resolve, reject) => {
+    axios.post(`https://${server.IP}:${server.port}/trigger/fire`)
+      .then((response) => {
+        resolve(response.data)
+      })
+      .catch((error) => {
+        reject(error)
+      })
+  })
+}
+
+export async function flushPrimedTriggerBox (server) {
+  // Skip deactivated servers
+  if (server.deactivated) return Promise.resolve({})
+
+  console.log(`Flushing primed trigger box on ${server.nickname}`)
+  return new Promise((resolve, reject) => {
+    axios.post(`https://${server.IP}:${server.port}/trigger/flush`)
       .then((response) => {
         resolve(response.data)
       })
