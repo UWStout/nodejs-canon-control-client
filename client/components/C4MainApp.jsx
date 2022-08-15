@@ -15,12 +15,13 @@ import CaptureControlsView from './captureControls/CaptureControlsView.jsx'
 import CameraListView from './cameraList/CameraListView.jsx'
 import TestingButtonsView from './testingButtons/TestingButonsView.jsx'
 
-import ServerSettingsDialog from './settings/ServerSettingsDialog.jsx'
-import ImportExportDialog from './settings/ImportExportDialog.jsx'
-import CameraNicknameSyncDialog from './settings/CameraNicknameSyncDialog.jsx'
+import ServerSettingsDialog from './settingsAndFeedback/ServerSettingsDialog.jsx'
+import ImportExportDialog from './settingsAndFeedback/ImportExportDialog.jsx'
+import CameraNicknameSyncDialog from './settingsAndFeedback/CameraNicknameSyncDialog.jsx'
 import LiveViewDialog from './liveView/LiveViewDialog.jsx'
 
 import C4_THEME from './C4Theme.js'
+import BulkTaskFeedback from './settingsAndFeedback/BulkTaskFeedback.jsx'
 
 export default function C4MainApp () {
   // Subscribe to changes in the server list
@@ -121,6 +122,7 @@ export default function C4MainApp () {
               <ImportExportDialog />
               <CameraNicknameSyncDialog />
               <LiveViewDialog />
+              <BulkTaskFeedback />
 
             </Container>
           </SnackbarProvider>

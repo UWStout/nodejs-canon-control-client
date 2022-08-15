@@ -35,6 +35,14 @@ const useGlobalState = create(set => ({
     return { liveViewDialogVisible: false }
   }),
 
+  bulkTaskFeedbackDialogVisible: false,
+  showBulkTaskFeedbackDialog: () => set(state => {
+    return { bulkTaskFeedbackDialogVisible: true }
+  }),
+  hideBulkTaskFeedbackDialog: () => set(state => {
+    return { bulkTaskFeedbackDialogVisible: false }
+  }),
+
   // Bulk mode global values
   bulkProperties: null,
   updateBulkProperties: (newProperties) => set(state => {

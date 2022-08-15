@@ -57,7 +57,7 @@ export function useServerSockets (serverList) {
       socket.off('BulkTaskSucceeded')
       socket.off('BulkTaskFailed')
       socket.on('BulkTaskSucceeded', ({ taskId, summary }) => {
-        completeBulkTask(taskId, false, summary)
+        completeBulkTask(taskId, summary.failed > 0, summary)
       })
       socket.on('BulkTaskFailed', ({ taskId, summary }) => {
         completeBulkTask(taskId, true, summary)
