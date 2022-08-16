@@ -364,3 +364,15 @@ export function setLiveViewTimeoutOnServer (server, timeout) {
       })
   })
 }
+
+export function pingServer (server) {
+  return new Promise((resolve, reject) => {
+    axios.get(`https://${server.IP}:${server.port}/server/ping`)
+      .then((response) => {
+        resolve(response.data)
+      })
+      .catch((error) => {
+        resolve(error)
+      })
+  })
+}
