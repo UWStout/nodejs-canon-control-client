@@ -6,7 +6,8 @@
   "type": "module",
   "scripts": {
     "premonit": "npm run client",
-    "monit": "pm2 start ecosystem.config.cjs",
+    "monit": "pm2 start ecosystem.config.cjs --env development",
+    "unmonit": "pm2 delete ecosystem.config.cjs",
     "client": "esbuild --bundle --minify --define:process.env.NODE_ENV=\\\"production\\\" --outdir=./public client/app.jsx",
     "client:dev": "esbuild --bundle --sourcemap --watch --define:process.env.NODE_ENV=\\\"development\\\" --outdir=./public client/app.jsx",
     "clientServer": "esbuild --bundle --servedir=./public --minify --define:process.env.NODE_ENV=\\\"production\\\" --outdir=./public client/app.jsx",
