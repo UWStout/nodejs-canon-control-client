@@ -17,8 +17,8 @@ const useTriggerTaskState = create(set => ({
 
   updateTriggerTask: (taskState) => set(state => {
     const triggerActive = !(
-      taskState.type === 'release:complete' ||
-      taskState.type === 'release:error'
+      taskState.type.includes(':complete') ||
+      taskState.type.includes(':error')
     )
 
     if (taskState.boxIndex !== state.boxIndex) {

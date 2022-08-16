@@ -39,7 +39,7 @@ const useSocketState = create(set => ({
   liveViewCameraSelection: -1,
   timeoutDialogVisible: false,
 
-  openTimeoutDialog: () => set (state => {
+  openTimeoutDialog: () => set(state => {
     return { timeoutDialogVisible: true }
   }),
 
@@ -157,7 +157,12 @@ const useSocketState = create(set => ({
 
         // Subscribe to needed events
         socket.on('connect', () => {
-          socket.emit('subscribe', ['CameraList', 'Download-*', 'TriggerBox-*'])
+          socket.emit('subscribe', [
+            'CameraList',
+            'Download-*',
+            'CameraState-*',
+            'TriggerBox-*'
+          ])
         })
 
         return { serverId: server.id, socket }
