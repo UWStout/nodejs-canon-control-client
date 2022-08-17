@@ -11,9 +11,9 @@ function buildExpectedExposure (bulkSettings) {
   const exposureFraction = bulkSettings?.Tv.split('/')
   return {
     shutterSpeed: parseInt(exposureFraction?.[0]) / parseInt(exposureFraction?.[1]),
-    apertureValue: parseInt(bulkSettings?.Av.slice(1)),
-    iso: parseInt(bulkSettings?.ISOSpeed),
-    focalLength: 18
+    apertureValue: parseInt(bulkSettings?.Av?.slice(1)),
+    iso: isNaN(parseInt(bulkSettings?.ISOSpeed)) ? 0 : parseInt(bulkSettings?.ISOSpeed),
+    focalLength: '18.0 mm'
   }
 }
 
@@ -41,7 +41,7 @@ export default function ProblemsList () {
     }
 
     if (image.exposureInfo.focalLength !== expectedExposure.focalLength) {
-      return `${image.filename} has an unexpected focal length (${image.exposureInfo.focalLength} mm)`
+      return `${image.filename} has an unexpected focal length (${image.exposureInfo.focalLength})`
     }
 
     if (image.exposureInfo.iso !== expectedExposure.iso) {
