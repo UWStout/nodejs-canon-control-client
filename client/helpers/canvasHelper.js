@@ -5,7 +5,7 @@
  * @param {number} rotation Rotation value in 90 deg units
  * @param {boolean} clear Should we clear the canvas first
  */
-export function drawImageToCanvas (canvas, imageData, rotation, zoomScale, clear = false) {
+export function drawImageToCanvas (canvas, imageData, histograms, rotation, zoomScale, clear = false) {
   const img = new Image()
   img.src = 'data:image/jpeg;base64,' + imageData
   img.onload = () => {
@@ -45,10 +45,66 @@ export function drawImageToCanvas (canvas, imageData, rotation, zoomScale, clear
 
     // Draw the image
     ctx.drawImage(img, 0, 0, img.width, img.height)
+
+    // Draw the histograms
+    drawHistogramsToCanvas(ctx, histograms, imgDims.width, imgDims.height)
   }
 
   img.onerror = (error) => {
     console.error('Error drawing image:', error)
+  }
+}
+
+/**
+ * Graph the given histogram data to the given canvas element
+ * @param {Array(UInt32Array)} histograms A set of UInt32 arrays with histogram data (Y, R, G, and B channels)
+ */
+function drawHistogramsToCanvas (ctx, histograms, width, height) {
+  if (!Array.isArray(histograms) || histograms.length < 1) {
+    return
+  }
+
+  // Setup a reasonable scaling
+  ctx.resetTransform()
+  ctx.scale(2, 2)
+
+  // Get a render context from the canvas and setup the path style
+  ctx.lineWidth = 1
+  for (let i = 0; i < histograms.length; i++) {
+    // Set path color
+    switch (i) {
+      case 1: ctx.strokeStyle = ctx.fillStyle = '#ff0000'; break
+      case 2: ctx.strokeStyle = ctx.fillStyle = '#00ff00'; break
+      case 3: ctx.strokeStyle = ctx.fillStyle = '#0000ff'; break
+      default: ctx.strokeStyle = ctx.fillStyle = '#ffffff'; break
+    }
+
+    // Start a path for the histogram object
+    ctx.beginPath()
+
+    // Start at lower left corner
+    ctx.moveTo(0, height / 2)
+
+    // Add vertices for each point in the histogram
+    const histData = new Uint32Array(histograms[i])
+    histData.forEach((value, bin) => {
+      ctx.lineTo(bin, (height / 2) - (value / 64))
+    })
+
+    // End at lower right corner
+    ctx.lineTo(255, height / 2)
+
+    // Draw the line
+    ctx.globalAlpha = 1.0
+    ctx.stroke()
+
+    // Draw the area under the line
+    ctx.globalAlpha = 0.33
+    ctx.closePath()
+    ctx.fill()
+
+    // Set opacity back to 100%
+    ctx.globalAlpha = 1.0
   }
 }
 

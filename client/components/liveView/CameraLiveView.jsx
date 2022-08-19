@@ -7,7 +7,7 @@ import { useLiveQuery } from 'dexie-react-hooks'
 // State of the underlying Socket.io connections
 import useSocketState from '../../state/useSocketState.js'
 
-import { Stack, Box, IconButton, FormGroup, FormControlLabel, Slider, Button, Divider } from '@mui/material'
+import { Stack, Box, IconButton, FormGroup, FormControlLabel, Slider, Button, Divider, Select, MenuItem, InputLabel, FormControl } from '@mui/material'
 import {
   Rotate90DegreesCcw as RotateCCWIcon,
   Rotate90DegreesCw as RotateCWIcon
@@ -29,6 +29,7 @@ export default function CameraLiveView (props) {
   // Subscribe to persistent settings
   const showLiveViewCrosshair = useLiveQuery(() => localDB.settings.get('showLiveViewCrosshair'))
   const doLVAutoRotate = useLiveQuery(() => localDB.settings.get('doLVAutoRotate'))
+  const LVHistograms = useLiveQuery(() => localDB.settings.get('LVHistograms'))
 
   // Coordinate local state and database
   const [localZoom, setLocalZoom] = React.useState(1.0)
@@ -46,11 +47,13 @@ export default function CameraLiveView (props) {
 
   // The current live view image
   const [imageData, setImageData] = React.useState(null)
+  const [histograms, setHistograms] = React.useState(null)
 
   // Receive the current live-view image
   const receiveImage = React.useCallback((message) => {
     if (message.imageData) {
       setImageData(message.imageData)
+      setHistograms(message.histograms)
     }
   }, [])
 
@@ -89,9 +92,30 @@ export default function CameraLiveView (props) {
   // Update the canvas whenever the image changes
   React.useEffect(() => {
     if (canvasTagRef?.current && imageData !== null) {
-      drawImageToCanvas(canvasTagRef.current, imageData, rotation, localZoom, true)
+      switch (LVHistograms?.value) {
+        case '*':
+          drawImageToCanvas(canvasTagRef.current, imageData, histograms, rotation, localZoom, true)
+          break
+
+        case 'Y':
+          drawImageToCanvas(canvasTagRef.current, imageData, histograms?.slice(0, 1), rotation, localZoom, true)
+          break
+        case 'R':
+          drawImageToCanvas(canvasTagRef.current, imageData, histograms?.slice(1, 2), rotation, localZoom, true)
+          break
+        case 'G':
+          drawImageToCanvas(canvasTagRef.current, imageData, histograms?.slice(2, 3), rotation, localZoom, true)
+          break
+        case 'B':
+          drawImageToCanvas(canvasTagRef.current, imageData, histograms?.slice(3, 4), rotation, localZoom, true)
+          break
+
+        default:
+          drawImageToCanvas(canvasTagRef.current, imageData, null, rotation, localZoom, true)
+          break
+      }
     }
-  }, [imageData, rotation, canvasTagRef, localZoom])
+  }, [imageData, rotation, canvasTagRef, localZoom, histograms, LVHistograms])
 
   // Start/Stop live view session
   React.useEffect(() => {
@@ -165,6 +189,26 @@ export default function CameraLiveView (props) {
           checked={!!showLiveViewCrosshair?.value}
           setChecked={(newValue) => updateSetting('showLiveViewCrosshair', newValue)}
         />
+
+        {/* Histogram options */}
+        <FormControl sx={{ minWidth: '130px' }}>
+          <InputLabel id="histogram-select-label">Histogram</InputLabel>
+          <Select
+            size="small"
+            labelId="histogram-select-label"
+            value={LVHistograms?.value || 'none'}
+            onChange={e => updateSetting('LVHistograms', e.target.value)}
+            fullWidth
+          >
+            <MenuItem value='none'>{'Disable'}</MenuItem>
+            <MenuItem value='Y'>{'Luminance'}</MenuItem>
+            <MenuItem value='R'>{'Red'}</MenuItem>
+            <MenuItem value='G'>{'Green'}</MenuItem>
+            <MenuItem value='B'>{'Blue'}</MenuItem>
+            <MenuItem value='*'>{'All'}</MenuItem>
+          </Select>
+        </FormControl>
+
         <Divider orientation="vertical" variant="middle" flexItem />
 
         {/* Zoom Slider */}
