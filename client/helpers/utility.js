@@ -43,20 +43,23 @@ export function useTraceUpdate (props) {
 /**
  * Convert a millisecond time into a human readable string
  * @param {string|number} time number to be converted
- * @returns {string} The propertyValue with any leading names
- *                       "Never" if time is 0, or "UNKNOWN VALUE" if time is not a number
+ * @returns {string} Time converted to reasonable units with the units appended, "Never" if
+ *                   time is 0, or "UNKNOWN VALUE" if time is not a parsable number
  */
 export function timeString (time) {
-  if (isNaN(time)) { return "UNKNOWN VALUE" }
-   
+  if (isNaN(time)) { return 'UNKNOWN VALUE' }
+
   const intTime = parseInt(time)
   if (intTime === 0) {
-    return "Never"
+    return 'Never'
   } else if (intTime >= 3600000) {
-    return `${parseInt(intTime / 3600000)} Hours`
+    const hours = parseInt(intTime / 3600000)
+    return `${hours} ${hours === 1 ? 'Hour' : 'Hours'}`
   } else if (intTime >= 60000) {
-    return `${parseInt(intTime / 60000)} Minutes`
+    const minutes = parseInt(intTime / 60000)
+    return `${minutes} ${minutes === 1 ? 'Minute' : 'Minutes'}`
   } else {
-    return `${parseInt(intTime / 1000)} Seconds`
+    const seconds = parseInt(intTime / 1000)
+    return `${seconds} ${seconds === 1 ? 'Second' : 'Seconds'}`
   }
 }

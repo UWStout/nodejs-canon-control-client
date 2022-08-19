@@ -195,6 +195,7 @@ export default function CameraLiveView (props) {
           <InputLabel id="histogram-select-label">Histogram</InputLabel>
           <Select
             size="small"
+            label="histogram"
             labelId="histogram-select-label"
             value={LVHistograms?.value || 'none'}
             onChange={e => updateSetting('LVHistograms', e.target.value)}
