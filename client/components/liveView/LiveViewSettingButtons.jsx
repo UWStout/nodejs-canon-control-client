@@ -26,7 +26,7 @@ export default function LiveViewSettingButtons (props) {
     () => localDB.cameras.where({ serverId: liveViewState.selectedServer }).toArray(),
     [liveViewState.selectedServer],
     null
-  )?.sort((A, B) => A.nickname.localeCompare(B.nickname))
+  )?.sort((A, B) => A.nickname?.localeCompare(B.nickname))
 
   const setSelectedServer = (newValue) => {
     liveViewState.setLiveViewSelection(newValue, liveViewState.selectedCamera)

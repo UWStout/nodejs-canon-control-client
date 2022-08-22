@@ -170,7 +170,8 @@ export async function refreshCameraList (cameraList, serverId) {
       await db.cameras.bulkAdd(newCameras.map(cameraId => ({
         ...cameraList.find(serverCam => serverCam.BodyIDEx?.value === cameraId),
         id: cameraId,
-        serverId
+        serverId,
+        nickname: cameraId
       })))
     }
   } catch (error) {
