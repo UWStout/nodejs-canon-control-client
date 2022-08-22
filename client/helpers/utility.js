@@ -4,11 +4,19 @@ import React from 'react'
  * Remove leading categories and names from an EDSDK property value.
  * @param {string|any} propertyValue EDSDK property value to be trimmed.
  *                                   Non-string values are returned unmodified.
+ * @param {string|any} propertyID EDSDK property name
+ *                                   Used to check for exceptions
  * @returns {string|any} The propertyValue with any leading names
  *                       removed or unchnaged if it is not a string.
  */
-export function trimProp (propertyValue) {
+export function trimProp (propertyValue, propertyID = '') {
   if (typeof propertyValue !== 'string') {
+    return propertyValue
+  }
+
+  // Exception for Av due to decimal point in allowed values
+  if (propertyID === 'aperture' || propertyID === 'Av')
+  {
     return propertyValue
   }
 

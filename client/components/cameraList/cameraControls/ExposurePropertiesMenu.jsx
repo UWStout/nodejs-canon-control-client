@@ -77,8 +77,8 @@ export default function ExposurePropertiesMenu (props) {
                 <ListItemIcon>{iconMap[propID]}</ListItemIcon>
                 <ListItemText>
                   {useBulkValues
-                    ? (bulkExposureSettings?.[propID] ? trimProp(bulkExposureSettings?.[propID]) : 'none')
-                    : (camera?.[propID] ? trimProp(camera[propID].label) : 'loading')}
+                    ? (bulkExposureSettings?.[propID] ? trimProp(bulkExposureSettings?.[propID], propID) : 'none')
+                    : (camera?.[propID] ? trimProp(camera[propID].label, propID) : 'loading')}
                 </ListItemText>
               </MenuItem>
             </Tooltip>

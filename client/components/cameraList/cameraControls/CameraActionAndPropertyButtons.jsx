@@ -1,7 +1,7 @@
 import React from 'react'
 import PropTypes from 'prop-types'
 
-import localDB from '../../../state/localDB.js'
+import localDB, { refreshCameraDetails } from '../../../state/localDB.js'
 import { useLiveQuery } from 'dexie-react-hooks'
 
 import useGlobalState from '../../../state/useGlobalState.js'
@@ -115,6 +115,9 @@ export default function CameraActionAndPropertyButtons (props) {
   // Menu anchor state
   const [exposureMenuAnchor, setExposureMenuAnchor] = React.useState(null)
   const onOpenMenu = () => {
+    // Refresh stored camera exposure settings
+    refreshCameraDetails(server.id, camera.id)
+    // Open exposure menu
     setExposureMenuAnchor(exposureAnchorRef.current)
   }
 
