@@ -6,9 +6,10 @@ import { getCameraDetails, getCameraList } from '../helpers/serverHelper'
 
 // Initialize the database
 const db = new Dexie('c4-database')
-db.version(4).stores({
+db.version(5).stores({
   servers: '++id, IP',
   cameras: 'id, serverId',
+  groups: 'id',
   sessions: '++id, path',
   settings: 'name'
 })
@@ -69,6 +70,7 @@ export async function exportLocalData () {
  * @param {blob} dataBlob A file or dataBlob containing the data to import.
  * @param {boolean} [includeServers=true] Import data in the servers table
  * @param {boolean} [includeCameras=true] Import data in the cameras table
+ * @param {boolean} [includeGroups=true] Import data in the groups table
  * @param {boolean} [includeSessions=true] Import data in the sessions table
  * @param {boolean} [includeSettings=false] Import data in the settings table
  */
@@ -76,6 +78,7 @@ export async function importLocalData (
   dataBlob,
   includeServers = true,
   includeCameras = true,
+  includeGroups = true,
   includeSessions = true,
   includeSettings = false
 ) {
@@ -85,6 +88,7 @@ export async function importLocalData (
     filter: (table) => {
       if (!includeServers && table === 'servers') return false
       if (!includeCameras && table === 'cameras') return false
+      if (!includeGroups && table === 'cameras') return false
       if (!includeSessions && table === 'sessions') return false
       if (!includeSettings && table === 'settings') return false
       return true
