@@ -81,7 +81,7 @@ export default function PropertySelectMenu (props) {
       if (camera && server) {
         try {
           if (newIndex !== selectedIndex) {
-            await setCameraProperty(server, camera, propID, trimProp(options[newIndex].label))
+            await setCameraProperty(server, camera, propID, trimProp(options[newIndex].label, propID))
             setSelectedIndex(newIndex)
             onClose(true)
           }
@@ -97,7 +97,7 @@ export default function PropertySelectMenu (props) {
     // Send to camera
     if (useBulkValues) {
       if (newIndex !== selectedIndex) {
-        updateSetting('bulkExposureSettings', { [propID]: trimProp(options[newIndex].label) })
+        updateSetting('bulkExposureSettings', { [propID]: trimProp(options[newIndex].label, propID) })
         setSelectedIndex(newIndex)
         onClose(true)
       } else {
@@ -133,7 +133,7 @@ export default function PropertySelectMenu (props) {
               selected={index === selectedIndex}
               onClick={() => handleMenuItemClick(index)}
             >
-              {trimProp(option.label)}
+              {trimProp(option.label, propID)}
             </MenuItem>
           ))}
       {/* eslint-enable react/jsx-indent, indent */}
