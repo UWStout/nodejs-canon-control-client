@@ -21,6 +21,7 @@ const DEFAULT_TIMEOUT_OPTIONS = [
   1800000,
   3600000
 ]
+
 export default function LiveViewTimoutSelect (props) {
   const { serverList } = props
 
@@ -30,8 +31,19 @@ export default function LiveViewTimoutSelect (props) {
   }))
 
   // Select box state
-  const [LVTimeoutOptions, setLVTimeoutOptions] = React.useState(DEFAULT_TIMEOUT_OPTIONS)
+  const [serverCurrentTimeout, setServerCurrentTimeout] = React.useState(DEFAULT_TIMEOUT_OPTIONS[0])
   const [selectValue, setSelectValue] = React.useState('')
+
+  // Convert options into MenuItems for Select Component
+  const defaultTimeoutMenuItems = DEFAULT_TIMEOUT_OPTIONS.map(option => (
+    <MenuItem key={option} value={option}>{timeString(option)}</MenuItem>
+  ))
+
+  // Convert current server time into an option if not already available
+  const serverTimeoutMenuItem =
+    (DEFAULT_TIMEOUT_OPTIONS.find((option) => option === serverCurrentTimeout) === undefined) ? 
+      <MenuItem key={serverCurrentTimeout} value={serverCurrentTimeout}>{timeString(serverCurrentTimeout)}</MenuItem>
+      : null
 
   // Fetch server's live view timeout setting whenever server changes
   React.useEffect(() => {
@@ -41,8 +53,8 @@ export default function LiveViewTimoutSelect (props) {
       if (server !== undefined) {
         const result = await getLiveViewTimeoutOnServer(server)
         // If server's current Live View Selection isn't a default option, add it
-        if (!LVTimeoutOptions.includes(parseInt(result.timeout))) {
-          setLVTimeoutOptions(LVTimeoutOptions => [...LVTimeoutOptions, result.timeout])
+        if (parseInt(result.timeout) !== serverCurrentTimeout) {
+          setServerCurrentTimeout(result.timeout)
         }
 
         // Update selected timeout to server's timeout
@@ -51,12 +63,7 @@ export default function LiveViewTimoutSelect (props) {
     }
 
     fetchLVTimeout()
-  }, [serverList, selectedServer]) // TODO: Need to reconsider dependency list
-
-  // Convert options into MenuItems for Select Component
-  const LVTimeoutMenuItems = LVTimeoutOptions.map(option => (
-    <MenuItem key={option} value={option}>{timeString(option)}</MenuItem>
-  ))
+  }, [serverList, selectedServer, serverCurrentTimeout, setServerCurrentTimeout, setSelectValue])
 
   // Set Select to current option and update server timeout settings
   const handleChange = (event) => {
@@ -76,7 +83,8 @@ export default function LiveViewTimoutSelect (props) {
         value={selectValue}
         onChange={handleChange}
       >
-        {LVTimeoutMenuItems}
+        {serverTimeoutMenuItem}
+        {defaultTimeoutMenuItems}
       </Select>
     </FormControl>
   )
