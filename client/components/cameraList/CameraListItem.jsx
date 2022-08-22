@@ -4,7 +4,9 @@ import PropTypes from 'prop-types'
 import localDB, { refreshCameraDetails } from '../../state/localDB.js'
 import { useLiveQuery } from 'dexie-react-hooks'
 
-import { ListItem, ListItemAvatar, Avatar } from '@mui/material'
+import useGlobalState from '../../state/useGlobalState.js'
+
+import { ListItem, Collapse, ListItemAvatar, Avatar, Checkbox, Tooltip, Stack } from '@mui/material'
 import { PhotoCamera as CameraIcon } from '@mui/icons-material'
 
 import EditableListItemText from './EditableListItemText.jsx'
@@ -17,7 +19,24 @@ export default function CameraListItem (props) {
   const camera = useLiveQuery(() => localDB.cameras.get(cameraID), [cameraID], null)
   const server = useLiveQuery(() => localDB.servers.get(serverID), [serverID], null)
 
-  // Monitor if mouse is hovering 
+  // Subscribe to camera selection global state
+  const selectionState = useGlobalState(state => ({
+    selectedCameras: state.selectedCameras,
+    addCameraToSelection: state.addCameraToSelection,
+    removeCameraFromSelection: state.removeCameraFromSelection,
+    clearSelectedCameras: state.clearSelectedCameras
+  }))
+
+  // Add/remove camera from selection list
+  const toggleSelection = () => {
+    if (selectionState.selectedCameras.includes(cameraID)) {
+      selectionState.removeCameraFromSelection(cameraID)
+    } else {
+      selectionState.addCameraToSelection(cameraID)
+    }
+  }
+
+  // Monitor if mouse is hovering
   const [mouseOver, setMouseOver] = React.useState(false)
 
   // Track if camera details refresh is needed
@@ -65,6 +84,10 @@ export default function CameraListItem (props) {
     }
   }, [cameraID, serverID, needsRefresh])
 
+  // Easy variables for camera selection state
+  const isSelected = selectionState.selectedCameras.includes(cameraID)
+  const showCheckbox = selectionState.selectedCameras.length > 0
+
   return (
     <ListItem
       onMouseEnter={() => setMouseOver(true)}
@@ -79,12 +102,30 @@ export default function CameraListItem (props) {
         />
       }
     >
-      {/* Basic camera icon indicating status */}
-      <ListItemAvatar>
-        <Avatar sx={{ bgcolor: statusColor }}>
-          <CameraIcon />
-        </Avatar>
-      </ListItemAvatar>
+      <Tooltip title={isSelected ? 'Deselect' : 'Select For Grouping'}>
+        <Stack direction="row">
+          {/* Camera Checkbox */}
+          <Collapse orientation="horizontal" in={showCheckbox}>
+            <Checkbox
+              edge="start"
+              checked={isSelected}
+              onClick={toggleSelection}
+              tabIndex={-1}
+              disableRipple
+              inputProps={{
+                'aria-labelledby': `cameraListItem-${camera?.id || 'unknown'}`
+              }}
+            />
+          </Collapse>
+
+          {/* Basic camera icon indicating status */}
+          <ListItemAvatar>
+            <Avatar sx={{ bgcolor: statusColor, cursor: 'pointer' }} onClick={toggleSelection}>
+              <CameraIcon />
+            </Avatar>
+          </ListItemAvatar>
+        </Stack>
+      </Tooltip>
 
       {/* Camera Text Info with a nickname that can be edited */}
       <EditableListItemText
@@ -92,7 +133,6 @@ export default function CameraListItem (props) {
         needsRefresh={() => setNeedsRefresh(true)}
         readOnly={readOnly}
       />
-
     </ListItem>
   )
 }
