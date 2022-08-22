@@ -1,7 +1,7 @@
 import React from 'react'
 import PropTypes from 'prop-types'
 
-import localDB, { updateSetting } from '../../../state/localDB.js'
+import localDB, { refreshCameraDetails, updateSetting } from '../../../state/localDB.js'
 import { useLiveQuery } from 'dexie-react-hooks'
 
 import { Menu, MenuItem, Skeleton } from '@mui/material'
@@ -105,6 +105,7 @@ export default function PropertySelectMenu (props) {
       }
     } else {
       updateSelection()
+      refreshCameraDetails(server.id, camera.id)
     }
   }
 
