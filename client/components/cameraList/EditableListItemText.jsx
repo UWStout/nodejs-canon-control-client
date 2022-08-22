@@ -89,7 +89,7 @@ export default function EditableListItemText (props) {
     }
 
     return (
-      <ListItemText secondary={secondaryText}>
+      <ListItemText secondary={secondaryText} id={`cameraListItem-${camera?.id || 'unknown'}`}>
         <TextField
           value={nickname || camera.ProductName.value}
           variant='standard'

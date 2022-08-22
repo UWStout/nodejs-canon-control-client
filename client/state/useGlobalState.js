@@ -2,6 +2,22 @@ import create from 'zustand'
 
 // Store for global application state
 const useGlobalState = create(set => ({
+  // Building a camera group
+  selectedCameras: [],
+  addCameraToSelection: (newCameraId) => set(state => {
+    return {
+      selectedCameras: [...state.selectedCameras, newCameraId]
+    }
+  }),
+  removeCameraFromSelection: (removedCameraId) => set(state => {
+    return {
+      selectedCameras: state.selectedCameras.filter(id => id !== removedCameraId)
+    }
+  }),
+  clearSelectedCameras: () => set(state => {
+    return { selectedCameras: [] }
+  }),
+
   // Visibility of settings dialogs
   serverEditDialogVisible: false,
   showServerEditDialog: () => set(state => {
