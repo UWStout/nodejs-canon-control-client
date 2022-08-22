@@ -4,7 +4,9 @@ import PropTypes from 'prop-types'
 import localDB from '../../state/localDB.js'
 import { useLiveQuery } from 'dexie-react-hooks'
 
-import { List, Grid, Stack, Typography } from '@mui/material'
+import useGlobalState from '../../state/useGlobalState.js'
+
+import { List, Grid, Stack, Typography, ButtonGroup, Button } from '@mui/material'
 
 import CameraListItem from './CameraListItem.jsx'
 import ServerTabPanel from './ServerTabPanel.jsx'
@@ -21,6 +23,20 @@ export default function CameraListPanel (props) {
   const bulkModeEnabled = useLiveQuery(() => localDB.settings.get('bulkModeEnabled'))
   const cameraSortField = useLiveQuery(() => localDB.settings.get('cameraSortField'))
   const cameraErrorsAtTop = useLiveQuery(() => localDB.settings.get('cameraErrorsAtTop'))
+
+  // Subscribe to camera selection global state
+  const selectionState = useGlobalState(state => ({
+    selectedCameras: state.selectedCameras,
+    addCameraToSelection: state.addCameraToSelection,
+    removeCameraFromSelection: state.removeCameraFromSelection,
+    clearSelectedCameras: state.clearSelectedCameras,
+    showGroupManagementDialog: state.showGroupManagementDialog
+  }))
+
+  // Show the group creation/management dialog
+  const createGroup = () => {
+    selectionState.showGroupManagementDialog()
+  }
 
   // Build camera widget list
   let serverStats = {}
@@ -84,11 +100,23 @@ export default function CameraListPanel (props) {
               width: '100%',
               bgcolor: 'background.paper',
               overflow: 'auto',
-              height: (bulkModeEnabled?.value ? '57vh' : '65vh')
+              height: (bulkModeEnabled?.value ? '51vh' : '59vh')
             }}
           >
             {cameraListItems}
           </List>
+        </Grid>
+        <Grid item xs={12}>
+          <Stack direction='row' spacing={1} alignItems='baseline' sx={{ paddingBottom: 1, width: '100%' }}>
+            <Typography variant='body1'>{'Camera Grouping:'}</Typography>
+            <ButtonGroup variant='text' size='small'>
+              <Button onClick={() => selectionState.addCameraToSelection(cameraList.map(cam => cam.id))}>{'select all'}</Button>
+              <Button onClick={() => selectionState.removeCameraFromSelection(cameraList.map(cam => cam.id))}>{'remove all'}</Button>
+              <Button onClick={() => selectionState.clearSelectedCameras()}>{'clear selection'}</Button>
+            </ButtonGroup>
+            {/* eslint-disable-next-line react/forbid-component-props */}
+            <Button variant='contained' size='small' style={{ marginLeft: 'auto' }} onClick={createGroup} disabled={selectionState.selectedCameras.length <= 0}>{'add to group'}</Button>
+          </Stack>
         </Grid>
       </Grid>
     </ServerTabPanel>

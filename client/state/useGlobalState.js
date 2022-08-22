@@ -5,11 +5,23 @@ const useGlobalState = create(set => ({
   // Building a camera group
   selectedCameras: [],
   addCameraToSelection: (newCameraId) => set(state => {
+    if (Array.isArray(newCameraId)) {
+      return {
+        selectedCameras: [...state.selectedCameras, ...newCameraId]
+      }
+    }
+
     return {
       selectedCameras: [...state.selectedCameras, newCameraId]
     }
   }),
   removeCameraFromSelection: (removedCameraId) => set(state => {
+    if (Array.isArray(removedCameraId)) {
+      return {
+        selectedCameras: state.selectedCameras.filter(id => !removedCameraId.includes(id))
+      }
+    }
+
     return {
       selectedCameras: state.selectedCameras.filter(id => id !== removedCameraId)
     }
@@ -57,6 +69,14 @@ const useGlobalState = create(set => ({
   }),
   hideBulkTaskFeedbackDialog: () => set(state => {
     return { bulkTaskFeedbackDialogVisible: false }
+  }),
+
+  groupManagementDialogVisible: false,
+  showGroupManagementDialog: () => set(state => {
+    return { groupManagementDialogVisible: true }
+  }),
+  hideGroupManagementDialog: () => set(state => {
+    return { groupManagementDialogVisible: false }
   }),
 
   // Bulk mode global values

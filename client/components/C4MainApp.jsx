@@ -23,6 +23,7 @@ import LiveViewDialog from './liveView/LiveViewDialog.jsx'
 import C4_THEME from './C4Theme.js'
 import BulkTaskFeedback from './settingsAndFeedback/BulkTaskFeedback.jsx'
 import ServerStatusVerifier from './settingsAndFeedback/ServerStatusVerifier.jsx'
+import GroupManagementDialog from './settingsAndFeedback/GroupManagementDialog.jsx'
 
 export default function C4MainApp () {
   // Subscribe to changes in the server list
@@ -124,9 +125,10 @@ export default function C4MainApp () {
               <CameraNicknameSyncDialog />
               <LiveViewDialog />
               <BulkTaskFeedback />
+              <GroupManagementDialog />
 
               {/* Invisible Server Tester */}
-              <ServerStatusVerifier serverList={serverList}/>
+              <ServerStatusVerifier serverList={serverList} />
 
             </Container>
           </SnackbarProvider>
