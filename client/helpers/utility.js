@@ -15,9 +15,15 @@ export function trimProp (propertyValue, propertyID = '') {
   }
 
   // Exception for Av due to decimal point in allowed values
-  if (propertyID === 'aperture' || propertyID === 'Av')
-  {
-    return propertyValue
+  switch(propertyID.toLowerCase()) {
+    case 'aperture':
+    case 'av':
+    case 'tv':
+    case 'shutterspeed':
+      return propertyID
+      break
+    default:
+      break
   }
 
   const index = propertyValue.lastIndexOf('.')
