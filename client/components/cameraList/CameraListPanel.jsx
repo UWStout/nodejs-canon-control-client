@@ -1,12 +1,14 @@
 import React from 'react'
 import PropTypes from 'prop-types'
 
-import localDB from '../../state/localDB.js'
+import localDB, { refreshCameraDetails } from '../../state/localDB.js'
 import { useLiveQuery } from 'dexie-react-hooks'
+import { useSnackbar } from 'notistack'
 
 import useGlobalState from '../../state/useGlobalState.js'
 
-import { List, Grid, Stack, Typography, ButtonGroup, Button } from '@mui/material'
+import { List, Grid, Stack, Typography, ButtonGroup, Button, IconButton, Tooltip } from '@mui/material'
+import { Refresh as RefreshIcon } from '@mui/icons-material'
 
 import CameraListItem from './CameraListItem.jsx'
 import ServerTabPanel from './ServerTabPanel.jsx'
@@ -14,6 +16,7 @@ import ServerTabPanel from './ServerTabPanel.jsx'
 
 export default function CameraListPanel (props) {
   const { serverId, index } = props
+  const { enqueueSnackbar } = useSnackbar()
 
   // Subscribe to changes to servers and cameras
   const server = useLiveQuery(() => localDB.servers.get(serverId))
@@ -36,6 +39,18 @@ export default function CameraListPanel (props) {
   // Show the group creation/management dialog
   const createGroup = () => {
     selectionState.showGroupManagementDialog()
+  }
+
+  // Function to refresh all camera details for this server
+  const [isRefreshing, setIsRefreshing] = React.useState(false)
+  const refreshAllCameraDetails = async () => {
+    enqueueSnackbar(`Starting Camera Refresh for ${server?.nickname}`)
+    setIsRefreshing(true)
+    for (let i = 0; i < cameraList.length; i++) {
+      await refreshCameraDetails(serverId, cameraList[i].id)
+    }
+    setIsRefreshing(false)
+    enqueueSnackbar(`Camera Refresh Complete for ${server?.nickname}`, { variant: 'success' })
   }
 
   // Build camera widget list
@@ -91,6 +106,13 @@ export default function CameraListPanel (props) {
                 {`${serverStats.missing > 0 ? serverStats.missing + ' missing of ' : ''}`}
                 {`${serverStats.expected || 0} cameras`}
               </Typography>
+              <Tooltip title={isRefreshing ? 'Working ...' : 'Refresh Camera Details'}>
+                <span>
+                  <IconButton aria-label="refresh" onClick={refreshAllCameraDetails} disabled={isRefreshing}>
+                    <RefreshIcon />
+                  </IconButton>
+                </span>
+              </Tooltip>
             </Stack>}
         </Grid>
         <Grid item xs={12}>

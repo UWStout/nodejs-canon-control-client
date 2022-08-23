@@ -26,8 +26,12 @@ export default function TriggerControl () {
     setDisableButtons(triggerTask.triggerActive)
   }, [triggerTask.triggerActive])
 
-  const onChangeTrigger = (event) => {
+  const onChangeTrigger = async (event) => {
     setSelectedTrigger(event.target.value)
+    const trigger = triggerList.find(trigger => trigger.label === event.target.value)
+    if (trigger?.server !== undefined) {
+      await flushPrimedTriggerBox(trigger.server)
+    }
   }
 
   const refreshList = React.useCallback(async () => {
@@ -43,7 +47,6 @@ export default function TriggerControl () {
         }))]
       }
 
-      console.log(newBoxes)
       setTriggerList(newBoxes)
     }
   }, [serverList])

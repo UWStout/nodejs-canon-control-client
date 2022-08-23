@@ -65,14 +65,12 @@ export default function C4MainApp () {
           if (server.deactivated) {
             const index = newSyncServers.findIndex(serverId => serverId === server.id)
             if (index >= 0) {
-              console.log('SyncServ: removing', server.id)
               newSyncServers.splice(index, 1)
               changed = true
             }
           } else {
             // Has this one been syncronized already
             if (!newSyncServers.includes(server.id)) {
-              console.log('SyncServ: adding', server.id)
               newSyncServers.push(server.id)
               reloadCameraList(serverList[i])
               changed = true
@@ -82,7 +80,6 @@ export default function C4MainApp () {
 
         // Update list of synchronized servers only if needed
         if (changed) {
-          console.log('Updating sync servers', newSyncServers)
           setSyncronizedServers(newSyncServers)
         }
       }

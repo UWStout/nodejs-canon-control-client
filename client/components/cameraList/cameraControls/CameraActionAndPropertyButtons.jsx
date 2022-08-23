@@ -114,9 +114,9 @@ export default function CameraActionAndPropertyButtons (props) {
 
   // Menu anchor state
   const [exposureMenuAnchor, setExposureMenuAnchor] = React.useState(null)
-  const onOpenMenu = () => {
+  const onOpenMenu = async () => {
     // Refresh stored camera exposure settings
-    refreshCameraDetails(server.id, camera.id)
+    await refreshCameraDetails(server.id, camera.id)
     // Open exposure menu
     setExposureMenuAnchor(exposureAnchorRef.current)
   }

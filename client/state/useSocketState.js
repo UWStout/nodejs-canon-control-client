@@ -160,7 +160,6 @@ const useSocketState = create(set => ({
           socket.emit('subscribe', [
             'CameraList',
             'Download-*',
-            'CameraState-*',
             'TriggerBox-*'
           ])
         })

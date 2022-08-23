@@ -64,20 +64,20 @@ export function useServerSockets (serverList) {
       })
 
       // Other messages
-      socket.off('CameraState')
-      socket.on('CameraState', message => {
-        console.log('State SocketMessage', message)
-      })
+      // socket.off('CameraState')
+      // socket.on('CameraState', message => {
+      //   console.log('State SocketMessage', message)
+      // })
 
-      socket.off('CameraPropertyValue')
-      socket.on('CameraPropertyValue', message => {
-        console.log('Prop Value SocketMessage', message)
-      })
+      // socket.off('CameraPropertyValue')
+      // socket.on('CameraPropertyValue', message => {
+      //   console.log('Prop Value SocketMessage', message)
+      // })
 
-      socket.off('CameraPropertyOptions')
-      socket.on('CameraPropertyOptions', message => {
-        console.log('Prop Options SocketMessage', message)
-      })
+      // socket.off('CameraPropertyOptions')
+      // socket.on('CameraPropertyOptions', message => {
+      //   console.log('Prop Options SocketMessage', message)
+      // })
     })
   }, [completeBulkTask, downloadFinished, downloadStarted, serverList, socketList, updateTriggerTask])
 }

@@ -16,12 +16,14 @@ const useTriggerTaskState = create(set => ({
   }),
 
   updateTriggerTask: (taskState) => set(state => {
+    // Does this state indicate a trigger no longer active?
     const triggerActive = !(
       taskState.type.includes(':complete') ||
       taskState.type.includes(':error')
     )
 
-    if (taskState.boxIndex !== state.boxIndex) {
+    // Is this message from an unexpected box?
+    if (state.boxIndex !== -1 && taskState.boxIndex !== state.boxIndex) {
       console.error('Unexpected trigger event with new box index')
     }
 

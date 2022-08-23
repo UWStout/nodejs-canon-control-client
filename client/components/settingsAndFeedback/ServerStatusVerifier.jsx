@@ -1,28 +1,23 @@
-import * as React from 'react'
+import React from 'react'
+import PropTypes from 'prop-types'
+
 import { useSnackbar } from 'notistack'
 import { pingServer } from '../../helpers/serverHelper'
 
-export default function ServerStatusVerifier(props) {
+import { ServerObjShape } from '../../state/dataModel.js'
+export default function ServerStatusVerifier (props) {
   const { serverList } = props
-  
+
   // Snackbar hooks
   const { enqueueSnackbar } = useSnackbar()
 
   React.useEffect(() => {
-    async function checkServerStatus()
-    {
-      if (Array.isArray(serverList))
-      {
+    async function checkServerStatus () {
+      if (Array.isArray(serverList)) {
         serverList.forEach(async server => {
-          if (!server.deactivated)
-          {
+          if (!server.deactivated) {
             const result = await pingServer(server)
-            console.log("result")
-            console.log(result)
-            if (result.pong)
-            {
-              enqueueSnackbar(`Ping ${server.nickname}: Pong!` , { variant: 'success' })
-            } else {
+            if (!result.pong) {
               enqueueSnackbar(`Unable to ping ${server.nickname} - ${result.message}`, { variant: 'error' })
             }
           }
@@ -30,9 +25,15 @@ export default function ServerStatusVerifier(props) {
       }
     }
     checkServerStatus()
-  }, [serverList])
+  }, [enqueueSnackbar, serverList])
 
-  return (
-    <></>
-  )
+  return (null)
+}
+
+ServerStatusVerifier.propTypes = {
+  serverList: PropTypes.arrayOf(PropTypes.shape(ServerObjShape))
+}
+
+ServerStatusVerifier.defaultProps = {
+  serverList: []
 }

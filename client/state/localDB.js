@@ -83,18 +83,24 @@ export async function importLocalData (
   includeSettings = false
 ) {
   await waitForDBLock()
-  await importInto(db, dataBlob, {
-    overwriteValues: true,
-    filter: (table) => {
-      if (!includeServers && table === 'servers') return false
-      if (!includeCameras && table === 'cameras') return false
-      if (!includeGroups && table === 'cameras') return false
-      if (!includeSessions && table === 'sessions') return false
-      if (!includeSettings && table === 'settings') return false
-      return true
-    }
-  })
-  unlockDB()
+  try {
+    await importInto(db, dataBlob, {
+      overwriteValues: true,
+      filter: (table) => {
+        if (!includeServers && table === 'servers') return false
+        if (!includeCameras && table === 'cameras') return false
+        if (!includeGroups && table === 'groups') return false
+        if (!includeSessions && table === 'sessions') return false
+        if (!includeSettings && table === 'settings') return false
+        console.log('Importing to table "' + table + '"')
+        return true
+      }
+    })
+    unlockDB()
+  } catch (error) {
+    unlockDB()
+    throw error
+  }
 }
 
 /**
@@ -178,11 +184,12 @@ export async function refreshCameraList (cameraList, serverId) {
         nickname: cameraId
       })))
     }
+    unlockDB()
   } catch (error) {
     console.error('Error refreshing server cameras')
     console.error(error)
+    unlockDB()
   }
-  unlockDB()
 }
 
 /**
@@ -200,17 +207,21 @@ export async function refreshCameraDetails (serverID, cameraID) {
       throw new Error(`Unknown camera id (${cameraID}) or server id (${serverID})`)
     }
 
-    // Query camera list from server and adjust with proper DB keys
+    // Wipe firmware version (used to acknowledge that it is refreshing)
+    await db.cameras.update(camera.id, { FirmwareVersion: null })
+
+    // Query camera details from server and adjust with proper DB keys
     const cameraDetails = await getCameraDetails(server, camera)
     const fullEntry = { ...camera, ...cameraDetails }
 
     // Put to database (will either update or add)
     await db.cameras.put(fullEntry)
+    unlockDB()
   } catch (error) {
     console.error('Error refreshing camera details')
     console.error(error)
+    unlockDB()
   }
-  unlockDB()
 }
 
 /**

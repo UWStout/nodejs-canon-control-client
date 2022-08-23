@@ -1,10 +1,12 @@
 import * as React from 'react'
 import PropTypes from 'prop-types'
 
+import useSocketState from '../../state/useSocketState.js'
+
 import { Select, MenuItem, FormControl, InputLabel } from '@mui/material'
+
 import { timeString } from '../../helpers/utility.js'
 import { getLiveViewTimeoutOnServer, setLiveViewTimeoutOnServer } from '../../helpers/serverHelper.js'
-import useSocketState from '../../state/useSocketState.js'
 import { ServerObjShape } from '../../state/dataModel.js'
 
 // Default options for timeout
@@ -41,8 +43,8 @@ export default function LiveViewTimoutSelect (props) {
 
   // Convert current server time into an option if not already available
   const serverTimeoutMenuItem =
-    (DEFAULT_TIMEOUT_OPTIONS.find((option) => option === serverCurrentTimeout) === undefined) ? 
-      <MenuItem key={serverCurrentTimeout} value={serverCurrentTimeout}>{timeString(serverCurrentTimeout)}</MenuItem>
+    (DEFAULT_TIMEOUT_OPTIONS.find((option) => option === serverCurrentTimeout) === undefined)
+      ? <MenuItem key={serverCurrentTimeout} value={serverCurrentTimeout}>{timeString(serverCurrentTimeout)}</MenuItem>
       : null
 
   // Fetch server's live view timeout setting whenever server changes
@@ -91,5 +93,9 @@ export default function LiveViewTimoutSelect (props) {
 }
 
 LiveViewTimoutSelect.propTypes = {
-  serverList: PropTypes.arrayOf(ServerObjShape).isRequired
+  serverList: PropTypes.arrayOf(PropTypes.shape(ServerObjShape))
+}
+
+LiveViewTimoutSelect.defaultProps = {
+  serverList: []
 }
