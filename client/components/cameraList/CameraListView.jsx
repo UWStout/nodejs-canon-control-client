@@ -60,10 +60,11 @@ export default function CameraListView () {
           </Box>
 
           {/* Server List Tab Panels */}
-          {Array.isArray(serverList) && serverList.filter(item => !item.deactivated)
-            .map((server, i) => (
-              <CameraListPanel key={server.id} index={i} serverId={server.id} />
-            ))}
+          {Array.isArray(serverList) && serverList.map((server, i) => (
+            server.deactivated
+              ? <div key={server.id} />
+              : <CameraListPanel key={server.id} index={i} serverId={server.id} />
+          ))}
         </Grid>
       </Grid>
     </React.Fragment>

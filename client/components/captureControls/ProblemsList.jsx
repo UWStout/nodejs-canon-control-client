@@ -9,12 +9,13 @@ import { Typography, Divider } from '@mui/material'
 // Convert the EDSDK settings to actual values
 function buildExpectedExposure (bulkSettings) {
   const exposureFraction = bulkSettings?.Tv.split('/')
-  return {
+  const expected = {
     shutterSpeed: parseInt(exposureFraction?.[0]) / parseInt(exposureFraction?.[1]),
-    apertureValue: parseInt(bulkSettings?.Av?.slice(1)),
+    apertureValue: parseFloat(bulkSettings?.Av?.slice(1)),
     iso: isNaN(parseInt(bulkSettings?.ISOSpeed)) ? 0 : parseInt(bulkSettings?.ISOSpeed),
     focalLength: '18.0 mm'
   }
+  return expected
 }
 
 export default function ProblemsList () {
@@ -37,7 +38,7 @@ export default function ProblemsList () {
     }
 
     if (image.exposureInfo.apertureValue !== expectedExposure.apertureValue) {
-      return `${image.filename} has an unexpected aperture f-stop (${image.exposureInfo.apertureValue})`
+      return `${image.filename} has an unexpected aperture f-stop (${image.exposureInfo.apertureValue} !== ${expectedExposure.apertureValue})`
     }
 
     if (image.exposureInfo.focalLength !== expectedExposure.focalLength) {

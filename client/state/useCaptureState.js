@@ -26,11 +26,11 @@ const useCaptureState = create(set => ({
   }),
 
   // Halt the capture and count up missing cameras
-  haltCapture: (cameraList) => set(state => {
+  haltCapture: (cameraList, expectTwoPhotos = false) => set(state => {
     const allResults = [...state.inProgress, ...state.succeeded, ...state.failed]
     const missingList = cameraList.filter(camera => {
-      const result = allResults.find(info => info.filename.includes(camera.nickname))
-      return (!result)
+      const result = allResults.filter(info => info.filename.includes(camera.nickname))
+      return (expectTwoPhotos ? result.length === 2 : result.length === 1)
     }).map(camera => ({
       nickname: camera.nickname,
       serverId: camera.serverId,

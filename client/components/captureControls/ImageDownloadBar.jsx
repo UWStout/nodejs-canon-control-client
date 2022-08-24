@@ -15,10 +15,8 @@ export default function ImageDownloadBar () {
   const [maxValue, setMaxValue] = React.useState(0)
   const [downloadInProgress, setDownloadInProgress] = React.useState(false)
 
-  // Camera List
-  const cameraList = useLiveQuery(() => localDB.cameras.toArray(), [], [])
-
-  // Global settings
+  // Subscribe to changes in a few global settings
+  const bulkExposureSettings = useLiveQuery(() => localDB.settings.get('bulkExposureSettings'))
   const autoIncrementCapture = useLiveQuery(() => localDB.settings.get('autoIncrementCapture'))
   const currentCaptureNumber = useLiveQuery(() => localDB.settings.get('currentCaptureNumber'))
 
@@ -34,6 +32,20 @@ export default function ImageDownloadBar () {
     missing: state.failed.missing
   }))
 
+  // Camera and server Lists
+  const cameraList = useLiveQuery(() => localDB.cameras.toArray(), [], [])
+  const serverList = useLiveQuery(() => localDB.servers.toArray(), [], [])
+  const [activeCameraList, setActiveCameraList] = React.useState([])
+  React.useEffect(() => {
+    const active = cameraList.filter(camera => {
+      const server = serverList.find(server => server.id === camera.serverId)
+      return (!camera.missing && server && !server.deactivated)
+    }, 0)
+    setActiveCameraList(active)
+    newCapture(active.length * (bulkExposureSettings?.ImageQuality === 'RAWAndLargeJPEGFine' ? 2 : 1))
+    setDownloadInProgress(false)
+  }, [bulkExposureSettings?.ImageQuality, cameraList, newCapture, serverList])
+
   // Syncronize with the capture state
   React.useEffect(() => {
     const newMaxValue = (capture.inProgress > 0 || (capture.succeeded + capture.failed) > 0) ? capture.expected : 0
@@ -46,6 +58,7 @@ export default function ImageDownloadBar () {
   React.useEffect(() => {
     if (downloadInProgress && currentValue === maxValue) {
       enqueueSnackbar('Image Download Completed', { variant: 'success' })
+      setDownloadInProgress(false)
       if (autoIncrementCapture?.value) {
         // Watch out for an undefined setting value
         const currentNumber = (typeof currentCaptureNumber?.value === 'number'
@@ -56,24 +69,26 @@ export default function ImageDownloadBar () {
         // Wait a short time and then increment the capture number
         setTimeout(() => {
           updateSetting('currentCaptureNumber', currentNumber + 1)
-          newCapture(Array.isArray(cameraList) ? cameraList.length : 0)
+          newCapture(activeCameraList.length * (bulkExposureSettings?.ImageQuality === 'RawAndLargeJPEGFine' ? 2 : 1))
         }, 3000)
       }
     }
-  }, [autoIncrementCapture?.value, cameraList, currentCaptureNumber, currentValue, downloadInProgress, enqueueSnackbar, maxValue, newCapture])
+  }, [activeCameraList, autoIncrementCapture?.value, bulkExposureSettings?.ImageQuality, currentCaptureNumber, currentValue, downloadInProgress, enqueueSnackbar, maxValue, newCapture])
 
   const onStop = () => {
-    haltCapture(cameraList)
+    haltCapture(activeCameraList, bulkExposureSettings?.ImageQuality === 'RawAndLargeJPEGFine')
+    setDownloadInProgress(false)
   }
 
   const onReset = () => {
-    newCapture(Array.isArray(cameraList) ? cameraList.length : 0)
+    newCapture(activeCameraList.length * (bulkExposureSettings?.ImageQuality === 'RawAndLargeJPEGFine' ? 2 : 1))
+    setDownloadInProgress(false)
   }
 
   return (
     <Stack direction="row" spacing={2} sx={{ width: '100%', alignItems: 'center' }}>
       <LinearProgress variant="determinate" sx={{ flexGrow: 1 }} value={100 * (capture.succeeded + capture.failed) / capture.expected} />
-      <Typography variant="body2" color="text.secondary" textAlign="center">
+      <Typography variant="body2" color="text.secondary" sx={{ textAlign: 'right', minWidth: '55px' }}>
         {`${capture.succeeded + capture.failed}/${capture.expected}`}
       </Typography>
       <Divider orientation="vertical" variant="middle" flexItem />
